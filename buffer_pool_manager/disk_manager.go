@@ -1,25 +1,41 @@
 package buffer_pool_manager
 
 import (
+	"encoding/binary"
 	"fmt"
 	"os"
 )
 
 type DiskManager struct {
 	file *os.File
+
+	deallocatedPageIdList []PageID
+	maxAllocatedPageId    PageID
 }
 
 func NewDiskManager(filePath string) (*DiskManager, error) {
 
-	f, err := os.OpenFile(filePath, os.O_RDWR|os.O_CREATE|os., 0755)
+	f, err := os.OpenFile(filePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0755)
+
 	if err != nil {
 		return nil, err
 	}
-	return &DiskManager{f}, nil
-}
-func (disk *DiskManager) Write(offset int64, data []byte) error {
 
-	_, err := disk.file.Seek(offset, 0)
+	disk := &DiskManager{file: f}
+
+	freeListPageData, err := disk.read(FREELIST_PAGE_ID*PAGE_SIZE, PAGE_SIZE)
+
+	if err != nil {
+		return nil, err
+	}
+
+	disk.deserializeFreelistPage(freeListPageData)
+
+	return disk, nil
+}
+func (disk *DiskManager) write(offset PageID, data []byte) error {
+
+	_, err := disk.file.Seek(int64(offset), 0)
 	if err != nil {
 		return err
 	}
@@ -35,9 +51,9 @@ func (disk *DiskManager) Write(offset int64, data []byte) error {
 	return nil
 }
 
-func (disk *DiskManager) Read(offset int64, size int) ([]byte, error) {
+func (disk *DiskManager) read(offset PageID, size int) ([]byte, error) {
 
-	_, err := disk.file.Seek(offset, 0)
+	_, err := disk.file.Seek(int64(offset), 0)
 	if err != nil {
 		return nil, err
 	}
@@ -52,4 +68,76 @@ func (disk *DiskManager) Read(offset int64, size int) ([]byte, error) {
 	}
 	return data, nil
 
+}
+
+func (disk *DiskManager) allocatePage() PageID {
+
+	if len(disk.deallocatedPageIdList) > 0 {
+
+		pageId := disk.deallocatedPageIdList[0]
+		disk.deallocatedPageIdList = disk.deallocatedPageIdList[1:]
+		return pageId
+	} else {
+		pageId := disk.maxAllocatedPageId + 1
+		disk.maxAllocatedPageId++
+		return pageId
+	}
+}
+
+func (disk *DiskManager) deallocatePage(pageId PageID) {
+	disk.deallocatedPageIdList = append(disk.deallocatedPageIdList, pageId)
+}
+
+func (disk *DiskManager) Close() error {
+
+	freelistPageData := disk.serializeFreelistPage()
+
+	if err := disk.write(FREELIST_PAGE_ID*PAGE_SIZE, freelistPageData); err != nil {
+		return err
+	}
+
+	if err := disk.file.Close(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (disk *DiskManager) serializeFreelistPage() []byte {
+
+	data := make([]byte, 0)
+
+	pointer := 0
+	binary.LittleEndian.PutUint64(data[pointer:pointer+8], uint64(disk.maxAllocatedPageId))
+	pointer += 8
+
+	binary.LittleEndian.PutUint64(data[pointer:pointer+8], uint64(len(disk.deallocatedPageIdList)))
+	pointer += 8
+
+	for _, pageId := range disk.deallocatedPageIdList {
+		binary.LittleEndian.PutUint64(data[pointer:pointer+8], uint64(pageId))
+		pointer += 8
+	}
+	return data
+
+}
+
+func (disk *DiskManager) deserializeFreelistPage(data []byte) {
+
+	pointer := 0
+	disk.maxAllocatedPageId = PageID(binary.LittleEndian.Uint64(data[pointer : pointer+8]))
+
+	pointer += 8
+
+	releasedPageListSize := binary.LittleEndian.Uint64(data[pointer : pointer+8])
+	pointer += 8
+
+	deallocatedPageIdList := make([]PageID, 0)
+
+	for i := 0; i < int(releasedPageListSize); i++ {
+		deallocatedPageIdList = append(deallocatedPageIdList, PageID(binary.LittleEndian.Uint64(data[pointer:pointer+8])))
+		pointer += 8
+	}
+
+	disk.deallocatedPageIdList = deallocatedPageIdList
 }
