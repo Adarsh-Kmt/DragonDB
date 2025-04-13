@@ -8,7 +8,7 @@ type ReadGuard struct {
 	bufferPool BufferPoolManager
 }
 
-func (bufferPool *SimpleBufferPoolManager) NewReadGuard(pageId PageID) (*ReadGuard, error) {
+func (bufferPool SimpleBufferPoolManager) NewReadGuard(pageId PageID) (*ReadGuard, error) {
 
 	page, err := bufferPool.fetchPage(pageId)
 

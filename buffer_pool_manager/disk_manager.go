@@ -4,11 +4,13 @@ import (
 	"encoding/binary"
 	"fmt"
 	"os"
+	"sync"
 )
 
 type DiskManager struct {
 	file *os.File
 
+	mutex                 *sync.Mutex
 	deallocatedPageIdList []PageID
 	maxAllocatedPageId    PageID
 }
@@ -21,7 +23,10 @@ func NewDiskManager(filePath string) (*DiskManager, error) {
 		return nil, err
 	}
 
-	disk := &DiskManager{file: f}
+	disk := &DiskManager{
+		file:  f,
+		mutex: &sync.Mutex{},
+	}
 
 	freeListPageData, err := disk.read(FREELIST_PAGE_ID*PAGE_SIZE, PAGE_SIZE)
 
@@ -72,6 +77,9 @@ func (disk *DiskManager) read(offset int64, size int) ([]byte, error) {
 
 func (disk *DiskManager) allocatePage() PageID {
 
+	disk.mutex.Lock()
+	defer disk.mutex.Unlock()
+
 	if len(disk.deallocatedPageIdList) > 0 {
 
 		pageId := disk.deallocatedPageIdList[0]
@@ -85,7 +93,10 @@ func (disk *DiskManager) allocatePage() PageID {
 }
 
 func (disk *DiskManager) deallocatePage(pageId PageID) {
+
+	disk.mutex.Lock()
 	disk.deallocatedPageIdList = append(disk.deallocatedPageIdList, pageId)
+	disk.mutex.Unlock()
 }
 
 func (disk *DiskManager) Close() error {
