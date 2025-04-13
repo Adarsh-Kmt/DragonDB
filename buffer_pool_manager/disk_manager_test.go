@@ -31,7 +31,7 @@ func (ds *DiskManagerTestSuite) TearDownSuite() {
 func (ds *DiskManagerTestSuite) TestDiskManagerWrite() {
 
 	data := []byte("testing disk manager...")
-	err := ds.diskManager.write(PageID(len(data)), data)
+	err := ds.diskManager.write(int64(len(data)), data)
 	ds.Assert().NoError(err)
 }
 

@@ -90,7 +90,7 @@ func (bufferPool *SimpleBufferPoolManager) fetchPage(pageId PageID) (*Frame, err
 	if !exists {
 
 		// 1. Read page from file using disk manager.
-		data, err := bufferPool.disk.read(pageId*PAGE_SIZE, PAGE_SIZE)
+		data, err := bufferPool.disk.read(int64(pageId*PAGE_SIZE), PAGE_SIZE)
 		if err != nil {
 			return nil, err
 		}
@@ -113,7 +113,7 @@ func (bufferPool *SimpleBufferPoolManager) fetchPage(pageId PageID) (*Frame, err
 			frame := bufferPool.frameList[frameId]
 
 			if frame.dirty {
-				bufferPool.disk.write(frame.pageId*PAGE_SIZE, frame.data)
+				bufferPool.disk.write(int64(frame.pageId*PAGE_SIZE), frame.data)
 			}
 
 		}
@@ -172,7 +172,7 @@ func (bufferPool SimpleBufferPoolManager) deletePage(pageId PageID) (bool, error
 
 	// 5. If frame stores a dirty page, write to disk.
 	if frame.dirty {
-		if err := bufferPool.disk.write(pageId*PAGE_SIZE, frame.data); err != nil {
+		if err := bufferPool.disk.write(int64(pageId*PAGE_SIZE), frame.data); err != nil {
 			return true, err
 		}
 	}
@@ -232,7 +232,7 @@ func (bufferPool SimpleBufferPoolManager) flushPage(pageId PageID) (bool, error)
 	frame := bufferPool.frameList[frameId]
 
 	if frame.dirty {
-		return true, bufferPool.disk.write(pageId*PAGE_SIZE, frame.data)
+		return true, bufferPool.disk.write(int64(pageId*PAGE_SIZE), frame.data)
 	}
 
 	return true, nil
@@ -246,7 +246,7 @@ func (bufferPool SimpleBufferPoolManager) flushAllPages() error {
 
 		if frame.dirty {
 
-			if err := bufferPool.disk.write(pageId*PAGE_SIZE, frame.data); err != nil {
+			if err := bufferPool.disk.write(int64(pageId*PAGE_SIZE), frame.data); err != nil {
 				return err
 			}
 		}

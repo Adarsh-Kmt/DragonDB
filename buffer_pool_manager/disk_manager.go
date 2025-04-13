@@ -15,7 +15,7 @@ type DiskManager struct {
 
 func NewDiskManager(filePath string) (*DiskManager, error) {
 
-	f, err := os.OpenFile(filePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0755)
+	f, err := os.OpenFile(filePath, os.O_RDWR|os.O_CREATE, 0644)
 
 	if err != nil {
 		return nil, err
@@ -33,9 +33,9 @@ func NewDiskManager(filePath string) (*DiskManager, error) {
 
 	return disk, nil
 }
-func (disk *DiskManager) write(offset PageID, data []byte) error {
+func (disk *DiskManager) write(offset int64, data []byte) error {
 
-	_, err := disk.file.Seek(int64(offset), 0)
+	_, err := disk.file.Seek(offset, 0)
 	if err != nil {
 		return err
 	}
@@ -51,9 +51,9 @@ func (disk *DiskManager) write(offset PageID, data []byte) error {
 	return nil
 }
 
-func (disk *DiskManager) read(offset PageID, size int) ([]byte, error) {
+func (disk *DiskManager) read(offset int64, size int) ([]byte, error) {
 
-	_, err := disk.file.Seek(int64(offset), 0)
+	_, err := disk.file.Seek(offset, 0)
 	if err != nil {
 		return nil, err
 	}
