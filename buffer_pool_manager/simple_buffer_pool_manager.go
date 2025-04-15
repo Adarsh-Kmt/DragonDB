@@ -5,8 +5,6 @@ import "sync"
 const (
 	PAGE_SIZE        = 4096
 	FREELIST_PAGE_ID = 0
-	DIRTY            = true
-	CLEAN            = false
 )
 
 type FrameID int
@@ -43,7 +41,7 @@ type Frame struct {
 	// used by the page guards to determine whether the page has been altered.
 	version int
 
-	// used to synchronize access to the page and its meta data stored in the frame.
+	// used to synchronize access to the page and its metadata stored in the frame.
 	mutex *sync.RWMutex
 }
 type SimpleBufferPoolManager struct {
