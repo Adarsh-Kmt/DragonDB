@@ -38,6 +38,8 @@ func NewDiskManager(filePath string) (*DiskManager, error) {
 
 	return disk, nil
 }
+
+// writes data to a particular offset in the file.
 func (disk *DiskManager) write(offset int64, data []byte) error {
 
 	_, err := disk.file.Seek(offset, 0)
@@ -56,6 +58,7 @@ func (disk *DiskManager) write(offset int64, data []byte) error {
 	return nil
 }
 
+// reads a specified amount of data starting from a particular offset in the file.
 func (disk *DiskManager) read(offset int64, size int) ([]byte, error) {
 
 	_, err := disk.file.Seek(offset, 0)
@@ -75,6 +78,8 @@ func (disk *DiskManager) read(offset int64, size int) ([]byte, error) {
 
 }
 
+// allocatePage allocates a page in the file and returns a new page ID for use.
+// It reuses a deallocated page ID if available, otherwise increments and returns a new page ID.
 func (disk *DiskManager) allocatePage() PageID {
 
 	disk.mutex.Lock()
@@ -92,6 +97,8 @@ func (disk *DiskManager) allocatePage() PageID {
 	}
 }
 
+// deallocatePage marks a page ID as free and adds it to the free list,
+// making it available for future allocation.
 func (disk *DiskManager) deallocatePage(pageId PageID) {
 
 	disk.mutex.Lock()
@@ -99,6 +106,7 @@ func (disk *DiskManager) deallocatePage(pageId PageID) {
 	disk.mutex.Unlock()
 }
 
+// writes the serialized freelist page to file, then closes the file.
 func (disk *DiskManager) Close() error {
 
 	freelistPageData := disk.serializeFreelistPage()
@@ -114,6 +122,8 @@ func (disk *DiskManager) Close() error {
 	return nil
 }
 
+// serializeFreeListPage encodes the list of deallocated page IDs and max allocated page ID into a byte slice
+// so it can be written to disk. This ensures persistence of the free list across restarts.
 func (disk *DiskManager) serializeFreelistPage() []byte {
 
 	data := make([]byte, 0)
@@ -133,6 +143,8 @@ func (disk *DiskManager) serializeFreelistPage() []byte {
 
 }
 
+// deserializeFreeListPage decodes the byte slice from disk into the in-memory
+// list of deallocated page IDs. This restores the free list after a database restart.
 func (disk *DiskManager) deserializeFreelistPage(data []byte) {
 
 	pointer := 0
