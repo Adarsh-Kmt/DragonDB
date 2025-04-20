@@ -5,7 +5,8 @@ import "errors"
 // ReadGuard is used to provide shared read access to a page stored in a frame in the buffer pool manager.
 type ReadGuard struct {
 	active     bool
-	Page       *Frame
+	page       *Frame
+	btreeNode  *BTreeNode
 	bufferPool BufferPoolManager
 }
 
@@ -26,16 +27,21 @@ func (bufferPool SimpleBufferPoolManager) NewReadGuard(pageId PageID) (*ReadGuar
 
 	versionCopy := page.version
 
-	guard := &ReadGuard{
-		active:     true,
-		Page:       page,
-		bufferPool: bufferPool,
-	}
-
-	guard.Page.mutex.RLock()
+	page.mutex.RLock()
 
 	if page.version != versionCopy {
+		page.mutex.RUnlock()
 		return nil, errors.New("version mismatch error")
+	}
+
+	btreeNode := new(BTreeNode)
+	btreeNode.deserialize(page.data)
+
+	guard := &ReadGuard{
+		active:     true,
+		page:       page,
+		bufferPool: bufferPool,
+		btreeNode:  btreeNode,
 	}
 
 	return guard, nil
@@ -43,13 +49,28 @@ func (bufferPool SimpleBufferPoolManager) NewReadGuard(pageId PageID) (*ReadGuar
 }
 
 // GetData is used to return the page data, provided it is active.
-func (guard *ReadGuard) GetData() ([]byte, bool) {
+func (guard *ReadGuard) GetData() (*BTreeNode, bool) {
 
 	if !guard.active {
 		return nil, false
 	}
+	// if guard.btreeNode != nil {
+	// 	return guard.btreeNode, true
+	// }
 
-	return guard.Page.data, true
+	// guard.btreeNode = new(BTreeNode)
+	// guard.btreeNode.deserialize(guard.page.data)
+
+	return guard.btreeNode, true
+}
+
+func (guard *ReadGuard) GetVersion() (int, bool) {
+
+	if !guard.active {
+		return -1, false
+	}
+
+	return guard.page.version, true
 }
 
 // Done is used to decrease the pin count of the page, and ensure the exclusive lock is released.
@@ -59,11 +80,11 @@ func (guard *ReadGuard) Done() bool {
 	if !guard.active {
 		return false
 	}
-	_ = guard.bufferPool.unpinPage(guard.Page.pageId)
+	_ = guard.bufferPool.unpinPage(guard.page.pageId)
 
-	guard.Page.mutex.RUnlock()
+	guard.page.mutex.RUnlock()
 
-	guard.Page = nil
+	guard.page = nil
 	guard.bufferPool = nil
 
 	return true

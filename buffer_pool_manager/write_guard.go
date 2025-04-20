@@ -1,6 +1,8 @@
 package buffer_pool_manager
 
-import "errors"
+import (
+	"errors"
+)
 
 // WriteGuard is used to provide exclusive write access to a page stored in a frame in the buffer pool manager.
 type WriteGuard struct {
@@ -8,6 +10,7 @@ type WriteGuard struct {
 	// active is used to prevent users from using a write guard once it's Done/DeletePage function has been called.
 	active     bool
 	page       *Frame
+	btreeNode  *BTreeNode
 	bufferPool BufferPoolManager
 }
 
@@ -28,16 +31,21 @@ func (bufferPool SimpleBufferPoolManager) NewWriteGuard(pageId PageID) (*WriteGu
 
 	versionCopy := page.version
 
+	page.mutex.Lock()
+
+	if versionCopy != page.version {
+		page.mutex.Unlock()
+		return nil, errors.New("version mismatch error")
+	}
+
+	btreeNode := new(BTreeNode)
+	btreeNode.deserialize(page.data)
+
 	guard := &WriteGuard{
 		active:     true,
 		page:       page,
 		bufferPool: bufferPool,
-	}
-
-	guard.page.mutex.Lock()
-
-	if versionCopy != page.version {
-		return nil, errors.New("version mismatch error")
+		btreeNode:  btreeNode,
 	}
 
 	guard.page.dirty = true
@@ -45,7 +53,8 @@ func (bufferPool SimpleBufferPoolManager) NewWriteGuard(pageId PageID) (*WriteGu
 	return guard, nil
 }
 
-// UpdateVersion is used to increment the version of a page, this is used to signal to the other guards that the page has been modified.
+// UpdateVersion is used to increment the version of a page.
+// This is used to signal to the other guards that the page has been modified.
 func (guard *WriteGuard) UpdateVersion() bool {
 
 	if !guard.active {
@@ -57,14 +66,29 @@ func (guard *WriteGuard) UpdateVersion() bool {
 	return true
 }
 
-// GetData is used to return the page data, provided it is active.
-func (guard *WriteGuard) GetData() ([]byte, bool) {
+func (guard *WriteGuard) GetVersion() (int, bool) {
+
+	if !guard.active {
+		return -1, false
+	}
+
+	return guard.page.version, true
+}
+
+// GetData is used to return the BTreeNode corresponding to the page, provided it is active.
+func (guard *WriteGuard) GetData() (*BTreeNode, bool) {
 
 	if !guard.active {
 		return nil, false
 	}
+	// if guard.btreeNode != nil {
+	// 	return guard.btreeNode, true
+	// }
 
-	return guard.page.data, true
+	// guard.btreeNode = new(BTreeNode)
+	// guard.btreeNode.deserialize(guard.page.data)
+
+	return guard.btreeNode, true
 }
 
 // DeletePage is used to call the delete function of the buffer pool manager in a thread-safe manner.
