@@ -104,6 +104,10 @@ func (guard *WriteGuard) DeletePage() bool {
 	if ok {
 		guard.active = false
 		guard.page.mutex.Unlock()
+
+		guard.btreeNode = nil
+		guard.page = nil
+		guard.bufferPool = nil
 	}
 	return false
 }
