@@ -66,6 +66,7 @@ func (guard *WriteGuard) UpdateVersion() bool {
 	return true
 }
 
+// GetVersion returns the current version of the page, provided the guard is active.
 func (guard *WriteGuard) GetVersion() (int, bool) {
 
 	if !guard.active {
@@ -75,7 +76,7 @@ func (guard *WriteGuard) GetVersion() (int, bool) {
 	return guard.page.version, true
 }
 
-// GetData is used to return the BTreeNode corresponding to the page, provided it is active.
+// GetData is used to return the BTreeNode corresponding to the page, provided the guard is is active.
 func (guard *WriteGuard) GetData() (*BTreeNode, bool) {
 
 	if !guard.active {
