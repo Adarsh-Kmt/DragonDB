@@ -16,7 +16,7 @@ func main() {
 		panic(err)
 	}
 
-	bufferPool := buffer_pool_manager.NewSimpleBufferPoolManager(5, cache, disk)
+	bufferPool := buffer_pool_manager.NewSimpleBufferPoolManager(5, 4096, cache, disk)
 
 	writeGuard, err := bufferPool.NewWriteGuard(buffer_pool_manager.PageID(1))
 

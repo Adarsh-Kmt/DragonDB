@@ -1,0 +1,184 @@
+package buffer_pool_manager
+
+import (
+	"encoding/binary"
+	"log"
+	"os"
+	"sync"
+	"testing"
+
+	"github.com/stretchr/testify/suite"
+)
+
+type BufferPoolManagerTestSuite struct {
+	suite.Suite
+	bufferPool *SimpleBufferPoolManager
+}
+
+func diskManagerSetup(disk *DiskManager, path string) error {
+
+	f, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0644)
+
+	if err != nil {
+		return err
+	}
+
+	pointer := 0
+
+	data := make([]byte, 8*16)
+
+	for i := 0; i < 8; i++ {
+
+		binary.LittleEndian.PutUint16(data[pointer:pointer+16], uint16(i))
+		pointer += 16
+	}
+
+	if _, err := f.Write(data); err != nil {
+		return err
+	}
+
+	disk.file = f
+
+	return nil
+}
+func (bs *BufferPoolManagerTestSuite) SetupTest() {
+
+	disk := &DiskManager{
+		mutex:                 &sync.Mutex{},
+		deallocatedPageIdList: make([]PageID, 0),
+		maxAllocatedPageId:    7,
+	}
+
+	err := diskManagerSetup(disk, "test_file.dat")
+
+	bs.Suite.Assert().NoError(err)
+
+	replacer := NewLRUReplacer()
+
+	bs.bufferPool = NewSimpleBufferPoolManager(3, 16, replacer, disk)
+
+}
+
+func (bs *BufferPoolManagerTestSuite) TearDownTest() {
+
+	err := bs.bufferPool.disk.file.Close()
+	bs.Suite.Assert().NoError(err)
+
+	err = os.Remove("test_file.dat")
+
+	bs.Suite.Assert().NoError(err)
+
+}
+
+func (bs *BufferPoolManagerTestSuite) TestBufferPoolManagerFetchMultiplePages() {
+
+	log.Println()
+
+	//------------------------------------------
+	// fetch page 1
+
+	log.Println("fetching page 1...")
+	frame, err := bs.bufferPool.fetchPage(1)
+
+	bs.Suite.Assert().NoError(err)
+
+	num := binary.LittleEndian.Uint16(frame.data[:16])
+
+	log.Printf("page data => %d", num)
+
+	bs.Suite.Assert().Equal(uint16(1), num)
+
+	log.Printf("page table => %v", bs.bufferPool.pageTable)
+	log.Printf("free frames => %v", bs.bufferPool.freeFrames)
+
+	bs.Suite.Assert().Equal(FrameID(1), bs.bufferPool.freeFrames[0])
+
+	//------------------------------------------
+
+	log.Println()
+
+	//------------------------------------------
+	// fetch page 0
+	log.Println("fetching page 0...")
+	frame, err = bs.bufferPool.fetchPage(0)
+
+	bs.Suite.Assert().NoError(err)
+
+	num = binary.LittleEndian.Uint16(frame.data[:16])
+
+	log.Printf("page data => %d", num)
+
+	bs.Suite.Assert().Equal(uint16(0), num)
+
+	log.Printf("page table => %v", bs.bufferPool.pageTable)
+	log.Printf("free frames => %v", bs.bufferPool.freeFrames)
+
+	//bs.Suite.Assert().Equal(0, len(bs.bufferPool.freeFrames))
+
+	// unpin page 0
+	bs.bufferPool.unpinPage(0)
+
+	bs.Suite.Require().Equal(0, frame.pinCount)
+
+	//------------------------------------------
+
+	log.Println()
+
+	//------------------------------------------
+	// fetch page 5
+
+	log.Println("fetching page 5...")
+
+	frame, err = bs.bufferPool.fetchPage(5)
+
+	bs.Suite.Assert().NoError(err)
+
+	num = binary.LittleEndian.Uint16(frame.data[:16])
+
+	log.Printf("page data => %d", num)
+
+	// assert page data
+	bs.Suite.Assert().Equal(uint16(5), num)
+
+	log.Printf("page table => %v", bs.bufferPool.pageTable)
+	log.Printf("free frames => %v", bs.bufferPool.freeFrames)
+
+	bs.Suite.Assert().Equal(0, len(bs.bufferPool.freeFrames))
+
+	// unpin page 5
+	bs.bufferPool.unpinPage(5)
+
+	bs.Suite.Require().Equal(0, frame.pinCount)
+
+	//------------------------------------------
+
+	log.Println()
+
+	//------------------------------------------
+	// fetch page 6
+
+	log.Println("fetching page 7...")
+	frame, err = bs.bufferPool.fetchPage(7)
+
+	bs.Suite.Assert().NoError(err)
+
+	num = binary.LittleEndian.Uint16(frame.data[:16])
+
+	log.Printf("page data => %d", num)
+
+	bs.Suite.Assert().Equal(uint16(7), num)
+
+	log.Printf("page table => %v", bs.bufferPool.pageTable)
+	log.Printf("free frames => %v", bs.bufferPool.freeFrames)
+
+	bs.Suite.Assert().Equal(0, len(bs.bufferPool.freeFrames))
+
+	//------------------------------------------
+
+	log.Println()
+}
+
+func TestBufferPoolManager(t *testing.T) {
+
+	suite.Run(t, new(BufferPoolManagerTestSuite))
+}
