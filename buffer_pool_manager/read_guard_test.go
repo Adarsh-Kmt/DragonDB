@@ -13,7 +13,7 @@ func (rs *ReadGuardTestSuite) SetupTest() {
 	disk, err := NewDiskManager("/test")
 
 	rs.Suite.Assert().NoError(err)
-	bpm := NewSimpleBufferPoolManager(5, replacer, disk)
+	bpm := NewSimpleBufferPoolManager(5, 4096, replacer, disk)
 
 	rs.bufferPool = *bpm
 

@@ -17,7 +17,7 @@ type ReadGuard struct {
 // Once the lock has been acquired:
 // 1. if the copy is equal to the current version of the page, then it wasn't modified before the lock was acquired, and the logical correctness of the page data is maintained.
 // 2. if the copy is not equal to the current version of the page, then the page was modified before the lock could be acquired, and its contents cannot be trusted anymore.
-func (bufferPool SimpleBufferPoolManager) NewReadGuard(pageId PageID) (*ReadGuard, error) {
+func (bufferPool *SimpleBufferPoolManager) NewReadGuard(pageId PageID) (*ReadGuard, error) {
 
 	page, err := bufferPool.fetchPage(pageId)
 

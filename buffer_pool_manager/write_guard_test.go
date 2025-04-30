@@ -13,7 +13,7 @@ func (ws *WriteGuardTestSuite) SetupTest() {
 	disk, err := NewDiskManager("/test")
 
 	ws.Suite.Assert().NoError(err)
-	bpm := NewSimpleBufferPoolManager(5, replacer, disk)
+	bpm := NewSimpleBufferPoolManager(5, 4096, replacer, disk)
 
 	ws.bufferPool = *bpm
 
