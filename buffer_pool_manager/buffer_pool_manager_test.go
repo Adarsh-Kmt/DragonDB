@@ -70,7 +70,7 @@ func (bs *BufferPoolManagerTestSuite) TearDownTest() {
 
 }
 
-func (bs *BufferPoolManagerTestSuite) TestBufferPoolManagerFetchMultiplePages() {
+func (bs *BufferPoolManagerTestSuite) TesthMultiplePageFetch() {
 
 	log.Println()
 
@@ -178,6 +178,49 @@ func (bs *BufferPoolManagerTestSuite) TestBufferPoolManagerFetchMultiplePages() 
 	log.Println()
 }
 
+func (bs *BufferPoolManagerTestSuite) TestUnpinPage() {
+
+	// test unpin without fetch
+	result := bs.bufferPool.unpinPage(0)
+
+	bs.Suite.Assert().Equal(false, result)
+
+	// test unpin after fetching
+	frame, err := bs.bufferPool.fetchPage(0)
+
+	bs.Suite.Assert().NoError(err)
+
+	bs.bufferPool.unpinPage(0)
+
+	bs.Suite.Assert().Equal(0, frame.pinCount)
+
+}
+
+func (bs *BufferPoolManagerTestSuite) TestDeletePage() {
+
+	// test delete without fetch
+
+	result, err := bs.bufferPool.deletePage(0)
+
+	bs.Suite.Assert().NoError(err)
+
+	bs.Suite.Assert().Equal(false, result)
+
+	_, err = bs.bufferPool.fetchPage(0)
+
+	bs.Suite.Assert().NoError(err)
+
+	log.Printf("page table => %v", bs.bufferPool.pageTable)
+	log.Printf("free frames => %v", bs.bufferPool.freeFrames)
+
+	_, err = bs.bufferPool.deletePage(0)
+
+	bs.Suite.Assert().NoError(err)
+	log.Printf("page table => %v", bs.bufferPool.pageTable)
+	log.Printf("deallocated page id list => %v", bs.bufferPool.disk.deallocatedPageIdList)
+	bs.Suite.Assert().Equal(PageID(0), bs.bufferPool.disk.deallocatedPageIdList[0])
+
+}
 func TestBufferPoolManager(t *testing.T) {
 
 	suite.Run(t, new(BufferPoolManagerTestSuite))
