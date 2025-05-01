@@ -25,14 +25,14 @@ func diskManagerSetup(disk *DiskManager, path string) error {
 
 	pointer := 0
 
-	data := make([]byte, 8*16)
+	data := make([]byte, 8*2)
 
 	for i := 0; i < 8; i++ {
 
-		binary.LittleEndian.PutUint16(data[pointer:pointer+16], uint16(i))
-		pointer += 16
+		binary.LittleEndian.PutUint16(data[pointer:pointer+2], uint16(i))
+		pointer += 2
 	}
-
+	log.Printf("file => %v", data)
 	if _, err := f.Write(data); err != nil {
 		return err
 	}
@@ -55,7 +55,7 @@ func (bs *BufferPoolManagerTestSuite) SetupTest() {
 
 	replacer := NewLRUReplacer()
 
-	bs.bufferPool = NewSimpleBufferPoolManager(3, 16, replacer, disk)
+	bs.bufferPool = NewSimpleBufferPoolManager(3, 2, replacer, disk)
 
 }
 
@@ -82,7 +82,7 @@ func (bs *BufferPoolManagerTestSuite) TesthMultiplePageFetch() {
 
 	bs.Suite.Assert().NoError(err)
 
-	num := binary.LittleEndian.Uint16(frame.data[:16])
+	num := binary.LittleEndian.Uint16(frame.data[:2])
 
 	log.Printf("page data => %d", num)
 
@@ -104,7 +104,7 @@ func (bs *BufferPoolManagerTestSuite) TesthMultiplePageFetch() {
 
 	bs.Suite.Assert().NoError(err)
 
-	num = binary.LittleEndian.Uint16(frame.data[:16])
+	num = binary.LittleEndian.Uint16(frame.data[:2])
 
 	log.Printf("page data => %d", num)
 
@@ -133,7 +133,7 @@ func (bs *BufferPoolManagerTestSuite) TesthMultiplePageFetch() {
 
 	bs.Suite.Assert().NoError(err)
 
-	num = binary.LittleEndian.Uint16(frame.data[:16])
+	num = binary.LittleEndian.Uint16(frame.data[:2])
 
 	log.Printf("page data => %d", num)
 
@@ -162,7 +162,7 @@ func (bs *BufferPoolManagerTestSuite) TesthMultiplePageFetch() {
 
 	bs.Suite.Assert().NoError(err)
 
-	num = binary.LittleEndian.Uint16(frame.data[:16])
+	num = binary.LittleEndian.Uint16(frame.data[:2])
 
 	log.Printf("page data => %d", num)
 
@@ -219,6 +219,59 @@ func (bs *BufferPoolManagerTestSuite) TestDeletePage() {
 	log.Printf("page table => %v", bs.bufferPool.pageTable)
 	log.Printf("deallocated page id list => %v", bs.bufferPool.disk.deallocatedPageIdList)
 	bs.Suite.Assert().Equal(PageID(0), bs.bufferPool.disk.deallocatedPageIdList[0])
+
+}
+
+func (bs *BufferPoolManagerTestSuite) TestNewPage() {
+
+	// should return max allocated page ID
+	pageId := bs.bufferPool.NewPage()
+
+	bs.Suite.Assert().Equal(PageID(8), pageId)
+
+	// delete page 0, check if new page returns 0
+	_, err := bs.bufferPool.fetchPage(0)
+
+	bs.Suite.Require().NoError(err)
+
+	result, err := bs.bufferPool.deletePage(0)
+
+	bs.Suite.Assert().NoError(err)
+
+	bs.Suite.Assert().Equal(true, result)
+
+	pageId = bs.bufferPool.NewPage()
+
+	bs.Suite.Assert().Equal(PageID(0), pageId)
+}
+
+func (bs *BufferPoolManagerTestSuite) TestDirtyPageEviction() {
+
+	// fetch page 0 from disk.
+	frame, err := bs.bufferPool.fetchPage(0)
+
+	bs.Suite.Require().NoError(err)
+
+	// update page 0
+	binary.LittleEndian.PutUint16(frame.data[:2], uint16(10))
+
+	frame.dirty = true
+
+	bs.bufferPool.unpinPage(0)
+
+	// evict page 0 by fetching other pages.
+	bs.bufferPool.fetchPage(5)
+	bs.bufferPool.fetchPage(3)
+	bs.bufferPool.fetchPage(2)
+
+	bs.bufferPool.unpinPage(3)
+
+	// fetch page 0 from disk again, check if updated.
+	frame, err = bs.bufferPool.fetchPage(0)
+
+	bs.Suite.Require().NoError(err)
+
+	bs.Suite.Assert().Equal(uint16(10), binary.LittleEndian.Uint16(frame.data[:2]))
 
 }
 func TestBufferPoolManager(t *testing.T) {
