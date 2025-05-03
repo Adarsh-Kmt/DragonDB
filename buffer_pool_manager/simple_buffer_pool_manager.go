@@ -105,8 +105,6 @@ type SimpleBufferPoolManager struct {
 
 	// size of the frames array
 	poolSize int
-
-	pageSize int
 }
 
 func NewSimpleBufferPoolManager(poolSize int, pageSize int, replacer Replacer, disk DiskManager) *SimpleBufferPoolManager {
@@ -122,7 +120,6 @@ func NewSimpleBufferPoolManager(poolSize int, pageSize int, replacer Replacer, d
 
 	freeFrames := make([]FrameID, 0)
 
-	for i := 0; i < poolSize; i++ {
 	for i := 0; i < poolSize; i++ {
 		freeFrames = append(freeFrames, FrameID(i))
 	}

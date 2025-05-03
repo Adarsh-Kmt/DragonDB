@@ -13,9 +13,10 @@ import (
 type BufferPoolManagerTestSuite struct {
 	suite.Suite
 	bufferPool *SimpleBufferPoolManager
+	disk       *OSBufferedDiskManager
 }
 
-func diskManagerSetup(disk *DiskManager, path string) error {
+func diskManagerSetup(disk *OSBufferedDiskManager, path string) error {
 
 	f, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0644)
 
@@ -43,7 +44,7 @@ func diskManagerSetup(disk *DiskManager, path string) error {
 }
 func (bs *BufferPoolManagerTestSuite) SetupTest() {
 
-	disk := &DiskManager{
+	disk := &OSBufferedDiskManager{
 		mutex:                 &sync.Mutex{},
 		deallocatedPageIdList: make([]PageID, 0),
 		maxAllocatedPageId:    7,
@@ -56,12 +57,13 @@ func (bs *BufferPoolManagerTestSuite) SetupTest() {
 	replacer := NewLRUReplacer()
 
 	bs.bufferPool = NewSimpleBufferPoolManager(3, 2, replacer, disk)
+	bs.disk = disk
 
 }
 
 func (bs *BufferPoolManagerTestSuite) TearDownTest() {
 
-	err := bs.bufferPool.disk.file.Close()
+	err := bs.disk.file.Close()
 	bs.Suite.Assert().NoError(err)
 
 	err = os.Remove("test_file.dat")
@@ -217,8 +219,8 @@ func (bs *BufferPoolManagerTestSuite) TestDeletePage() {
 
 	bs.Suite.Assert().NoError(err)
 	log.Printf("page table => %v", bs.bufferPool.pageTable)
-	log.Printf("deallocated page id list => %v", bs.bufferPool.disk.deallocatedPageIdList)
-	bs.Suite.Assert().Equal(PageID(0), bs.bufferPool.disk.deallocatedPageIdList[0])
+	log.Printf("deallocated page id list => %v", bs.disk.deallocatedPageIdList)
+	bs.Suite.Assert().Equal(PageID(0), bs.disk.deallocatedPageIdList[0])
 
 }
 
