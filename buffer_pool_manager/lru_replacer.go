@@ -49,7 +49,7 @@ func (replacer *LRUReplacer) victim() FrameID {
 	defer replacer.mutex.Unlock()
 
 	frameElement := replacer.list.Back()
-	frameId := FrameID(replacer.list.Remove(frameElement).(int))
+	frameId := FrameID(replacer.list.Remove(frameElement).(FrameID))
 
 	delete(replacer.frameMap, frameId)
 	return frameId
