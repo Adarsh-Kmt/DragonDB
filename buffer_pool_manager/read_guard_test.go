@@ -10,10 +10,10 @@ type ReadGuardTestSuite struct {
 func (rs *ReadGuardTestSuite) SetupTest() {
 
 	replacer := NewLRUReplacer()
-	disk, err := NewDiskManager("/test")
+	disk, err := NewOSBufferedDiskManager("/test")
 
 	rs.Suite.Assert().NoError(err)
-	bpm := NewSimpleBufferPoolManager(5, replacer, disk)
+	bpm := NewSimpleBufferPoolManager(5, 4096, replacer, disk)
 
 	rs.bufferPool = *bpm
 
