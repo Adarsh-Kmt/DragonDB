@@ -10,7 +10,7 @@ import (
 func main() {
 
 	cache := buffer_pool_manager.NewLRUReplacer()
-	disk, err := buffer_pool_manager.NewDiskManager("/file")
+	disk, err := buffer_pool_manager.NewDirectIODiskManager("/file")
 
 	if err != nil {
 		panic(err)

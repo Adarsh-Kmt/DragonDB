@@ -10,7 +10,7 @@ type WriteGuardTestSuite struct {
 func (ws *WriteGuardTestSuite) SetupTest() {
 
 	replacer := NewLRUReplacer()
-	disk, err := NewDiskManager("/test")
+	disk, err := NewOSBufferedDiskManager("/test")
 
 	ws.Suite.Assert().NoError(err)
 	bpm := NewSimpleBufferPoolManager(5, 4096, replacer, disk)

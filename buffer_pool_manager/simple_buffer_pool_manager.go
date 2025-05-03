@@ -16,15 +16,34 @@ type PageID uint64
 type BufferPoolManager interface {
 
 	// public methods
+
+	// NewPage allocates a new page in the file and returns its page ID.
 	NewPage() PageID
+
 	NewWriteGuard(pageId PageID) (*WriteGuard, error)
 	NewReadGuard(pageId PageID) (*ReadGuard, error)
+
+	// Close is called during shutdown to ensure data durability.
+	// It flushes all dirty pages to disk, writes the free list metadata page,
+	// and closes the underlying file.
 	Close() error
 
 	// private methods
+
+	// flushAllPages writes all dirty pages currently in the buffer pool to disk.
 	flushAllPages() error
+
+	// fetchPage loads a page with the given page ID into the buffer pool,
+	// returning the corresponding frame. If the page is already in memory,
+	// it returns the cached frame.
 	fetchPage(pageID PageID) (*Frame, error)
+
+	// deletePage removes a page with the given page ID from both memory and disk.
+	// Returns true if the deletion was successful.
 	deletePage(pageID PageID) (bool, error)
+
+	// unpinPage marks a page as no longer being used by any client.
+	// If the page is dirty, it remains in the buffer pool until flushed.
 	unpinPage(pageID PageID) bool
 }
 
@@ -64,7 +83,7 @@ type SimpleBufferPoolManager struct {
 	// It is responsible for allocating and deallocating page IDs,
 	// reading pages from disk into memory, and writing pages from memory back to disk.
 	// It also manages metadata such as the list of deallocated page IDs and the next available page ID.
-	disk *DiskManager
+	disk DiskManager
 
 	lookupMutex *sync.RWMutex
 
@@ -88,7 +107,7 @@ type SimpleBufferPoolManager struct {
 	poolSize int
 }
 
-func NewSimpleBufferPoolManager(poolSize int, pageSize int, replacer Replacer, disk *DiskManager) *SimpleBufferPoolManager {
+func NewSimpleBufferPoolManager(poolSize int, pageSize int, replacer Replacer, disk DiskManager) *SimpleBufferPoolManager {
 
 	frames := make([]*Frame, poolSize)
 
@@ -115,9 +134,8 @@ func NewSimpleBufferPoolManager(poolSize int, pageSize int, replacer Replacer, d
 
 		frameAllocationMutex: &sync.Mutex{},
 		freeFrames:           freeFrames,
-
-		poolSize: poolSize,
-		pageSize: pageSize,
+		poolSize:             poolSize,
+		pageSize:             pageSize,
 	}
 }
 
@@ -331,7 +349,7 @@ func (bufferPool *SimpleBufferPoolManager) flushAllPages() error {
 
 		if frame.dirty {
 
-			if err := bufferPool.disk.write(int64(pageId*PAGE_SIZE), frame.data); err != nil {
+			if err := bufferPool.disk.write(int64(pageId)*int64(bufferPool.pageSize), frame.data); err != nil {
 				return err
 			}
 		}
@@ -347,7 +365,7 @@ func (bufferPool *SimpleBufferPoolManager) Close() error {
 		return err
 	}
 
-	if err := bufferPool.disk.Close(); err != nil {
+	if err := bufferPool.disk.close(); err != nil {
 		return err
 	}
 
