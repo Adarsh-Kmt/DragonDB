@@ -3,7 +3,7 @@ A key-value database, written in Go.
 
 Check out my [substack](https://adarshkmt.substack.com/s/building-a-database), where I'll be explaining how I built it, layer by layer.
 
-Currently working on the buffer pool manager, refer to the [BufferPoolManagerImpl](https://github.com/Adarsh-Kmt/DragonDB/tree/BufferPoolManagerImpl) branch.
+Currently working on the database server, refer to the [DatabaseServerImpl](https://github.com/Adarsh-Kmt/DragonDB/tree/DatabaseServerImpl) branch.
 
 <p align="center">
   <img src="assets/DragonDB Architecture.png" alt="Architecture Diagram" width="1000"/>
