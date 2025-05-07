@@ -3,14 +3,14 @@ package server
 import (
 	"encoding/binary"
 	"fmt"
-	"net"
+	"io"
 )
 
-func readNBytes(conn net.Conn, N int) ([]byte, error) {
+func readNBytes(reader io.Reader, N int) ([]byte, error) {
 
 	data := make([]byte, N)
 
-	n, err := conn.Read(data)
+	n, err := reader.Read(data)
 
 	if err != nil {
 		return nil, err
@@ -22,9 +22,9 @@ func readNBytes(conn net.Conn, N int) ([]byte, error) {
 
 	return data, nil
 }
-func decodeInsertRequest(conn net.Conn) (key []byte, value []byte, err error) {
+func decodeInsertRequestBody(reader io.Reader) (key []byte, value []byte, err error) {
 
-	keyLengthBytes, err := readNBytes(conn, 4)
+	keyLengthBytes, err := readNBytes(reader, 4)
 
 	if err != nil {
 		return nil, nil, err
@@ -32,14 +32,14 @@ func decodeInsertRequest(conn net.Conn) (key []byte, value []byte, err error) {
 
 	keyLength := binary.LittleEndian.Uint32(keyLengthBytes)
 
-	key, err = readNBytes(conn, int(keyLength))
+	key, err = readNBytes(reader, int(keyLength))
 
 	if err != nil {
 
 		return nil, nil, err
 	}
 
-	valueLengthBytes, err := readNBytes(conn, 4)
+	valueLengthBytes, err := readNBytes(reader, 4)
 
 	if err != nil {
 		return nil, nil, err
@@ -47,7 +47,7 @@ func decodeInsertRequest(conn net.Conn) (key []byte, value []byte, err error) {
 
 	valueLength := binary.LittleEndian.Uint32(valueLengthBytes)
 
-	value, err = readNBytes(conn, int(valueLength))
+	value, err = readNBytes(reader, int(valueLength))
 
 	if err != nil {
 		return nil, nil, err
@@ -57,9 +57,9 @@ func decodeInsertRequest(conn net.Conn) (key []byte, value []byte, err error) {
 
 }
 
-func decodeGetRequest(conn net.Conn) (key []byte, err error) {
+func decodeGetRequestBody(reader io.Reader) (key []byte, err error) {
 
-	keyLengthBytes, err := readNBytes(conn, 4)
+	keyLengthBytes, err := readNBytes(reader, 4)
 
 	if err != nil {
 		return nil, err
@@ -67,7 +67,7 @@ func decodeGetRequest(conn net.Conn) (key []byte, err error) {
 
 	keyLength := binary.LittleEndian.Uint32(keyLengthBytes)
 
-	key, err = readNBytes(conn, int(keyLength))
+	key, err = readNBytes(reader, int(keyLength))
 
 	if err != nil {
 
@@ -77,9 +77,9 @@ func decodeGetRequest(conn net.Conn) (key []byte, err error) {
 	return key, nil
 }
 
-func decodeDeleteRequest(conn net.Conn) (key []byte, err error) {
+func decodeDeleteRequestBody(reader io.Reader) (key []byte, err error) {
 
-	keyLengthBytes, err := readNBytes(conn, 4)
+	keyLengthBytes, err := readNBytes(reader, 4)
 
 	if err != nil {
 		return nil, err
@@ -87,7 +87,7 @@ func decodeDeleteRequest(conn net.Conn) (key []byte, err error) {
 
 	keyLength := binary.LittleEndian.Uint32(keyLengthBytes)
 
-	key, err = readNBytes(conn, int(keyLength))
+	key, err = readNBytes(reader, int(keyLength))
 
 	if err != nil {
 
