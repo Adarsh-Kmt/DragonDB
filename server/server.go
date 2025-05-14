@@ -2,6 +2,7 @@ package server
 
 import (
 	"net"
+	"sync"
 
 	dtl "github.com/Adarsh-Kmt/DragonDB/data_structure_layer"
 )
@@ -9,6 +10,14 @@ import (
 type Server struct {
 	addr               string
 	dataStructureLayer dtl.DataStructureLayer
+	connections        []*DatabaseConnection
+}
+
+type DatabaseConnection struct {
+	conn            net.Conn
+	shutdown        bool
+	mutex           *sync.Mutex
+	pendingRequests int
 }
 
 func NewServer(addr string, dataStructureLayer dtl.DataStructureLayer) *Server {
@@ -16,9 +25,10 @@ func NewServer(addr string, dataStructureLayer dtl.DataStructureLayer) *Server {
 	return &Server{
 		dataStructureLayer: dataStructureLayer,
 		addr:               addr,
+		connections:        make([]*DatabaseConnection, 0),
 	}
 }
-func (server *Server) HandleClient(conn net.Conn) error {
+func (server *Server) HandleClient(conn net.Conn) {
 
 	for {
 
@@ -27,23 +37,23 @@ func (server *Server) HandleClient(conn net.Conn) error {
 		// handle error
 		if err != nil {
 			response := encodeErrorResponse(err)
-
 			conn.Write(response)
 			continue
 		}
 
 		messageType := string(messageTypeBytes[:])
 
-		// handle ping
-		if messageType == "P" {
+		switch messageType {
+
+		// handle ping request
+		case "P":
 
 			conn.Write([]byte("O"))
-		}
 
-		// handle insert
-		if messageType == "I" {
+		// handle insert request
+		case "I":
 
-			key, value, err := decodeInsertRequest(conn)
+			key, value, err := decodeInsertRequestBody(conn)
 
 			// handle error
 			if err != nil {
@@ -63,12 +73,10 @@ func (server *Server) HandleClient(conn net.Conn) error {
 				conn.Write(response)
 			}
 
-		}
+		// handle delete request
+		case "D":
 
-		// handle delete
-		if messageType == "D" {
-
-			key, err := decodeDeleteRequest(conn)
+			key, err := decodeDeleteRequestBody(conn)
 
 			if err != nil {
 				response := encodeErrorResponse(err)
@@ -87,12 +95,11 @@ func (server *Server) HandleClient(conn net.Conn) error {
 				response := encodeDeleteResponse()
 				conn.Write(response)
 			}
-		}
 
-		// handle get
-		if messageType == "G" {
+		// handle get request
+		case "G":
 
-			key, err := decodeGetRequest(conn)
+			key, err := decodeGetRequestBody(conn)
 
 			if err != nil {
 				response := encodeErrorResponse(err)
@@ -109,9 +116,14 @@ func (server *Server) HandleClient(conn net.Conn) error {
 
 			} else {
 				response := encodeGetResponse(key, value)
-
 				conn.Write(response)
 			}
+
+		// handle close request
+		case "C":
+
+			conn.Close()
+			return
 
 		}
 
@@ -138,8 +150,9 @@ func (server *Server) Run() error {
 		go server.HandleClient(conn)
 	}
 }
-func main() {
 
-	server := NewServer(":addr", dtl.NewHashMap())
-	server.Run()
+func (dbconn *DatabaseConnection) 
+
+func (server *Server) Shutdown() error {
+
 }
