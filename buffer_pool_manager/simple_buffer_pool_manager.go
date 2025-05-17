@@ -64,9 +64,6 @@ type Frame struct {
 	// used to keep track of whether the data field has been written to since it was read from disk.
 	dirty bool
 
-	// used by the page guards to determine whether the page has been altered.
-	version int
-
 	// used to synchronize access to the page and its metadata stored in the frame.
 	mutex *sync.RWMutex
 }
@@ -237,7 +234,6 @@ func (bufferPool *SimpleBufferPoolManager) fetchPage(pageId PageID) (*Frame, err
 	frame.pinCount = 1
 	frame.pageId = pageId
 	frame.dirty = false
-	frame.version = 1
 
 	bufferPool.pageTable[pageId] = newFrameId
 
@@ -298,7 +294,6 @@ func (bufferPool *SimpleBufferPoolManager) deletePage(pageId PageID) (bool, erro
 
 	// 10. Reset dirty, version, pageId fields of the frame
 	frame.dirty = false
-	frame.version = 1
 	frame.pageId = 0
 	frame.pinCount = 0
 
