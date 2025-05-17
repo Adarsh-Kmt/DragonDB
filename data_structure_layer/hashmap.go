@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sync"
 )
-
+// dummy data structure layer to test the database server, because I'm too lazy to build a B-Tree from scratch rn.
 type HashMap struct {
 	store map[uint16][]byte
 	mutex *sync.RWMutex
