@@ -1,158 +1,232 @@
 package server
 
 import (
+	"errors"
+	"fmt"
+	"log/slog"
 	"net"
 	"sync"
+	"time"
 
 	dtl "github.com/Adarsh-Kmt/DragonDB/data_structure_layer"
 )
 
 type Server struct {
-	addr               string
+	addr     string
+	listener net.Listener
+
 	dataStructureLayer dtl.DataStructureLayer
-	connections        []*DatabaseConnection
+
+	shutdown     chan struct{}
+	shutdownOnce *sync.Once
 }
 
-type DatabaseConnection struct {
-	conn            net.Conn
-	shutdown        bool
-	mutex           *sync.Mutex
-	pendingRequests int
-}
+func NewServer(addr string, dataStructureLayer dtl.DataStructureLayer) (*Server, error) {
 
-func NewServer(addr string, dataStructureLayer dtl.DataStructureLayer) *Server {
+	listener, err := net.Listen("tcp", addr)
 
+	if err != nil {
+		return nil, err
+	}
 	return &Server{
 		dataStructureLayer: dataStructureLayer,
+		listener:           listener,
 		addr:               addr,
-		connections:        make([]*DatabaseConnection, 0),
-	}
+		shutdown:           make(chan struct{}),
+		shutdownOnce:       &sync.Once{},
+	}, nil
 }
-func (server *Server) HandleClient(conn net.Conn) {
 
-	for {
+func handleShutdown(conn net.Conn) {
 
-		messageTypeBytes, err := readNBytes(conn, 1)
+	message := encodeShutdownMessage()
+
+	if _, err := conn.Write(message); err != nil {
+		slog.Error(err.Error(), "msg", "error while sending shutdown message")
+	}
+
+	conn.Close()
+
+}
+
+func (server *Server) handleRequest(conn net.Conn) {
+
+	messageTypeBytes, err := readNBytes(conn, 1)
+
+	var netErr net.Error
+	if errors.As(err, &netErr) && netErr.Timeout() {
+		return
+	}
+	// handle error
+	if err != nil {
+		slog.Error(err.Error(), "msg", "error while reading message op code")
+		response := encodeErrorResponse(err)
+		conn.Write(response)
+		return
+	}
+
+	messageType := string(messageTypeBytes[:])
+
+	switch messageType {
+
+	// handle ping request
+	case "P":
+
+		if _, err := conn.Write([]byte("O")); err != nil {
+			slog.Error(err.Error(), "msg", "error while sending OK response")
+		}
+
+	// handle insert request
+	case "I":
+
+		key, value, err := decodeInsertRequestBody(conn)
 
 		// handle error
 		if err != nil {
+			slog.Error(err.Error(), "msg", "error while decoding insert request")
 			response := encodeErrorResponse(err)
 			conn.Write(response)
-			continue
+			return
 		}
 
-		messageType := string(messageTypeBytes[:])
+		err = server.dataStructureLayer.Insert(key, value)
 
-		switch messageType {
+		// handle error
+		if err != nil {
+			slog.Error(err.Error(), "msg", "error occured in data structure layer")
+			response := encodeErrorResponse(err)
+			conn.Write(response)
+		} else {
+			response := encodeInsertResponse()
+			conn.Write(response)
+		}
 
-		// handle ping request
-		case "P":
+	// handle delete request
+	case "D":
 
-			conn.Write([]byte("O"))
+		key, err := decodeDeleteRequestBody(conn)
 
-		// handle insert request
-		case "I":
+		if err != nil {
+			slog.Error(err.Error(), "msg", "error while decoding delete request")
+			response := encodeErrorResponse(err)
+			conn.Write(response)
+			return
+		}
 
-			key, value, err := decodeInsertRequestBody(conn)
+		err = server.dataStructureLayer.Delete(key)
 
-			// handle error
-			if err != nil {
-				response := encodeErrorResponse(err)
-				conn.Write(response)
-				continue
-			}
+		// handle error
+		if err != nil {
+			slog.Error(err.Error(), "msg", "error occured in data structure layer")
+			response := encodeErrorResponse(err)
+			conn.Write(response)
 
-			err = server.dataStructureLayer.Insert(key, value)
+		} else {
+			response := encodeDeleteResponse()
+			conn.Write(response)
+		}
 
-			// handle error
-			if err != nil {
-				response := encodeErrorResponse(err)
-				conn.Write(response)
-			} else {
-				response := encodeInsertResponse()
-				conn.Write(response)
-			}
+	// handle get request
+	case "G":
 
-		// handle delete request
-		case "D":
+		key, err := decodeGetRequestBody(conn)
 
-			key, err := decodeDeleteRequestBody(conn)
+		if err != nil {
+			slog.Error(err.Error(), "msg", "error while decoding get request")
+			response := encodeErrorResponse(err)
+			conn.Write(response)
+			return
+		}
+		slog.Info(fmt.Sprintf("received get request for key %d", key))
+		value, err := server.dataStructureLayer.Get(key)
 
-			if err != nil {
-				response := encodeErrorResponse(err)
-				conn.Write(response)
-				continue
-			}
+		// handle error
+		if err != nil {
+			slog.Error(err.Error(), "msg", "error occured in data structure layer")
+			response := encodeErrorResponse(err)
+			conn.Write(response)
 
-			err = server.dataStructureLayer.Delete(key)
+		} else {
+			response := encodeGetResponse(key, value)
+			conn.Write(response)
+		}
 
-			// handle error
-			if err != nil {
-				response := encodeErrorResponse(err)
-				conn.Write(response)
+	// handle close request
+	case "C":
 
-			} else {
-				response := encodeDeleteResponse()
-				conn.Write(response)
-			}
+		conn.Close()
+		return
 
-		// handle get request
-		case "G":
+	default:
+		slog.Error("invalid op code")
+		response := encodeErrorResponse(fmt.Errorf("invalid op code"))
+		conn.Write(response)
 
-			key, err := decodeGetRequestBody(conn)
+	}
 
-			if err != nil {
-				response := encodeErrorResponse(err)
-				conn.Write(response)
-				continue
-			}
+}
+func (server *Server) handleClient(conn net.Conn, wg *sync.WaitGroup) {
 
-			value, err := server.dataStructureLayer.Get(key)
+	defer wg.Done()
+	conn.SetReadDeadline(time.Now().Add(100 * time.Millisecond))
+	for {
 
-			// handle error
-			if err != nil {
-				response := encodeErrorResponse(err)
-				conn.Write(response)
+		select {
 
-			} else {
-				response := encodeGetResponse(key, value)
-				conn.Write(response)
-			}
-
-		// handle close request
-		case "C":
-
-			conn.Close()
+		case <-server.shutdown:
+			slog.Info("client shutting down...")
+			handleShutdown(conn)
 			return
 
+		default:
+
+			server.handleRequest(conn)
 		}
 
 	}
 
 }
 
-func (server *Server) Run() error {
+func (server *Server) listen(listenerWaitGroup, clientWaitGroup *sync.WaitGroup) {
 
-	listener, err := net.Listen("tcp", server.addr)
-
-	if err != nil {
-		return err
-	}
+	defer listenerWaitGroup.Done()
 
 	for {
 
-		conn, err := listener.Accept()
-
-		if err != nil {
-			return err
+		conn, err := server.listener.Accept()
+		if errors.Is(err, net.ErrClosed) {
+			slog.Error(err.Error(), "msg", "listener closed")
+			return
 		}
+		slog.Info("client joined from " + conn.LocalAddr().String())
+		clientWaitGroup.Add(1)
+		go server.handleClient(conn, clientWaitGroup)
 
-		go server.HandleClient(conn)
 	}
+
 }
 
-func (dbconn *DatabaseConnection) 
+func (server *Server) Run() {
 
-func (server *Server) Shutdown() error {
+	clientWaitGroup := &sync.WaitGroup{}
+	listenerWaitGroup := &sync.WaitGroup{}
+
+	listenerWaitGroup.Add(1)
+	go server.listen(listenerWaitGroup, clientWaitGroup)
+
+	slog.Info("waiting for shutdown...")
+	listenerWaitGroup.Wait()
+	slog.Info("waiting for clients to exit...")
+	clientWaitGroup.Wait()
+}
+
+func (server *Server) Shutdown() {
+
+	slog.Info("shutdown initiated")
+	server.shutdownOnce.Do(func() {
+		server.listener.Close()
+		close(server.shutdown)
+
+	})
 
 }

@@ -66,3 +66,11 @@ func encodeErrorResponse(err error) []byte {
 
 	return response
 }
+
+func encodeShutdownMessage() []byte {
+
+	response := make([]byte, 1)
+
+	response[0] = byte('S')
+	return response
+}
