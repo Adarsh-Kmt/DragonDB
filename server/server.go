@@ -45,7 +45,9 @@ func handleShutdown(conn net.Conn) {
 		slog.Error(err.Error(), "msg", "error while sending shutdown message")
 	}
 
-	conn.Close()
+	if err := conn.Close(); err != nil {
+		slog.Error(err.Error(), "msg", "error while closing connection")
+	}
 
 }
 
@@ -53,6 +55,7 @@ func (server *Server) handleRequest(conn net.Conn) {
 
 	messageTypeBytes, err := readNBytes(conn, 1)
 
+	// check for read timeout error
 	var netErr net.Error
 	if errors.As(err, &netErr) && netErr.Timeout() {
 		return
@@ -85,7 +88,10 @@ func (server *Server) handleRequest(conn net.Conn) {
 		if err != nil {
 			slog.Error(err.Error(), "msg", "error while decoding insert request")
 			response := encodeErrorResponse(err)
-			conn.Write(response)
+
+			if _, err2 := conn.Write(response); err2 != nil {
+				slog.Error(err2.Error(), "msg", "error while writing to connection")
+			}
 			return
 		}
 
@@ -95,10 +101,17 @@ func (server *Server) handleRequest(conn net.Conn) {
 		if err != nil {
 			slog.Error(err.Error(), "msg", "error occured in data structure layer")
 			response := encodeErrorResponse(err)
-			conn.Write(response)
+
+			if _, err2 := conn.Write(response); err2 != nil {
+				slog.Error(err2.Error(), "msg", "error while writing to connection")
+			}
 		} else {
+
 			response := encodeInsertResponse()
-			conn.Write(response)
+
+			if _, err = conn.Write(response); err != nil {
+				slog.Error(err.Error(), "msg", "error while writing to conn")
+			}
 		}
 
 	// handle delete request
@@ -119,11 +132,16 @@ func (server *Server) handleRequest(conn net.Conn) {
 		if err != nil {
 			slog.Error(err.Error(), "msg", "error occured in data structure layer")
 			response := encodeErrorResponse(err)
-			conn.Write(response)
+
+			if _, err2 := conn.Write(response); err2 != nil {
+				slog.Error(err2.Error(), "msg", "error while writing to connection")
+			}
 
 		} else {
 			response := encodeDeleteResponse()
-			conn.Write(response)
+			if _, err = conn.Write(response); err != nil {
+				slog.Error(err.Error(), "msg", "error while writing to conn")
+			}
 		}
 
 	// handle get request
@@ -134,7 +152,10 @@ func (server *Server) handleRequest(conn net.Conn) {
 		if err != nil {
 			slog.Error(err.Error(), "msg", "error while decoding get request")
 			response := encodeErrorResponse(err)
-			conn.Write(response)
+
+			if _, err2 := conn.Write(response); err2 != nil {
+				slog.Error(err2.Error(), "msg", "error while writing to connection")
+			}
 			return
 		}
 		slog.Info(fmt.Sprintf("received get request for key %d", key))
@@ -144,23 +165,37 @@ func (server *Server) handleRequest(conn net.Conn) {
 		if err != nil {
 			slog.Error(err.Error(), "msg", "error occured in data structure layer")
 			response := encodeErrorResponse(err)
-			conn.Write(response)
+
+			if _, err2 := conn.Write(response); err2 != nil {
+				slog.Error(err2.Error(), "msg", "error while writing to connection")
+			}
 
 		} else {
 			response := encodeGetResponse(key, value)
-			conn.Write(response)
+
+			if _, err = conn.Write(response); err != nil {
+				slog.Error(err.Error(), "msg", "error while writing to conn")
+			}
 		}
 
 	// handle close request
 	case "C":
 
-		conn.Close()
-		return
+		if err := conn.Close(); err != nil {
+			slog.Error(err.Error(), "msg", "error while closing connection")
+		}
+
+	// handle shutdown request
+	case "S":
+		server.Shutdown()
 
 	default:
 		slog.Error("invalid op code")
 		response := encodeErrorResponse(fmt.Errorf("invalid op code"))
-		conn.Write(response)
+
+		if _, err := conn.Write(response); err != nil {
+			slog.Error(err.Error(), "msg", "error while writing to connection")
+		}
 
 	}
 
@@ -174,7 +209,7 @@ func (server *Server) handleClient(conn net.Conn, wg *sync.WaitGroup) {
 		select {
 
 		case <-server.shutdown:
-			slog.Info("client shutting down...")
+			slog.Info("client exiting...")
 			handleShutdown(conn)
 			return
 
@@ -222,7 +257,7 @@ func (server *Server) Run() {
 
 func (server *Server) Shutdown() {
 
-	slog.Info("shutdown initiated")
+	slog.Info("shutdown initiated...")
 	server.shutdownOnce.Do(func() {
 		server.listener.Close()
 		close(server.shutdown)
