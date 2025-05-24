@@ -1,7 +1,5 @@
 package buffer_pool_manager
 
-import "errors"
-
 // ReadGuard is used to provide shared read access to a page stored in a frame in the buffer pool manager.
 type ReadGuard struct {
 	active     bool
@@ -25,14 +23,7 @@ func (bufferPool *SimpleBufferPoolManager) NewReadGuard(pageId PageID) (*ReadGua
 		return nil, err
 	}
 
-	versionCopy := page.version
-
 	page.mutex.RLock()
-
-	if page.version != versionCopy {
-		page.mutex.RUnlock()
-		return nil, errors.New("version mismatch error")
-	}
 
 	btreeNode := new(BTreeNode)
 	btreeNode.deserialize(page.data)
@@ -54,23 +45,8 @@ func (guard *ReadGuard) GetData() (*BTreeNode, bool) {
 	if !guard.active {
 		return nil, false
 	}
-	// if guard.btreeNode != nil {
-	// 	return guard.btreeNode, true
-	// }
-
-	// guard.btreeNode = new(BTreeNode)
-	// guard.btreeNode.deserialize(guard.page.data)
 
 	return guard.btreeNode, true
-}
-
-func (guard *ReadGuard) GetVersion() (int, bool) {
-
-	if !guard.active {
-		return -1, false
-	}
-
-	return guard.page.version, true
 }
 
 // Done is used to decrease the pin count of the page, and ensure the exclusive lock is released.

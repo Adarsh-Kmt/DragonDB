@@ -1,9 +1,5 @@
 package buffer_pool_manager
 
-import (
-	"errors"
-)
-
 // WriteGuard is used to provide exclusive write access to a page stored in a frame in the buffer pool manager.
 type WriteGuard struct {
 
@@ -29,14 +25,7 @@ func (bufferPool *SimpleBufferPoolManager) NewWriteGuard(pageId PageID) (*WriteG
 		return nil, err
 	}
 
-	versionCopy := page.version
-
 	page.mutex.Lock()
-
-	if versionCopy != page.version {
-		page.mutex.Unlock()
-		return nil, errors.New("version mismatch error")
-	}
 
 	btreeNode := new(BTreeNode)
 	btreeNode.deserialize(page.data)
@@ -48,32 +37,7 @@ func (bufferPool *SimpleBufferPoolManager) NewWriteGuard(pageId PageID) (*WriteG
 		btreeNode:  btreeNode,
 	}
 
-	guard.page.dirty = true
-
 	return guard, nil
-}
-
-// UpdateVersion is used to increment the version of a page.
-// This is used to signal to the other guards that the page has been modified.
-func (guard *WriteGuard) UpdateVersion() bool {
-
-	if !guard.active {
-		return false
-	}
-
-	guard.page.version++
-
-	return true
-}
-
-// GetVersion returns the current version of the page, provided the guard is active.
-func (guard *WriteGuard) GetVersion() (int, bool) {
-
-	if !guard.active {
-		return -1, false
-	}
-
-	return guard.page.version, true
 }
 
 // GetData is used to return the BTreeNode corresponding to the page, provided the guard is is active.
@@ -82,12 +46,6 @@ func (guard *WriteGuard) GetData() (*BTreeNode, bool) {
 	if !guard.active {
 		return nil, false
 	}
-	// if guard.btreeNode != nil {
-	// 	return guard.btreeNode, true
-	// }
-
-	// guard.btreeNode = new(BTreeNode)
-	// guard.btreeNode.deserialize(guard.page.data)
 
 	return guard.btreeNode, true
 }
@@ -111,6 +69,17 @@ func (guard *WriteGuard) DeletePage() bool {
 		guard.bufferPool = nil
 	}
 	return false
+}
+
+func (guard *WriteGuard) SetDirtyFlag() bool {
+
+	if !guard.active {
+		return false
+	}
+
+	guard.page.dirty = true
+
+	return true
 }
 
 // Done is used to decrease the pin count of the page, and ensure the exclusive lock is released.
