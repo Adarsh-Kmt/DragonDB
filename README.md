@@ -5,8 +5,8 @@ Check out my [substack](https://adarshkmt.substack.com/s/building-a-database), w
 
 Currently working on
 
-1.  the database server, refer to the [DatabaseServerImpl](https://github.com/Adarsh-Kmt/DragonDB/tree/DatabaseServerImpl) branch.
-2.  The buffer pool manager, refer to the [BufferPoolManagerImpl](https://github.com/Adarsh-Kmt/DragonDB/tree/BufferPoolManagerImpl) branch.
+1. The database server, refer to the [DatabaseServerImpl](https://github.com/Adarsh-Kmt/DragonDB/tree/DatabaseServerImpl) branch.
+2. The buffer pool manager, refer to the [BufferPoolManagerImpl](https://github.com/Adarsh-Kmt/DragonDB/tree/BufferPoolManagerImpl) branch.
 
 <p align="center">
   <img src="assets/DragonDB Architecture v2.png" alt="Architecture Diagram" width="1000"/>
