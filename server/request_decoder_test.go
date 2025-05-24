@@ -1,8 +1,8 @@
 package server
 
 import (
-	"bytes"
 	"encoding/binary"
+	"log"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
@@ -32,6 +32,7 @@ func createInsertRequestBody(key []byte, value []byte) []byte {
 
 	copy(request[pointer:pointer+len(value)], value)
 
+	log.Printf("%v", request)
 	return request
 }
 
@@ -39,9 +40,7 @@ func (ts *RequestDecoderTestSuite) TestDecodeInsertRequest() {
 
 	request := createInsertRequestBody([]byte("hello"), []byte("world"))
 
-	key, value, err := decodeInsertRequestBody(bytes.NewReader(request))
-
-	ts.Suite.Assert().NoError(err)
+	key, value := decodeInsertRequestBody(request)
 
 	ts.Suite.Assert().Equal([]byte("hello"), key)
 
@@ -68,9 +67,7 @@ func (ts *RequestDecoderTestSuite) TestDecodeDeleteRequest() {
 
 	request := createDeleteRequestBody([]byte("hello"))
 
-	key, err := decodeDeleteRequestBody(bytes.NewReader(request))
-
-	ts.Suite.Assert().NoError(err)
+	key := decodeDeleteRequestBody(request)
 
 	ts.Suite.Assert().Equal([]byte("hello"), key)
 }

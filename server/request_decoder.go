@@ -4,7 +4,13 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
+	"net"
 )
+
+type Request struct {
+	opCode string
+	body   []byte
+}
 
 func readNBytes(reader io.Reader, N int) ([]byte, error) {
 
@@ -22,78 +28,101 @@ func readNBytes(reader io.Reader, N int) ([]byte, error) {
 
 	return data, nil
 }
-func decodeInsertRequestBody(reader io.Reader) (key []byte, value []byte, err error) {
 
-	keyLengthBytes, err := readNBytes(reader, 4)
+func readUInt32(reader io.Reader) (uint32, error) {
 
-	if err != nil {
-		return nil, nil, err
-	}
-
-	keyLength := binary.LittleEndian.Uint32(keyLengthBytes)
-
-	key, err = readNBytes(reader, int(keyLength))
+	data, err := readNBytes(reader, 4)
 
 	if err != nil {
-
-		return nil, nil, err
+		return 0, err
 	}
 
-	valueLengthBytes, err := readNBytes(reader, 4)
+	return binary.LittleEndian.Uint32(data), nil
+}
+
+func readRequest(conn net.Conn) (*Request, error) {
+
+	opCodeByte, err := readNBytes(conn, 1)
 
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	valueLength := binary.LittleEndian.Uint32(valueLengthBytes)
+	opCode := string(opCodeByte)
 
-	value, err = readNBytes(reader, int(valueLength))
+	request := &Request{}
+
+	request.opCode = opCode
+
+	if request.opCode == "P" || request.opCode == "S" || request.opCode == "C" {
+		return request, nil
+	}
+
+	requestBodyLength, err := readUInt32(conn)
 
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return key, value, nil
+	requestBody, err := readNBytes(conn, int(requestBodyLength))
+
+	if err != nil {
+		return nil, err
+	}
+
+	request.body = requestBody
+
+	return request, nil
+}
+func decodeInsertRequestBody(body []byte) (key []byte, value []byte) {
+
+	pointer := 0
+	keyLength := binary.LittleEndian.Uint32(body[pointer : pointer+4])
+
+	pointer += 4
+
+	key = make([]byte, keyLength)
+
+	copy(key, body[pointer:pointer+int(keyLength)])
+
+	pointer += int(keyLength)
+
+	valueLength := binary.LittleEndian.Uint32(body[pointer : pointer+4])
+	pointer += 4
+
+	value = make([]byte, valueLength)
+
+	copy(value, body[pointer:pointer+int(valueLength)])
+
+	return key, value
 
 }
 
-func decodeGetRequestBody(reader io.Reader) (key []byte, err error) {
+func decodeGetRequestBody(body []byte) (key []byte) {
 
-	keyLengthBytes, err := readNBytes(reader, 4)
+	pointer := 0
+	keyLength := binary.LittleEndian.Uint32(body[pointer : pointer+4])
 
-	if err != nil {
-		return nil, err
-	}
+	pointer += 4
 
-	keyLength := binary.LittleEndian.Uint32(keyLengthBytes)
+	key = make([]byte, keyLength)
 
-	key, err = readNBytes(reader, int(keyLength))
+	copy(key, body[pointer:pointer+int(keyLength)])
 
-	if err != nil {
-
-		return nil, err
-	}
-
-	return key, nil
+	return key
 }
 
-func decodeDeleteRequestBody(reader io.Reader) (key []byte, err error) {
+func decodeDeleteRequestBody(body []byte) (key []byte) {
 
-	keyLengthBytes, err := readNBytes(reader, 4)
+	pointer := 0
+	keyLength := binary.LittleEndian.Uint32(body[pointer : pointer+4])
 
-	if err != nil {
-		return nil, err
-	}
+	pointer += 4
 
-	keyLength := binary.LittleEndian.Uint32(keyLengthBytes)
+	key = make([]byte, keyLength)
 
-	key, err = readNBytes(reader, int(keyLength))
+	copy(key, body[pointer:pointer+int(keyLength)])
 
-	if err != nil {
-
-		return nil, err
-	}
-
-	return key, nil
+	return key
 
 }

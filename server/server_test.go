@@ -2,6 +2,8 @@ package server
 
 import (
 	"encoding/binary"
+	"fmt"
+	"log"
 	"log/slog"
 	"net"
 	"testing"
@@ -46,6 +48,7 @@ func (test *DatabaseServerTestSuite) TearDownTest() {
 
 	n, err := test.conn.Read(shutdownMessage)
 
+	log.Printf("shutdown message received %v", shutdownMessage)
 	test.Suite.Require().NoError(err)
 
 	test.Suite.Require().Equal(1, n)
@@ -57,12 +60,17 @@ func (test *DatabaseServerTestSuite) TearDownTest() {
 
 func createInsertRequest(key uint16, value []byte) []byte {
 
-	request := make([]byte, 1+4+2+4+len(value))
+	request := make([]byte, 1+4+4+2+4+len(value))
 
 	pointer := 0
 
 	request[pointer] = byte('I')
 	pointer += 1
+
+	requestBodyLength := 4 + 2 + 4 + len(value)
+
+	binary.LittleEndian.PutUint32(request[pointer:pointer+4], uint32(requestBodyLength))
+	pointer += 4
 
 	binary.LittleEndian.PutUint32(request[pointer:pointer+4], uint32(2))
 	pointer += 4
@@ -80,18 +88,24 @@ func createInsertRequest(key uint16, value []byte) []byte {
 
 func createGetRequest(key uint16) []byte {
 
-	request := make([]byte, 1+4+2)
+	request := make([]byte, 1+4+4+2)
 
 	pointer := 0
 
 	request[pointer] = byte('G')
 	pointer += 1
 
+	requestBodyLength := 4 + 2
+
+	binary.LittleEndian.PutUint32(request[pointer:pointer+4], uint32(requestBodyLength))
+	pointer += 4
+
 	binary.LittleEndian.PutUint32(request[pointer:pointer+4], uint32(2))
 	pointer += 4
 
 	binary.LittleEndian.PutUint16(request[pointer:pointer+2], key)
 
+	log.Printf("%v", request)
 	return request
 
 }
@@ -140,14 +154,20 @@ func (test *DatabaseServerTestSuite) TestGet() {
 	test.Suite.Require().Equal(len(request), n)
 
 	responseOpCode, err = readNBytes(test.conn, 1)
+
+	slog.Info(fmt.Sprintf("response op code for get request %s", string(responseOpCode)))
 	test.Suite.Require().NoError(err)
 
 	test.Suite.Require().Equal("O", string(responseOpCode[0]))
 
+	requestBodylength, err := readNBytes(test.conn, 4)
+
+	test.Suite.Require().NoError(err)
+	test.Suite.Require().Equal(uint32(15), binary.LittleEndian.Uint32(requestBodylength))
 	keyLen, err := readNBytes(test.conn, 4)
 
 	test.Suite.Require().NoError(err)
-
+	test.Suite.Require().Equal(uint32(2), binary.LittleEndian.Uint32(keyLen))
 	key, err := readNBytes(test.conn, int(binary.LittleEndian.Uint32(keyLen)))
 
 	test.Suite.Require().NoError(err)

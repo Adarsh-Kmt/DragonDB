@@ -4,14 +4,18 @@ import "encoding/binary"
 
 func encodeGetResponse(key []byte, value []byte) []byte {
 
-	responseLength := 1 + 4 + len(key) + 4 + len(value)
+	responseLength := 1 + 4 + 4 + len(key) + 4 + len(value)
 
 	response := make([]byte, responseLength)
 
+	responseBodyLength := 4 + len(key) + 4 + len(value)
+
 	pointer := 0
 	response[pointer] = byte('O')
-
 	pointer += 1
+
+	binary.LittleEndian.PutUint32(response[pointer:pointer+4], uint32(responseBodyLength))
+	pointer += 4
 
 	binary.LittleEndian.PutUint32(response[pointer:pointer+4], uint32(len(key)))
 	pointer += 4
@@ -28,6 +32,14 @@ func encodeGetResponse(key []byte, value []byte) []byte {
 	return response
 }
 
+func encodeOkayResponse() []byte {
+
+	response := make([]byte, 1)
+
+	response[0] = byte('O')
+
+	return response
+}
 func encodeDeleteResponse() []byte {
 
 	response := make([]byte, 1)

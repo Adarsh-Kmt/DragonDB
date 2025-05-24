@@ -41,6 +41,7 @@ func handleShutdown(conn net.Conn) {
 
 	message := encodeShutdownMessage()
 
+	slog.Info(fmt.Sprintf("sending shutdown message %v", message))
 	if _, err := conn.Write(message); err != nil {
 		slog.Error(err.Error(), "msg", "error while sending shutdown message")
 	}
@@ -51,9 +52,19 @@ func handleShutdown(conn net.Conn) {
 
 }
 
+func sendErrorResponse(conn net.Conn, err error, message string) {
+
+	slog.Error(err.Error(), "msg", message)
+	response := encodeErrorResponse(err)
+
+	if _, err2 := conn.Write(response); err2 != nil {
+		slog.Error(err2.Error(), "msg", "error while writing to connection")
+	}
+}
+
 func (server *Server) handleRequest(conn net.Conn) {
 
-	messageTypeBytes, err := readNBytes(conn, 1)
+	request, err := readRequest(conn)
 
 	// check for read timeout error
 	var netErr net.Error
@@ -62,36 +73,29 @@ func (server *Server) handleRequest(conn net.Conn) {
 	}
 	// handle error
 	if err != nil {
-		slog.Error(err.Error(), "msg", "error while reading message op code")
-		response := encodeErrorResponse(err)
-		conn.Write(response)
+		sendErrorResponse(conn, err, "error while reading request")
 		return
 	}
 
-	messageType := string(messageTypeBytes[:])
-
-	switch messageType {
+	switch request.opCode {
 
 	// handle ping request
 	case "P":
 
-		if _, err := conn.Write([]byte("O")); err != nil {
+		response := encodeOkayResponse()
+
+		if _, err := conn.Write(response); err != nil {
 			slog.Error(err.Error(), "msg", "error while sending OK response")
 		}
 
 	// handle insert request
 	case "I":
 
-		key, value, err := decodeInsertRequestBody(conn)
+		key, value := decodeInsertRequestBody(request.body)
 
 		// handle error
 		if err != nil {
-			slog.Error(err.Error(), "msg", "error while decoding insert request")
-			response := encodeErrorResponse(err)
-
-			if _, err2 := conn.Write(response); err2 != nil {
-				slog.Error(err2.Error(), "msg", "error while writing to connection")
-			}
+			sendErrorResponse(conn, err, "error while decoding insert request")
 			return
 		}
 
@@ -99,30 +103,24 @@ func (server *Server) handleRequest(conn net.Conn) {
 
 		// handle error
 		if err != nil {
-			slog.Error(err.Error(), "msg", "error occured in data structure layer")
-			response := encodeErrorResponse(err)
+			sendErrorResponse(conn, err, "error occured in data structure layer")
+			return
 
-			if _, err2 := conn.Write(response); err2 != nil {
-				slog.Error(err2.Error(), "msg", "error while writing to connection")
-			}
-		} else {
+		}
 
-			response := encodeInsertResponse()
+		response := encodeInsertResponse()
 
-			if _, err = conn.Write(response); err != nil {
-				slog.Error(err.Error(), "msg", "error while writing to conn")
-			}
+		if _, err = conn.Write(response); err != nil {
+			slog.Error(err.Error(), "msg", "error while writing to conn")
 		}
 
 	// handle delete request
 	case "D":
 
-		key, err := decodeDeleteRequestBody(conn)
+		key := decodeDeleteRequestBody(request.body)
 
 		if err != nil {
-			slog.Error(err.Error(), "msg", "error while decoding delete request")
-			response := encodeErrorResponse(err)
-			conn.Write(response)
+			sendErrorResponse(conn, err, "error while decoding delete request")
 			return
 		}
 
@@ -130,56 +128,52 @@ func (server *Server) handleRequest(conn net.Conn) {
 
 		// handle error
 		if err != nil {
-			slog.Error(err.Error(), "msg", "error occured in data structure layer")
-			response := encodeErrorResponse(err)
+			sendErrorResponse(conn, err, "error occured in data structure layer")
+			return
 
-			if _, err2 := conn.Write(response); err2 != nil {
-				slog.Error(err2.Error(), "msg", "error while writing to connection")
-			}
+		}
 
-		} else {
-			response := encodeDeleteResponse()
-			if _, err = conn.Write(response); err != nil {
-				slog.Error(err.Error(), "msg", "error while writing to conn")
-			}
+		response := encodeDeleteResponse()
+		if _, err = conn.Write(response); err != nil {
+			slog.Error(err.Error(), "msg", "error while writing to conn")
 		}
 
 	// handle get request
 	case "G":
 
-		key, err := decodeGetRequestBody(conn)
+		key := decodeGetRequestBody(request.body)
 
 		if err != nil {
-			slog.Error(err.Error(), "msg", "error while decoding get request")
-			response := encodeErrorResponse(err)
-
-			if _, err2 := conn.Write(response); err2 != nil {
-				slog.Error(err2.Error(), "msg", "error while writing to connection")
-			}
+			sendErrorResponse(conn, err, "error while decoding get request")
 			return
 		}
 		slog.Info(fmt.Sprintf("received get request for key %d", key))
+
 		value, err := server.dataStructureLayer.Get(key)
 
+		slog.Info(fmt.Sprintf("value => %v", value))
 		// handle error
 		if err != nil {
-			slog.Error(err.Error(), "msg", "error occured in data structure layer")
-			response := encodeErrorResponse(err)
+			sendErrorResponse(conn, err, "error occured in data structure layer")
+			return
 
-			if _, err2 := conn.Write(response); err2 != nil {
-				slog.Error(err2.Error(), "msg", "error while writing to connection")
-			}
+		}
 
-		} else {
-			response := encodeGetResponse(key, value)
+		response := encodeGetResponse(key, value)
 
-			if _, err = conn.Write(response); err != nil {
-				slog.Error(err.Error(), "msg", "error while writing to conn")
-			}
+		slog.Info(fmt.Sprintf("get response => %v", response))
+		if _, err = conn.Write(response); err != nil {
+			slog.Error(err.Error(), "msg", "error while writing to conn")
 		}
 
 	// handle close request
 	case "C":
+
+		response := encodeOkayResponse()
+
+		if _, err := conn.Write(response); err != nil {
+			slog.Error(err.Error(), "msg", "error while writing to conn")
+		}
 
 		if err := conn.Close(); err != nil {
 			slog.Error(err.Error(), "msg", "error while closing connection")
@@ -187,15 +181,13 @@ func (server *Server) handleRequest(conn net.Conn) {
 
 	// handle shutdown request
 	case "S":
+		slog.Info("server received shut down message")
 		server.Shutdown()
 
 	default:
 		slog.Error("invalid op code")
-		response := encodeErrorResponse(fmt.Errorf("invalid op code"))
 
-		if _, err := conn.Write(response); err != nil {
-			slog.Error(err.Error(), "msg", "error while writing to connection")
-		}
+		sendErrorResponse(conn, fmt.Errorf("invalid op code"), "invalid op code")
 
 	}
 
@@ -259,6 +251,7 @@ func (server *Server) Shutdown() {
 
 	slog.Info("shutdown initiated...")
 	server.shutdownOnce.Do(func() {
+
 		server.listener.Close()
 		close(server.shutdown)
 
