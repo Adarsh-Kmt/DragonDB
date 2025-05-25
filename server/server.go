@@ -64,6 +64,7 @@ func sendErrorResponse(conn net.Conn, err error, message string) {
 
 func (server *Server) handleRequest(conn net.Conn) {
 
+	// read request from connection
 	request, err := readRequest(conn)
 
 	// check for read timeout error
@@ -77,20 +78,24 @@ func (server *Server) handleRequest(conn net.Conn) {
 		return
 	}
 
+	// interpret request body based on op code
 	switch request.opCode {
 
-	// handle ping request
+	// handle PING request
 	case "P":
 
-		response := encodeOkayResponse()
+		// create OK response
+		response := encodeOKResponse()
 
+		// send response
 		if _, err := conn.Write(response); err != nil {
 			slog.Error(err.Error(), "msg", "error while sending OK response")
 		}
 
-	// handle insert request
+	// handle INSERT request
 	case "I":
 
+		// extract key value pair from request body
 		key, value := decodeInsertRequestBody(request.body)
 
 		// handle error
@@ -99,6 +104,7 @@ func (server *Server) handleRequest(conn net.Conn) {
 			return
 		}
 
+		// call insert function
 		err = server.dataStructureLayer.Insert(key, value)
 
 		// handle error
@@ -108,22 +114,27 @@ func (server *Server) handleRequest(conn net.Conn) {
 
 		}
 
-		response := encodeInsertResponse()
+		// create OK response
+		response := encodeOKResponse()
 
+		// send response
 		if _, err = conn.Write(response); err != nil {
 			slog.Error(err.Error(), "msg", "error while writing to conn")
 		}
 
-	// handle delete request
+	// handle DELETE request
 	case "D":
 
+		// extract key from request body
 		key := decodeDeleteRequestBody(request.body)
 
+		// handle error
 		if err != nil {
 			sendErrorResponse(conn, err, "error while decoding delete request")
 			return
 		}
 
+		// call delete function
 		err = server.dataStructureLayer.Delete(key)
 
 		// handle error
@@ -133,25 +144,33 @@ func (server *Server) handleRequest(conn net.Conn) {
 
 		}
 
-		response := encodeDeleteResponse()
+		// create OK response
+		response := encodeOKResponse()
+
+		// send response
 		if _, err = conn.Write(response); err != nil {
 			slog.Error(err.Error(), "msg", "error while writing to conn")
 		}
 
-	// handle get request
+	// handle GET request
 	case "G":
 
+		// extract key from request body
 		key := decodeGetRequestBody(request.body)
 
+		// handle error
 		if err != nil {
 			sendErrorResponse(conn, err, "error while decoding get request")
 			return
 		}
+
 		slog.Info(fmt.Sprintf("received get request for key %d", key))
 
+		// call get function
 		value, err := server.dataStructureLayer.Get(key)
 
 		slog.Info(fmt.Sprintf("value => %v", value))
+
 		// handle error
 		if err != nil {
 			sendErrorResponse(conn, err, "error occured in data structure layer")
@@ -159,32 +178,42 @@ func (server *Server) handleRequest(conn net.Conn) {
 
 		}
 
+		// create success response
 		response := encodeGetResponse(key, value)
 
 		slog.Info(fmt.Sprintf("get response => %v", response))
+
+		// send response
 		if _, err = conn.Write(response); err != nil {
 			slog.Error(err.Error(), "msg", "error while writing to conn")
 		}
 
-	// handle close request
+	// handle CLOSE request
 	case "C":
 
-		response := encodeOkayResponse()
+		// create OK response
+		response := encodeOKResponse()
 
+		// send response
 		if _, err := conn.Write(response); err != nil {
 			slog.Error(err.Error(), "msg", "error while writing to conn")
 		}
 
+		// close connection
 		if err := conn.Close(); err != nil {
 			slog.Error(err.Error(), "msg", "error while closing connection")
 		}
 
-	// handle shutdown request
+	// handle SHUTDOWN request
 	case "S":
 		slog.Info("server received shut down message")
+
+		// initiate server shutdown
 		server.Shutdown()
 
+	// handle invalid op code
 	default:
+
 		slog.Error("invalid op code")
 
 		sendErrorResponse(conn, fmt.Errorf("invalid op code"), "invalid op code")

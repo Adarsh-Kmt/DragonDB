@@ -5,6 +5,11 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"slices"
+)
+
+var (
+	noBodyOpCodes = []string{"P", "S", "C"}
 )
 
 type Request struct {
@@ -50,11 +55,11 @@ func readRequest(conn net.Conn) (*Request, error) {
 
 	opCode := string(opCodeByte)
 
-	request := &Request{}
+	request := &Request{
+		opCode: opCode,
+	}
 
-	request.opCode = opCode
-
-	if request.opCode == "P" || request.opCode == "S" || request.opCode == "C" {
+	if slices.Contains(noBodyOpCodes, request.opCode) {
 		return request, nil
 	}
 
@@ -74,6 +79,7 @@ func readRequest(conn net.Conn) (*Request, error) {
 
 	return request, nil
 }
+
 func decodeInsertRequestBody(body []byte) (key []byte, value []byte) {
 
 	pointer := 0

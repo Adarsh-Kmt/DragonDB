@@ -32,32 +32,6 @@ func encodeGetResponse(key []byte, value []byte) []byte {
 	return response
 }
 
-func encodeOkayResponse() []byte {
-
-	response := make([]byte, 1)
-
-	response[0] = byte('O')
-
-	return response
-}
-func encodeDeleteResponse() []byte {
-
-	response := make([]byte, 1)
-
-	response[0] = byte('O')
-
-	return response
-}
-
-func encodeInsertResponse() []byte {
-
-	response := make([]byte, 1)
-
-	response[0] = byte('O')
-
-	return response
-}
-
 func encodeErrorResponse(err error) []byte {
 
 	message := []byte(err.Error())
@@ -79,10 +53,37 @@ func encodeErrorResponse(err error) []byte {
 	return response
 }
 
+func encodeOKResponse() []byte {
+
+	response := make([]byte, 1)
+
+	response[0] = byte('O')
+
+	return response
+}
+
 func encodeShutdownMessage() []byte {
 
 	response := make([]byte, 1)
 
 	response[0] = byte('S')
+	return response
+}
+
+func encodeDeleteResponse() []byte {
+
+	response := make([]byte, 1)
+
+	response[0] = byte('O')
+
+	return response
+}
+
+func encodeInsertResponse() []byte {
+
+	response := make([]byte, 1)
+
+	response[0] = byte('O')
+
 	return response
 }
