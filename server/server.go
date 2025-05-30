@@ -282,6 +282,7 @@ func (server *Server) Shutdown() {
 	server.shutdownOnce.Do(func() {
 
 		server.listener.Close()
+		server.dataStructureLayer.Close()
 		close(server.shutdown)
 
 	})
