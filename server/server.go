@@ -282,7 +282,9 @@ func (server *Server) Shutdown() {
 	server.shutdownOnce.Do(func() {
 
 		server.listener.Close()
-		server.dataStructureLayer.Close()
+		if err := server.dataStructureLayer.Close(); err != nil {
+			slog.Error(err.Error(), "msg", "error while closing data structure layer")
+		}
 		close(server.shutdown)
 
 	})
