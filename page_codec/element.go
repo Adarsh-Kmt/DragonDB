@@ -1,4 +1,4 @@
-package pagecodec
+package page_codec
 
 import (
 	"bytes"
@@ -17,16 +17,16 @@ type Element struct {
 	RightChildNodePageId uint32
 }
 
-func DefaultSlottedPageCodec() *SlottedPageCodec {
+func DefaultSlottedPageCodec() SlottedPageCodec {
 
-	return &SlottedPageCodec{
+	return SlottedPageCodec{
 		headerConfig: defaultHeaderConfig(),
 		slotConfig:   defaultSlotConfig(),
 	}
 }
 
 // decodeElement takes a slice of bytes representing a element in the data region, and returns a deserialized element object
-func (codec *SlottedPageCodec) decodeElement(elementBytes []byte) Element {
+func (codec SlottedPageCodec) decodeElement(elementBytes []byte) Element {
 
 	e := Element{}
 
@@ -68,7 +68,7 @@ func (codec *SlottedPageCodec) decodeElement(elementBytes []byte) Element {
 }
 
 // encodeSlot takes an element struct and returns an encoded slice of bytes representing this element
-func (codec *SlottedPageCodec) encodeElement(element Element) []byte {
+func (codec SlottedPageCodec) encodeElement(element Element) []byte {
 
 	b := make([]byte, 0)
 
@@ -88,7 +88,7 @@ func (codec *SlottedPageCodec) encodeElement(element Element) []byte {
 }
 
 // setValue sets the value field in the element. only use if len(new_value) <= len(old_value)
-func (codec *SlottedPageCodec) setValue(element []byte, value []byte) {
+func (codec SlottedPageCodec) setValue(element []byte, value []byte) {
 
 	pointer := 0
 
@@ -105,7 +105,7 @@ func (codec *SlottedPageCodec) setValue(element []byte, value []byte) {
 }
 
 // FindElement is used to return the value corresponding to a key, or the next page ID where this key could be found
-func (codec *SlottedPageCodec) FindElement(page []byte, key []byte) (value []byte, nextPageId uint32, found bool) {
+func (codec SlottedPageCodec) FindElement(page []byte, key []byte) (value []byte, nextPageId uint32, found bool) {
 
 	_, elements := codec.getAllSlotsAndElements(page)
 
@@ -138,7 +138,7 @@ func (codec *SlottedPageCodec) FindElement(page []byte, key []byte) (value []byt
 }
 
 // InsertElement is used to insert a key value pair in a page
-func (codec *SlottedPageCodec) InsertElement(page []byte, key []byte, value []byte) bool {
+func (codec SlottedPageCodec) InsertElement(page []byte, key []byte, value []byte) bool {
 
 	defer codec.updateCRC(page)
 
@@ -269,7 +269,7 @@ func (codec *SlottedPageCodec) InsertElement(page []byte, key []byte, value []by
 }
 
 // DeleteElement is used to delete a key value pair, if it exists
-func (codec *SlottedPageCodec) DeleteElement(page []byte, key []byte) bool {
+func (codec SlottedPageCodec) DeleteElement(page []byte, key []byte) bool {
 
 	slotBytes, elementBytes, found := codec.linearSearch(page, key)
 
@@ -291,7 +291,7 @@ func (codec *SlottedPageCodec) DeleteElement(page []byte, key []byte) bool {
 }
 
 // isAdequate is used to check whether the page has the required amount of free space or not
-func (codec *SlottedPageCodec) isAdequate(page []byte, spaceRequired int) bool {
+func (codec SlottedPageCodec) isAdequate(page []byte, spaceRequired int) bool {
 
 	header := codec.decodePageHeader(page)
 
@@ -301,7 +301,7 @@ func (codec *SlottedPageCodec) isAdequate(page []byte, spaceRequired int) bool {
 }
 
 // shoudCompact is used to check whether compaction will free up the required amount of space or not
-func (codec *SlottedPageCodec) shouldCompact(page []byte, size int) bool {
+func (codec SlottedPageCodec) shouldCompact(page []byte, size int) bool {
 
 	header := codec.decodePageHeader(page)
 
@@ -309,7 +309,7 @@ func (codec *SlottedPageCodec) shouldCompact(page []byte, size int) bool {
 }
 
 // getAllSlotsAndElements returns a list of slots and their corresponding elements in the page. This function skips deleted elements
-func (codec *SlottedPageCodec) getAllSlotsAndElements(page []byte) ([]Slot, []Element) {
+func (codec SlottedPageCodec) getAllSlotsAndElements(page []byte) ([]Slot, []Element) {
 
 	header := codec.decodePageHeader(page)
 	pointer := codec.headerConfig.headerSize
@@ -337,7 +337,7 @@ func (codec *SlottedPageCodec) getAllSlotsAndElements(page []byte) ([]Slot, []El
 }
 
 // putAllSlotsAndElements inserts slots and elements into the page, assuming it to be empty
-func (codec *SlottedPageCodec) putAllSlotsAndElements(page []byte, slots []Slot, elements []Element) {
+func (codec SlottedPageCodec) putAllSlotsAndElements(page []byte, slots []Slot, elements []Element) {
 
 	freeSpaceBegin := uint16(codec.headerConfig.headerSize)
 	freeSpaceEnd := uint16(4096)
@@ -359,7 +359,7 @@ func (codec *SlottedPageCodec) putAllSlotsAndElements(page []byte, slots []Slot,
 }
 
 // compact is used to remove all garbage that results from performing delete/update operations on the page
-func (codec *SlottedPageCodec) compact(page []byte) {
+func (codec SlottedPageCodec) compact(page []byte) {
 
 	slots, elements := codec.getAllSlotsAndElements(page)
 
@@ -367,7 +367,7 @@ func (codec *SlottedPageCodec) compact(page []byte) {
 }
 
 // getTotalDataRegionSize returns the size of the data region
-func (codec *SlottedPageCodec) getTotalDataRegionSize(slots []Slot) uint16 {
+func (codec SlottedPageCodec) getTotalDataRegionSize(slots []Slot) uint16 {
 
 	size := uint16(0)
 
@@ -377,7 +377,7 @@ func (codec *SlottedPageCodec) getTotalDataRegionSize(slots []Slot) uint16 {
 	return size
 }
 
-func (codec *SlottedPageCodec) Split(page []byte, leftNode []byte, rightNode []byte) (extraKey []byte, extraValue []byte) {
+func (codec SlottedPageCodec) Split(page []byte, leftNode []byte, rightNode []byte) (extraKey []byte, extraValue []byte) {
 
 	defer codec.updateCRC(leftNode)
 	defer codec.updateCRC(rightNode)
@@ -410,7 +410,7 @@ func (codec *SlottedPageCodec) Split(page []byte, leftNode []byte, rightNode []b
 	return extraKey, extraValue
 }
 
-func (codec *SlottedPageCodec) linearSearch(page []byte, key []byte) (slot []byte, element []byte, found int) {
+func (codec SlottedPageCodec) linearSearch(page []byte, key []byte) (slot []byte, element []byte, found int) {
 
 	header := codec.decodePageHeader(page[:codec.headerConfig.headerSize])
 
@@ -442,7 +442,7 @@ func (codec *SlottedPageCodec) linearSearch(page []byte, key []byte) (slot []byt
 	return nil, nil, -1
 }
 
-func (codec *SlottedPageCodec) appendElement(page []byte, freeSpaceEnd uint16, element Element) (updatedFreeSpaceEnd uint16) {
+func (codec SlottedPageCodec) appendElement(page []byte, freeSpaceEnd uint16, element Element) (updatedFreeSpaceEnd uint16) {
 
 	elementBytes := codec.encodeElement(element)
 
@@ -452,7 +452,7 @@ func (codec *SlottedPageCodec) appendElement(page []byte, freeSpaceEnd uint16, e
 
 }
 
-func (codec *SlottedPageCodec) appendAllSlotsAndElements(page []byte, slots []Slot, elements []Element) {
+func (codec SlottedPageCodec) appendAllSlotsAndElements(page []byte, slots []Slot, elements []Element) {
 
 	headerBytes := page[:codec.headerConfig.headerSize]
 
@@ -471,7 +471,7 @@ func (codec *SlottedPageCodec) appendAllSlotsAndElements(page []byte, slots []Sl
 	codec.setGarbageSize(headerBytes, 0)
 
 }
-func (codec *SlottedPageCodec) Merge(underflowNode []byte, separatorKey []byte, separatorValue []byte, siblingNode []byte, isLeftSibling bool) {
+func (codec SlottedPageCodec) Merge(underflowNode []byte, separatorKey []byte, separatorValue []byte, siblingNode []byte, isLeftSibling bool) {
 
 	underflowSlots, underflowElements := codec.getAllSlotsAndElements(underflowNode)
 	siblingSlots, siblingElements := codec.getAllSlotsAndElements(siblingNode)
@@ -525,7 +525,7 @@ func (codec *SlottedPageCodec) Merge(underflowNode []byte, separatorKey []byte, 
 }
 
 // calculateElementSize returns the total size of the element in the data region
-func (codec *SlottedPageCodec) calculateElementSize(element Element) (size uint16) {
+func (codec SlottedPageCodec) calculateElementSize(element Element) (size uint16) {
 
 	keyLengthFieldSize := 2
 	keyFieldSize := len(element.Key)

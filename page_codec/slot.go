@@ -1,4 +1,4 @@
-package pagecodec
+package page_codec
 
 import (
 	"bytes"
@@ -33,7 +33,7 @@ func defaultSlotConfig() SlotConfig {
 }
 
 // decodeSlot takes a slice of bytes representing a slot, and returns a decoded slot struct
-func (codec *SlottedPageCodec) decodeSlot(slotBytes []byte) Slot {
+func (codec SlottedPageCodec) decodeSlot(slotBytes []byte) Slot {
 
 	s := Slot{}
 
@@ -44,7 +44,7 @@ func (codec *SlottedPageCodec) decodeSlot(slotBytes []byte) Slot {
 }
 
 // encodeSlot takes a slot struct and returns an encoded slice of bytes representing this slot
-func (codec *SlottedPageCodec) encodeSlot(slot Slot) []byte {
+func (codec SlottedPageCodec) encodeSlot(slot Slot) []byte {
 
 	b := make([]byte, 0)
 
@@ -55,24 +55,24 @@ func (codec *SlottedPageCodec) encodeSlot(slot Slot) []byte {
 }
 
 // setElementPointer is used to set the value of the element pointer field in the slot
-func (codec *SlottedPageCodec) setElementPointer(slotBytes []byte, p uint16) {
+func (codec SlottedPageCodec) setElementPointer(slotBytes []byte, p uint16) {
 
 	binary.LittleEndian.PutUint16(slotBytes[codec.slotConfig.elementPointerOffset:], p)
 }
 
 // setElementSize is used to set the value of the element size field in the slot
-func (codec *SlottedPageCodec) setElementSize(slotBytes []byte, s uint16) {
+func (codec SlottedPageCodec) setElementSize(slotBytes []byte, s uint16) {
 
 	binary.LittleEndian.PutUint16(slotBytes[codec.slotConfig.elementSizeOffset:], s)
 }
 
 // isElementDeleted is used to check if the slot points to a deleted element
-func (codec *SlottedPageCodec) isElementDeleted(slot Slot) bool {
+func (codec SlottedPageCodec) isElementDeleted(slot Slot) bool {
 	return slot.elementPointer == codec.slotConfig.deletedElementPointerVal
 }
 
 // appendSlot is used to insert a slot at a particular offset in the page
-func (codec *SlottedPageCodec) appendSlot(page []byte, freeSpaceBegin uint16, slot Slot) (updatedFreeSpaceBegin uint16) {
+func (codec SlottedPageCodec) appendSlot(page []byte, freeSpaceBegin uint16, slot Slot) (updatedFreeSpaceBegin uint16) {
 
 	slotBytes := codec.encodeSlot(slot)
 	copy(page[freeSpaceBegin:], slotBytes)
@@ -81,7 +81,7 @@ func (codec *SlottedPageCodec) appendSlot(page []byte, freeSpaceBegin uint16, sl
 }
 
 // insertSlot inserts a slot into the slot region while maintaining the sorted nature of the slot region. It also returns the left and right child node page ID of the element after insertion
-func (codec *SlottedPageCodec) InsertSlot(page []byte, slot Slot, key []byte) (updatedFreeSpaceBegin uint16, leftChildNodePageId uint32, rightChildNodePageId uint32) {
+func (codec SlottedPageCodec) InsertSlot(page []byte, slot Slot, key []byte) (updatedFreeSpaceBegin uint16, leftChildNodePageId uint32, rightChildNodePageId uint32) {
 
 	// initialize pointer to beginning of slot region
 	pointer := codec.headerConfig.headerSize

@@ -1,4 +1,4 @@
-package pagecodec
+package page_codec
 
 import (
 	"encoding/binary"
@@ -49,7 +49,7 @@ func defaultHeaderConfig() HeaderConfig {
 }
 
 // decodePageHeader takes a slice of bytes representing a slotted page header, and returns a deserialized header object
-func (codec *SlottedPageCodec) decodePageHeader(headerBytes []byte) Header {
+func (codec SlottedPageCodec) decodePageHeader(headerBytes []byte) Header {
 
 	h := Header{}
 	h.crc = binary.LittleEndian.Uint32(headerBytes[codec.headerConfig.crcOffset:])
@@ -70,13 +70,13 @@ func (codec *SlottedPageCodec) decodePageHeader(headerBytes []byte) Header {
 }
 
 // setCRC is used to set the value of the CRC field in the header
-func (codec *SlottedPageCodec) setCRC(headerBytes []byte, crc uint32) {
+func (codec SlottedPageCodec) setCRC(headerBytes []byte, crc uint32) {
 
 	binary.LittleEndian.PutUint32(headerBytes[codec.headerConfig.crcOffset:], crc)
 }
 
 // setNodeType is used to set the value of the node type field in the header
-func (codec *SlottedPageCodec) SetNodeType(headerBytes []byte, isLeafNode bool) {
+func (codec SlottedPageCodec) SetNodeType(headerBytes []byte, isLeafNode bool) {
 
 	if isLeafNode {
 		headerBytes[codec.headerConfig.nodeTypeOffset] = codec.headerConfig.leafNodeType
@@ -86,25 +86,25 @@ func (codec *SlottedPageCodec) SetNodeType(headerBytes []byte, isLeafNode bool) 
 }
 
 // setNumSlots is used to set the value of the number of slots field in the header
-func (codec *SlottedPageCodec) setNumSlots(headerBytes []byte, numSlots int) {
+func (codec SlottedPageCodec) setNumSlots(headerBytes []byte, numSlots int) {
 
 	binary.LittleEndian.PutUint16(headerBytes[codec.headerConfig.numSlotsOffset:], uint16(numSlots))
 }
 
 // setGarbageSize is used to set the value of the garbage size field in the header
-func (codec *SlottedPageCodec) setGarbageSize(headerBytes []byte, garbageSize uint16) {
+func (codec SlottedPageCodec) setGarbageSize(headerBytes []byte, garbageSize uint16) {
 
 	binary.LittleEndian.PutUint16(headerBytes[codec.headerConfig.garbageSizeOffset:], garbageSize)
 }
 
 // setFreeSpaceBegin is used to set the value of the free space begin pointer field in the header
-func (codec *SlottedPageCodec) setFreeSpaceBegin(headerBytes []byte, freeSpaceBegin uint16) {
+func (codec SlottedPageCodec) setFreeSpaceBegin(headerBytes []byte, freeSpaceBegin uint16) {
 
 	binary.LittleEndian.PutUint16(headerBytes[codec.headerConfig.freeSpaceBeginOffset:], freeSpaceBegin)
 }
 
 // setFreeSpaceEnd is used to set the value of the free space end pointer field in the header
-func (codec *SlottedPageCodec) setFreeSpaceEnd(headerBytes []byte, freeSpaceEnd uint16) {
+func (codec SlottedPageCodec) setFreeSpaceEnd(headerBytes []byte, freeSpaceEnd uint16) {
 
 	binary.LittleEndian.PutUint16(headerBytes[codec.headerConfig.freeSpaceEndOffset:], freeSpaceEnd)
 }
@@ -118,7 +118,7 @@ func CheckCRC(data []byte, crc uint32) bool {
 	return crc32.ChecksumIEEE(data) == crc
 }
 
-func (codec *SlottedPageCodec) updateCRC(page []byte) {
+func (codec SlottedPageCodec) updateCRC(page []byte) {
 
 	data := page[4:]
 	header := page[:codec.headerConfig.headerSize]
