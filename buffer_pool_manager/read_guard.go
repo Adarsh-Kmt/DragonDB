@@ -22,9 +22,6 @@ func (bufferPool *SimpleBufferPoolManager) NewReadGuard(pageId PageID) (*ReadGua
 
 	page.mutex.RLock()
 
-	btreeNode := new(BTreeNode)
-	btreeNode.deserialize(page.data)
-
 	guard := &ReadGuard{
 		active:     true,
 		page:       page,

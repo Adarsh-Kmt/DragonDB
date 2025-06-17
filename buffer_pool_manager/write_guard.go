@@ -27,9 +27,6 @@ func (bufferPool *SimpleBufferPoolManager) NewWriteGuard(pageId PageID) (*WriteG
 
 	page.mutex.Lock()
 
-	btreeNode := new(BTreeNode)
-	btreeNode.deserialize(page.data)
-
 	guard := &WriteGuard{
 		active:     true,
 		page:       page,
