@@ -81,7 +81,7 @@ func (codec SlottedPageCodec) appendSlot(page []byte, freeSpaceBegin uint16, slo
 }
 
 // insertSlot inserts a slot into the slot region while maintaining the sorted nature of the slot region. It also returns the left and right child node page ID of the element after insertion
-func (codec SlottedPageCodec) InsertSlot(page []byte, slot Slot, key []byte) (updatedFreeSpaceBegin uint16, leftChildNodePageId uint32, rightChildNodePageId uint32) {
+func (codec SlottedPageCodec) InsertSlot(page []byte, newSlot Slot, newElement Element) (updatedFreeSpaceBegin uint16) {
 
 	// initialize pointer to beginning of slot region
 	pointer := codec.headerConfig.headerSize
@@ -93,7 +93,10 @@ func (codec SlottedPageCodec) InsertSlot(page []byte, slot Slot, key []byte) (up
 	header := codec.decodePageHeader(headerBytes)
 
 	// create a list to store all slots corresponding to elements with key greater than or equal to target key
-	greaterSlots := []Slot{slot}
+	greaterSlots := []Slot{newSlot}
+
+	smallerElementBytes := make([]byte, 0)
+	greaterElementBytes := make([]byte, 0)
 
 	greaterFound := false
 	// create a list to store all slots representing deleted elements.
@@ -113,20 +116,20 @@ func (codec SlottedPageCodec) InsertSlot(page []byte, slot Slot, key []byte) (up
 			elementBytes := page[existingSlot.elementPointer : existingSlot.elementPointer+existingSlot.elementSize]
 
 			// decode elment from element bytes
-			element := codec.decodeElement(elementBytes)
+			existingElement := codec.decodeElement(elementBytes)
 
 			// compare element key and target key
-			result := bytes.Compare(element.Key, key)
+			result := bytes.Compare(existingElement.Key, newElement.Key)
 
 			// if element.key > target key, append slot to greater slots list
 			if result == 1 {
 				if !greaterFound {
-					rightChildNodePageId = element.LeftChildNodePageId
+					greaterElementBytes = elementBytes
 					greaterFound = true
 				}
 				greaterSlots = append(greaterSlots, existingSlot)
 			} else if result == -1 {
-				leftChildNodePageId = element.RightChildNodePageId
+				smallerElementBytes = elementBytes
 			}
 
 		} else {
@@ -140,6 +143,8 @@ func (codec SlottedPageCodec) InsertSlot(page []byte, slot Slot, key []byte) (up
 				greaterSlots = append(greaterSlots, existingSlot)
 			}
 		}
+
+		pointer = pointer + codec.slotConfig.slotSize
 	}
 
 	// calculate number of slots in page greater than new slot
@@ -154,6 +159,13 @@ func (codec SlottedPageCodec) InsertSlot(page []byte, slot Slot, key []byte) (up
 		header.freeSpaceBegin = codec.appendSlot(page, header.freeSpaceBegin, currSlot)
 	}
 
+	if greaterElementBytes != nil {
+		codec.setLeftChildNodePageId(greaterElementBytes, newElement.RightChildNodePageId)
+	}
+	if smallerElementBytes != nil {
+		codec.setRightChildNodePageId(smallerElementBytes, newElement.LeftChildNodePageId)
+	}
+
 	// return updated free space begin pointer
-	return header.freeSpaceBegin, leftChildNodePageId, rightChildNodePageId
+	return header.freeSpaceBegin
 }

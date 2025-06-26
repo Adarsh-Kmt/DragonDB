@@ -88,19 +88,56 @@ func (codec SlottedPageCodec) encodeElement(element Element) []byte {
 }
 
 // setValue sets the value field in the element. only use if len(new_value) <= len(old_value)
-func (codec SlottedPageCodec) setValue(element []byte, value []byte) {
+func (codec SlottedPageCodec) setValue(elementBytes []byte, value []byte) {
 
 	pointer := 0
 
-	keySize := binary.LittleEndian.Uint16(element[pointer:])
+	keySize := binary.LittleEndian.Uint16(elementBytes[pointer:])
 	pointer += 2
 
 	pointer += int(keySize)
 
-	binary.LittleEndian.PutUint16(element[pointer:], uint16(len(value)))
+	binary.LittleEndian.PutUint16(elementBytes[pointer:], uint16(len(value)))
 	pointer += 2
 
-	copy(element[pointer:], value)
+	copy(elementBytes[pointer:], value)
+
+}
+
+func (codec SlottedPageCodec) setRightChildNodePageId(elementBytes []byte, rightChildNodePageId uint32) {
+
+	pointer := 0
+
+	keySize := binary.LittleEndian.Uint16(elementBytes[pointer:])
+	pointer += 2
+
+	pointer += int(keySize)
+
+	valueSize := binary.LittleEndian.Uint16(elementBytes[pointer:])
+	pointer += 2
+	pointer += int(valueSize)
+
+	pointer += 4
+
+	binary.LittleEndian.PutUint32(elementBytes[pointer:], rightChildNodePageId)
+
+}
+
+func (codec SlottedPageCodec) setLeftChildNodePageId(elementBytes []byte, leftChildNodePageId uint32) {
+
+	pointer := 0
+
+	keySize := binary.LittleEndian.Uint16(elementBytes[pointer:])
+	pointer += 2
+
+	pointer += int(keySize)
+
+	valueSize := binary.LittleEndian.Uint16(elementBytes[pointer:])
+	pointer += 2
+
+	pointer += int(valueSize)
+
+	binary.LittleEndian.PutUint32(elementBytes[pointer:], leftChildNodePageId)
 
 }
 
@@ -137,13 +174,14 @@ func (codec SlottedPageCodec) FindElement(page []byte, key []byte) (value []byte
 	return nil, nextPageId, false
 }
 
-// InsertElement is used to insert a key value pair in a page
-func (codec SlottedPageCodec) InsertElement(page []byte, key []byte, value []byte) bool {
-
+func (codec SlottedPageCodec) PutValue(page []byte, key []byte, value []byte) bool {
 	defer codec.updateCRC(page)
 
 	// search for slot, element corresponding to key
-	slotBytes, elementBytes, found := codec.linearSearch(page, key)
+	slotBytes, elementBytes, _ := codec.linearSearch(page, key)
+
+	// decode existing element
+	oldElement := codec.decodeElement(elementBytes)
 
 	// extract header bytes from page
 	headerBytes := page[:codec.headerConfig.headerSize]
@@ -154,71 +192,79 @@ func (codec SlottedPageCodec) InsertElement(page []byte, key []byte, value []byt
 	// calculate space required to store element
 	elementSpaceRequired := 2 + len(key) + 2 + len(value) + 4 + 4
 
-	// if slot, element corresponding to key found
-	if found == 0 {
+	// if size(current_element_value) >= size(new_element_value)
+	if len(oldElement.Value) >= len(value) {
 
-		// decode existing element
-		oldElement := codec.decodeElement(elementBytes)
+		// update value in place
+		codec.setValue(elementBytes, value)
 
-		// if size(current_element_value) >= size(new_element_value)
-		if len(oldElement.Value) >= len(value) {
+		// update garbage size field in the header region
+		codec.setGarbageSize(headerBytes, header.garbageSize+uint16(len(oldElement.Value)-len(value)))
 
-			// update value in place
-			codec.setValue(elementBytes, value)
+	} else {
 
-			// update garbage size field in the header region
-			codec.setGarbageSize(headerBytes, header.garbageSize+uint16(len(oldElement.Value)-len(value)))
+		// this block is executed if size(current_element_value) < size(new_element_value)
+		// in this case, a new element must be inserted into the free space region
 
-		} else {
+		// check if free space region has enough space to accomodate new element.
+		if !codec.isAdequate(page, elementSpaceRequired) {
 
-			// this block is executed if size(current_element_value) < size(new_element_value)
-			// in this case, a new element must be inserted into the free space region
+			// if space is not enough, check if performing compaction will free up enough space to insert the element.
+			if !codec.shouldCompact(page, elementSpaceRequired) {
 
-			// check if free space region has enough space to accomodate new element.
-			if !codec.isAdequate(page, elementSpaceRequired) {
+				// if even compaction won't free up enough space to insert the new element, return false.
+				return false
+			} else {
 
-				// if space is not enough, check if performing compaction will free up enough space to insert the element.
-				if !codec.shouldCompact(page, elementSpaceRequired) {
+				// if compaction is useful, perform compaction first before inserting the new element.
+				codec.compact(page)
 
-					// if even compaction won't free up enough space to insert the new element, return false.
-					return false
-				} else {
-
-					// if compaction is useful, perform compaction first before inserting the new element.
-					codec.compact(page)
-
-					// update the header after compaction
-					headerBytes = page[:codec.headerConfig.headerSize]
-					header = codec.decodePageHeader(headerBytes)
-				}
+				// update the header after compaction
+				headerBytes = page[:codec.headerConfig.headerSize]
+				header = codec.decodePageHeader(headerBytes)
 			}
-
-			// create element
-			newElement := Element{
-				Key:                  key,
-				Value:                value,
-				LeftChildNodePageId:  oldElement.LeftChildNodePageId,
-				RightChildNodePageId: oldElement.RightChildNodePageId,
-			}
-
-			// append value to end of free space region
-			header.freeSpaceEnd = codec.appendElement(page, header.freeSpaceEnd, newElement)
-
-			// update free space end value
-			codec.setFreeSpaceEnd(headerBytes, header.freeSpaceEnd)
-
-			// update element pointer field in existing slot
-			codec.setElementPointer(slotBytes, header.freeSpaceEnd)
-
-			// update element size field in existing slot
-			codec.setElementSize(slotBytes, codec.calculateElementSize(newElement))
-
-			// update garbage size field in header region
-			codec.setGarbageSize(headerBytes, header.garbageSize+codec.calculateElementSize(oldElement))
-
 		}
-		return true
+
+		// create element
+		newElement := Element{
+			Key:                  key,
+			Value:                value,
+			LeftChildNodePageId:  oldElement.LeftChildNodePageId,
+			RightChildNodePageId: oldElement.RightChildNodePageId,
+		}
+
+		// append value to end of free space region
+		header.freeSpaceEnd = codec.appendElement(page, header.freeSpaceEnd, newElement)
+
+		// update free space end value
+		codec.setFreeSpaceEnd(headerBytes, header.freeSpaceEnd)
+
+		// update element pointer field in existing slot
+		codec.setElementPointer(slotBytes, header.freeSpaceEnd)
+
+		// update element size field in existing slot
+		codec.setElementSize(slotBytes, codec.calculateElementSize(newElement))
+
+		// update garbage size field in header region
+		codec.setGarbageSize(headerBytes, header.garbageSize+codec.calculateElementSize(oldElement))
+
 	}
+	return true
+}
+
+// InsertElement is used to insert a key value pair in a page
+func (codec SlottedPageCodec) InsertElement(page []byte, key []byte, value []byte, leftChildNodePageId uint32, rightChildNodePageId uint32) bool {
+
+	defer codec.updateCRC(page)
+
+	// extract header bytes from page
+	headerBytes := page[:codec.headerConfig.headerSize]
+
+	// decode header
+	header := codec.decodePageHeader(headerBytes)
+
+	// calculate space required to store element
+	elementSpaceRequired := 2 + len(key) + 2 + len(value) + 4 + 4
 
 	// calculate space required to store new slot
 	slotSpaceRequired := codec.slotConfig.slotSize
@@ -244,21 +290,22 @@ func (codec SlottedPageCodec) InsertElement(page []byte, key []byte, value []byt
 
 	// create new element
 	newElement := Element{
-		Key:   key,
-		Value: value,
+		Key:                  key,
+		Value:                value,
+		LeftChildNodePageId:  leftChildNodePageId,
+		RightChildNodePageId: rightChildNodePageId,
 	}
-
-	// create new slot
-	slot := Slot{
-		elementSize:    codec.calculateElementSize(newElement),
-		elementPointer: header.freeSpaceEnd - codec.calculateElementSize(newElement),
-	}
-
-	header.freeSpaceBegin, newElement.LeftChildNodePageId, newElement.RightChildNodePageId = codec.InsertSlot(page, slot, key)
 
 	// append new element to end of free space region
 	header.freeSpaceEnd = codec.appendElement(page, header.freeSpaceEnd, newElement)
 
+	// create new slot
+	newSlot := Slot{
+		elementSize:    codec.calculateElementSize(newElement),
+		elementPointer: header.freeSpaceEnd,
+	}
+
+	header.freeSpaceBegin = codec.InsertSlot(page, newSlot, newElement)
 	// update free space end pointer field in header region
 	codec.setFreeSpaceEnd(headerBytes, header.freeSpaceEnd)
 	// update free space begin pointer field in header region
@@ -305,7 +352,7 @@ func (codec SlottedPageCodec) shouldCompact(page []byte, size int) bool {
 
 	header := codec.decodePageHeader(page)
 
-	return size >= int(header.garbageSize)
+	return size <= int(header.garbageSize)
 }
 
 // getAllSlotsAndElements returns a list of slots and their corresponding elements in the page. This function skips deleted elements
@@ -345,7 +392,7 @@ func (codec SlottedPageCodec) putAllSlotsAndElements(page []byte, slots []Slot, 
 	for i := range slots {
 
 		freeSpaceEnd = codec.appendElement(page, freeSpaceEnd, elements[i])
-		slots[i].elementPointer = uint16(freeSpaceEnd)
+		slots[i].elementPointer = freeSpaceEnd
 		freeSpaceBegin = codec.appendSlot(page, freeSpaceBegin, slots[i])
 
 	}
@@ -377,9 +424,9 @@ func (codec SlottedPageCodec) getTotalDataRegionSize(slots []Slot) uint16 {
 	return size
 }
 
-func (codec SlottedPageCodec) Split(page []byte, leftNode []byte, rightNode []byte) (extraKey []byte, extraValue []byte) {
+func (codec SlottedPageCodec) Split(page []byte, rightNode []byte) (extraKey []byte, extraValue []byte) {
 
-	defer codec.updateCRC(leftNode)
+	defer codec.updateCRC(page)
 	defer codec.updateCRC(rightNode)
 
 	slots, elements := codec.getAllSlotsAndElements(page)
@@ -404,7 +451,7 @@ func (codec SlottedPageCodec) Split(page []byte, leftNode []byte, rightNode []by
 	extraKey = elements[index].Key
 	extraValue = elements[index].Value
 
-	codec.putAllSlotsAndElements(leftNode, leftSlots, leftElements)
+	codec.putAllSlotsAndElements(page, leftSlots, leftElements)
 	codec.putAllSlotsAndElements(rightNode, rightSlots, rightElements)
 
 	return extraKey, extraValue
@@ -473,6 +520,7 @@ func (codec SlottedPageCodec) appendAllSlotsAndElements(page []byte, slots []Slo
 }
 func (codec SlottedPageCodec) Merge(underflowNode []byte, separatorKey []byte, separatorValue []byte, siblingNode []byte, isLeftSibling bool) {
 
+	defer codec.updateCRC(underflowNode)
 	underflowSlots, underflowElements := codec.getAllSlotsAndElements(underflowNode)
 	siblingSlots, siblingElements := codec.getAllSlotsAndElements(siblingNode)
 
@@ -490,7 +538,7 @@ func (codec SlottedPageCodec) Merge(underflowNode []byte, separatorKey []byte, s
 
 	if isLeftSibling {
 		separatorElement.LeftChildNodePageId = siblingElements[len(siblingElements)-1].RightChildNodePageId
-		separatorElement.RightChildNodePageId = underflowElements[len(underflowElements)-1].LeftChildNodePageId
+		separatorElement.RightChildNodePageId = underflowElements[0].LeftChildNodePageId
 
 		leftSlots = siblingSlots
 		leftElements = siblingElements

@@ -125,3 +125,12 @@ func (codec SlottedPageCodec) updateCRC(page []byte) {
 
 	codec.setCRC(header, generateCRC(data))
 }
+
+func (codec *SlottedPageCodec) IsLeafNode(page []byte) bool {
+
+	headerBytes := page[:codec.headerConfig.headerSize]
+
+	header := codec.decodePageHeader(headerBytes)
+
+	return header.isLeafNode
+}
