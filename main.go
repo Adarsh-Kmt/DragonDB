@@ -1,33 +1,33 @@
 package main
 
 import (
-	"log"
-	"log/slog"
-
 	"github.com/Adarsh-Kmt/DragonDB/buffer_pool_manager"
+	dtl "github.com/Adarsh-Kmt/DragonDB/data_structure_layer"
+	"github.com/Adarsh-Kmt/DragonDB/server"
 )
 
 func main() {
 
 	cache := buffer_pool_manager.NewLRUReplacer()
-	disk, err := buffer_pool_manager.NewDirectIODiskManager("/file")
+	disk, metadata, err := buffer_pool_manager.NewDirectIODiskManager("dragon.db")
 
 	if err != nil {
 		panic(err)
 	}
 
-	bufferPool := buffer_pool_manager.NewSimpleBufferPoolManager(5, 4096, cache, disk)
-
-	writeGuard, err := bufferPool.NewWriteGuard(buffer_pool_manager.PageID(1))
+	bufferPoolManager, err := buffer_pool_manager.NewSimpleBufferPoolManager(5, 4096, cache, disk)
 
 	if err != nil {
-		slog.Error(err.Error())
+		panic(err)
 	}
-	defer writeGuard.Done()
 
-	data, ok := writeGuard.GetData()
+	btree := dtl.NewBTree(bufferPoolManager, metadata)
 
-	if ok {
-		log.Println(data)
+	server, err := server.NewServer(":8080", btree)
+
+	if err != nil {
+		panic(err)
 	}
+
+	server.Run()
 }
