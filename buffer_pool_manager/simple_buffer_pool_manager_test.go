@@ -7,6 +7,7 @@ import (
 	"sync"
 	"testing"
 
+	codec "github.com/Adarsh-Kmt/DragonDB/page_codec"
 	"github.com/ncw/directio"
 	"github.com/stretchr/testify/suite"
 )
@@ -74,15 +75,19 @@ func (bs *BufferPoolManagerTestSuite) SetupTest() {
 	bs.Require().NoError(err)
 
 	disk := &DirectIODiskManager{
-		file:                  file,
-		mutex:                 &sync.Mutex{},
-		deallocatedPageIdList: make([]PageID, 0),
-		maxAllocatedPageId:    7,
+		file:  file,
+		mutex: &sync.Mutex{},
+		metadata: &codec.MetaData{
+			DeallocatedPageIdList: make([]uint64, 0),
+			MaxAllocatedPageId:    7,
+		},
 	}
 
 	bs.disk = disk
 
-	bs.bufferPool = NewSimpleBufferPoolManager(3, 4096, replacer, disk)
+	bs.bufferPool, err = NewSimpleBufferPoolManager(3, 4096, replacer, disk)
+
+	bs.Require().NoError(err)
 
 }
 
@@ -227,8 +232,8 @@ func (bs *BufferPoolManagerTestSuite) TestDeletePage() {
 
 	bs.Suite.Assert().NoError(err)
 	log.Printf("page table => %v", bs.bufferPool.pageTable)
-	log.Printf("deallocated page id list => %v", bs.disk.deallocatedPageIdList)
-	bs.Suite.Assert().Equal(PageID(0), bs.disk.deallocatedPageIdList[0])
+	log.Printf("deallocated page id list => %v", bs.disk.metadata.DeallocatedPageIdList)
+	bs.Suite.Assert().Equal(uint64(0), bs.disk.metadata.DeallocatedPageIdList[0])
 
 }
 
@@ -237,7 +242,7 @@ func (bs *BufferPoolManagerTestSuite) TestNewPage() {
 	// should return max allocated page ID
 	pageId := bs.bufferPool.NewPage()
 
-	bs.Suite.Assert().Equal(PageID(8), pageId)
+	bs.Suite.Assert().Equal(uint64(8), pageId)
 
 	// delete page 0, check if new page returns 0
 	_, err := bs.bufferPool.fetchPage(0)
@@ -252,7 +257,7 @@ func (bs *BufferPoolManagerTestSuite) TestNewPage() {
 
 	pageId = bs.bufferPool.NewPage()
 
-	bs.Suite.Assert().Equal(PageID(0), pageId)
+	bs.Suite.Assert().Equal(uint64(0), pageId)
 }
 
 func (bs *BufferPoolManagerTestSuite) TestDirtyPageEviction() {

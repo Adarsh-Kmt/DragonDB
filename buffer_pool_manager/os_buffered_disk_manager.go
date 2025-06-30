@@ -11,8 +11,8 @@ type OSBufferedDiskManager struct {
 	file *os.File
 
 	mutex                 *sync.Mutex
-	deallocatedPageIdList []PageID
-	maxAllocatedPageId    PageID
+	deallocatedPageIdList []uint64
+	maxAllocatedPageId    uint64
 }
 
 func NewOSBufferedDiskManager(filePath string) (*OSBufferedDiskManager, error) {
@@ -28,7 +28,7 @@ func NewOSBufferedDiskManager(filePath string) (*OSBufferedDiskManager, error) {
 		mutex: &sync.Mutex{},
 	}
 
-	freeListPageData, err := disk.read(FREELIST_PAGE_ID*PAGE_SIZE, PAGE_SIZE)
+	freeListPageData, err := disk.read(METADATA_PAGE_ID*PAGE_SIZE, PAGE_SIZE)
 
 	if err != nil {
 		return nil, err
@@ -80,7 +80,7 @@ func (disk *OSBufferedDiskManager) read(offset int64, size int) ([]byte, error) 
 
 // allocatePage allocates a page in the file and returns a new page ID for use.
 // It reuses a deallocated page ID if available, otherwise increments and returns a new page ID.
-func (disk *OSBufferedDiskManager) allocatePage() PageID {
+func (disk *OSBufferedDiskManager) allocatePage() uint64 {
 
 	disk.mutex.Lock()
 	defer disk.mutex.Unlock()
@@ -99,7 +99,7 @@ func (disk *OSBufferedDiskManager) allocatePage() PageID {
 
 // deallocatePage marks a page ID as free and adds it to the free list,
 // making it available for future allocation.
-func (disk *OSBufferedDiskManager) deallocatePage(pageId PageID) {
+func (disk *OSBufferedDiskManager) deallocatePage(pageId uint64) {
 
 	disk.mutex.Lock()
 	disk.deallocatedPageIdList = append(disk.deallocatedPageIdList, pageId)
@@ -111,7 +111,7 @@ func (disk *OSBufferedDiskManager) close() error {
 
 	freelistPageData := disk.serializeFreelistPage()
 
-	if err := disk.write(FREELIST_PAGE_ID*PAGE_SIZE, freelistPageData); err != nil {
+	if err := disk.write(METADATA_PAGE_ID*PAGE_SIZE, freelistPageData); err != nil {
 		return err
 	}
 
@@ -148,17 +148,17 @@ func (disk *OSBufferedDiskManager) serializeFreelistPage() []byte {
 func (disk *OSBufferedDiskManager) deserializeFreelistPage(data []byte) {
 
 	pointer := 0
-	disk.maxAllocatedPageId = PageID(binary.LittleEndian.Uint64(data[pointer : pointer+8]))
+	disk.maxAllocatedPageId = binary.LittleEndian.Uint64(data[pointer : pointer+8])
 
 	pointer += 8
 
 	releasedPageListSize := binary.LittleEndian.Uint64(data[pointer : pointer+8])
 	pointer += 8
 
-	deallocatedPageIdList := make([]PageID, 0)
+	deallocatedPageIdList := make([]uint64, 0)
 
 	for i := 0; i < int(releasedPageListSize); i++ {
-		deallocatedPageIdList = append(deallocatedPageIdList, PageID(binary.LittleEndian.Uint64(data[pointer:pointer+8])))
+		deallocatedPageIdList = append(deallocatedPageIdList, binary.LittleEndian.Uint64(data[pointer:pointer+8]))
 		pointer += 8
 	}
 

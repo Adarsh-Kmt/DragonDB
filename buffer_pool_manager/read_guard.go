@@ -1,6 +1,8 @@
 package buffer_pool_manager
 
-import codec "github.com/Adarsh-Kmt/DragonDB/page_codec"
+import (
+	"log/slog"
+)
 
 // ReadGuard is used to provide shared read access to a page stored in a frame in the buffer pool manager.
 type ReadGuard struct {
@@ -12,11 +14,12 @@ type ReadGuard struct {
 
 // NewReadGuard returns an active read guard.
 // All read guards corresponding to a page share a RW lock.
-func (bufferPool *SimpleBufferPoolManager) NewReadGuard(pageId PageID) (*ReadGuard, error) {
+func (bufferPool *SimpleBufferPoolManager) NewReadGuard(pageId uint64) (*ReadGuard, error) {
 
 	page, err := bufferPool.fetchPage(pageId)
 
 	if err != nil {
+		slog.Error("Failed to fetch page for read guard", "pageId", pageId, "error", err.Error())
 		return nil, err
 	}
 
@@ -31,6 +34,15 @@ func (bufferPool *SimpleBufferPoolManager) NewReadGuard(pageId PageID) (*ReadGua
 
 	return guard, nil
 
+}
+
+func (guard *ReadGuard) GetPageId() uint64 {
+
+	if !guard.active {
+		return 0
+	}
+
+	return guard.page.pageId
 }
 
 // Done is used to decrease the pin count of the page, and ensure the exclusive lock is released.
@@ -50,11 +62,20 @@ func (guard *ReadGuard) Done() bool {
 	return true
 }
 
-func (guard *ReadGuard) FindElement(key []byte) (value []byte, nextPageId uint32, found bool) {
+func (guard *ReadGuard) FindElement(key []byte) (value []byte, nextPageId uint64, found bool) {
 
 	if !guard.active {
 		return nil, 0, false
 	}
 
 	return guard.codec.FindElement(guard.page.data, key)
+}
+
+func (guard *ReadGuard) IsLeafNode() bool {
+
+	if !guard.active {
+		return false
+	}
+
+	return guard.codec.IsLeafNode(guard.page.data)
 }

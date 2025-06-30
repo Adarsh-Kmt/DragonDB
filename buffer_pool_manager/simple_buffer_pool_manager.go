@@ -1,27 +1,31 @@
 package buffer_pool_manager
 
 import (
+	"fmt"
 	"log"
+	"log/slog"
 	"sync"
+
+	"github.com/ncw/directio"
+	"golang.org/x/sys/unix"
 )
 
 const (
 	PAGE_SIZE        = 4096
-	FREELIST_PAGE_ID = 0
+	METADATA_PAGE_ID = 0
 )
 
 type FrameID int
-type PageID uint64
 
 type BufferPoolManager interface {
 
 	// public methods
 
 	// NewPage allocates a new page in the file and returns its page ID.
-	NewPage() PageID
+	NewPage() uint64
 
-	NewWriteGuard(pageId PageID) (*WriteGuard, error)
-	NewReadGuard(pageId PageID) (*ReadGuard, error)
+	NewWriteGuard(pageId uint64) (*WriteGuard, error)
+	NewReadGuard(pageId uint64) (*ReadGuard, error)
 
 	// Close is called during shutdown to ensure data durability.
 	// It flushes all dirty pages to disk, writes the free list metadata page,
@@ -36,21 +40,21 @@ type BufferPoolManager interface {
 	// fetchPage loads a page with the given page ID into the buffer pool,
 	// returning the corresponding frame. If the page is already in memory,
 	// it returns the cached frame.
-	fetchPage(pageID PageID) (*Frame, error)
+	fetchPage(pageID uint64) (*Frame, error)
 
 	// deletePage removes a page with the given page ID from both memory and disk.
 	// Returns true if the deletion was successful.
-	deletePage(pageID PageID) (bool, error)
+	deletePage(pageID uint64) (bool, error)
 
 	// unpinPage marks a page as no longer being used by any client.
 	// If the page is dirty, it remains in the buffer pool until flushed.
-	unpinPage(pageID PageID) bool
+	unpinPage(pageID uint64) bool
 }
 
 type Frame struct {
 
 	// page ID of the page currently stored in the frame.
-	pageId PageID
+	pageId uint64
 
 	// stores page data.
 	data []byte
@@ -86,7 +90,7 @@ type SimpleBufferPoolManager struct {
 
 	// pageTable is used to map page IDs to frame IDs.
 	// It is used to keep track of which page is currently stored in which frame.
-	pageTable map[PageID]FrameID
+	pageTable map[uint64]FrameID
 
 	// fixed size array of frames.
 	frames []*Frame
@@ -104,20 +108,27 @@ type SimpleBufferPoolManager struct {
 	poolSize int
 }
 
-func NewSimpleBufferPoolManager(poolSize int, pageSize int, replacer Replacer, disk DiskManager) *SimpleBufferPoolManager {
+func NewSimpleBufferPoolManager(poolSize int, pageSize int, replacer Replacer, disk DiskManager) (*SimpleBufferPoolManager, error) {
 
 	frames := make([]*Frame, poolSize)
 
 	for i := range frames {
+
+		buf, err := createFrameBuffer(pageSize)
+
+		if err != nil {
+			return nil, err
+		}
 		frames[i] = &Frame{
 			mutex:         &sync.RWMutex{},
 			pinCountMutex: &sync.Mutex{},
+			data:          buf,
 		}
 	}
 
 	freeFrames := make([]FrameID, 0)
 
-	for i := 0; i < poolSize; i++ {
+	for i := range poolSize {
 		freeFrames = append(freeFrames, FrameID(i))
 	}
 
@@ -126,18 +137,18 @@ func NewSimpleBufferPoolManager(poolSize int, pageSize int, replacer Replacer, d
 		disk:     disk,
 
 		lookupMutex: &sync.RWMutex{},
-		pageTable:   make(map[PageID]FrameID),
+		pageTable:   make(map[uint64]FrameID),
 		frames:      frames,
 
 		frameAllocationMutex: &sync.Mutex{},
 		freeFrames:           freeFrames,
 		poolSize:             poolSize,
 		pageSize:             pageSize,
-	}
+	}, nil
 }
 
 // NewPage is a thread-safe function that allocates a new page in the file, and returns its page ID.
-func (bufferPool *SimpleBufferPoolManager) NewPage() PageID {
+func (bufferPool *SimpleBufferPoolManager) NewPage() uint64 {
 
 	return bufferPool.disk.allocatePage()
 }
@@ -145,14 +156,15 @@ func (bufferPool *SimpleBufferPoolManager) NewPage() PageID {
 // fetchPage returns a pointer to the frame storing the page with a given page ID.
 // DO NOT call fetchPage directly, as it is not thread-safe.
 // Always use a page guard to access page data.
-func (bufferPool *SimpleBufferPoolManager) fetchPage(pageId PageID) (*Frame, error) {
+func (bufferPool *SimpleBufferPoolManager) fetchPage(pageId uint64) (*Frame, error) {
 
 	bufferPool.lookupMutex.RLock()
-
+	slog.Info(fmt.Sprintf("fetching page %d", pageId))
+	slog.Info(fmt.Sprintf("page table => %v", bufferPool.pageTable))
 	frameId, exists := bufferPool.pageTable[pageId]
-
 	if exists {
 
+		slog.Info(fmt.Sprintf("page %d found in memory", pageId))
 		frame := bufferPool.frames[frameId]
 
 		frame.pinCountMutex.Lock()
@@ -198,6 +210,7 @@ func (bufferPool *SimpleBufferPoolManager) fetchPage(pageId PageID) (*Frame, err
 	data, err := bufferPool.disk.read(int64(pageId)*int64(bufferPool.pageSize), bufferPool.pageSize)
 
 	if err != nil {
+		slog.Error("Failed to read page from disk", "pageId", pageId, "error", err.Error())
 		return nil, err
 	}
 
@@ -230,7 +243,7 @@ func (bufferPool *SimpleBufferPoolManager) fetchPage(pageId PageID) (*Frame, err
 
 	frame := bufferPool.frames[newFrameId]
 
-	frame.data = data
+	copy(frame.data, data)
 	frame.pinCount = 1
 	frame.pageId = pageId
 	frame.dirty = false
@@ -244,7 +257,7 @@ func (bufferPool *SimpleBufferPoolManager) fetchPage(pageId PageID) (*Frame, err
 // deletePage is used to deallocate a page which contains data that is no longer useful.
 // DO NOT call deletePage directly, as it is not thread-safe.
 // always call the DeletePage function of the write guard corresponding to a page, to safely delete it.
-func (bufferPool *SimpleBufferPoolManager) deletePage(pageId PageID) (bool, error) {
+func (bufferPool *SimpleBufferPoolManager) deletePage(pageId uint64) (bool, error) {
 
 	bufferPool.lookupMutex.Lock()
 	defer bufferPool.lookupMutex.Unlock()
@@ -289,8 +302,8 @@ func (bufferPool *SimpleBufferPoolManager) deletePage(pageId PageID) (bool, erro
 	// 8. Deallocate page in file.
 	bufferPool.disk.deallocatePage(pageId)
 
-	// 9. Free up space.
-	frame.data = nil
+	// // 9. Free up space.
+	// frame.data =
 
 	// 10. Reset dirty, version, pageId fields of the frame
 	frame.dirty = false
@@ -301,7 +314,7 @@ func (bufferPool *SimpleBufferPoolManager) deletePage(pageId PageID) (bool, erro
 }
 
 // unpinPage is used to decrement the pin count of a page.
-func (bufferPool *SimpleBufferPoolManager) unpinPage(pageId PageID) bool {
+func (bufferPool *SimpleBufferPoolManager) unpinPage(pageId uint64) bool {
 
 	bufferPool.lookupMutex.RLock()
 	defer bufferPool.lookupMutex.RUnlock()
@@ -360,10 +373,43 @@ func (bufferPool *SimpleBufferPoolManager) Close() error {
 		return err
 	}
 
+	if err := bufferPool.releaseAllFrameBuffers(); err != nil {
+		return err
+	}
+
 	if err := bufferPool.disk.close(); err != nil {
 		return err
 	}
 
 	return nil
 
+}
+
+func (bufferPool *SimpleBufferPoolManager) releaseAllFrameBuffers() error {
+
+	for _, frame := range bufferPool.frames {
+		if err := releaseFrameBuffer(frame.data); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func createFrameBuffer(size int) ([]byte, error) {
+
+	data := directio.AlignedBlock(size)
+
+	if len(data) < size {
+		return nil, fmt.Errorf("buffer size is less than requested size")
+	}
+
+	if err := unix.Mlock(data); err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+func releaseFrameBuffer(buffer []byte) error {
+
+	return unix.Munlock(buffer)
 }
