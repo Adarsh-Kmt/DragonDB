@@ -1,22 +1,22 @@
 package buffer_pool_manager
 
+import (
+	codec "github.com/Adarsh-Kmt/DragonDB/page_codec"
+)
+
 // WriteGuard is used to provide exclusive write access to a page stored in a frame in the buffer pool manager.
 type WriteGuard struct {
 
 	// active is used to prevent users from using a write guard once it's Done/DeletePage function has been called.
 	active     bool
 	page       *Frame
-	btreeNode  *BTreeNode
+	codec      codec.SlottedPageCodec
 	bufferPool BufferPoolManager
 }
 
 // NewWriteGuard returns an active write guard.
 // All write guards corresponding to a page share a RW lock.
 // Each page in the buffer pool manager is associated with a version, which is incremented each time it is updated.
-// Before acquiring the lock, a copy of the version is recorded.
-// Once the lock has been acquired:
-// 1. if the copy is equal to the current version of the page, then it wasn't modified before the lock was acquired, and the logical correctness of the page data is maintained.
-// 2. if the copy is not equal to the current version of the page, then the page was modified before the lock could be acquired, and its contents cannot be trusted anymore.
 func (bufferPool *SimpleBufferPoolManager) NewWriteGuard(pageId PageID) (*WriteGuard, error) {
 
 	page, err := bufferPool.fetchPage(pageId)
@@ -27,27 +27,14 @@ func (bufferPool *SimpleBufferPoolManager) NewWriteGuard(pageId PageID) (*WriteG
 
 	page.mutex.Lock()
 
-	btreeNode := new(BTreeNode)
-	btreeNode.deserialize(page.data)
-
 	guard := &WriteGuard{
 		active:     true,
 		page:       page,
 		bufferPool: bufferPool,
-		btreeNode:  btreeNode,
+		codec:      codec.DefaultSlottedPageCodec(),
 	}
 
 	return guard, nil
-}
-
-// GetData is used to return the BTreeNode corresponding to the page, provided the guard is is active.
-func (guard *WriteGuard) GetData() (*BTreeNode, bool) {
-
-	if !guard.active {
-		return nil, false
-	}
-
-	return guard.btreeNode, true
 }
 
 // DeletePage is used to call the delete function of the buffer pool manager in a thread-safe manner.
@@ -64,7 +51,6 @@ func (guard *WriteGuard) DeletePage() bool {
 		guard.active = false
 		guard.page.mutex.Unlock()
 
-		guard.btreeNode = nil
 		guard.page = nil
 		guard.bufferPool = nil
 	}
@@ -99,4 +85,31 @@ func (guard *WriteGuard) Done() bool {
 
 	return true
 
+}
+
+func (guard *WriteGuard) InsertElement(key []byte, value []byte) bool {
+
+	if !guard.active {
+		return false
+	}
+
+	return guard.codec.InsertElement(guard.page.data, key, value)
+}
+
+func (guard *WriteGuard) FindElement(key []byte) (value []byte, nextPageId uint32, found bool) {
+
+	if !guard.active {
+		return nil, 0, false
+	}
+
+	return guard.codec.FindElement(guard.page.data, key)
+}
+
+func (guard *WriteGuard) DeleteElement(key []byte) bool {
+
+	if !guard.active {
+		return false
+	}
+
+	return guard.codec.DeleteElement(guard.page.data, key)
 }
