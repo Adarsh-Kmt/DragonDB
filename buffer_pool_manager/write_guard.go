@@ -10,7 +10,7 @@ type WriteGuard struct {
 	// active is used to prevent users from using a write guard once it's Done/DeletePage function has been called.
 	active     bool
 	page       *Frame
-	btreeNode  *BTreeNode
+	codec      codec.SlottedPageCodec
 	bufferPool BufferPoolManager
 }
 
@@ -28,27 +28,14 @@ func (bufferPool *SimpleBufferPoolManager) NewWriteGuard(pageId uint64) (*WriteG
 
 	page.mutex.Lock()
 
-	btreeNode := new(BTreeNode)
-	btreeNode.deserialize(page.data)
-
 	guard := &WriteGuard{
 		active:     true,
 		page:       page,
 		bufferPool: bufferPool,
-		btreeNode:  btreeNode,
+		codec:      codec.DefaultSlottedPageCodec(),
 	}
 
 	return guard, nil
-}
-
-// GetData is used to return the BTreeNode corresponding to the page, provided the guard is is active.
-func (guard *WriteGuard) GetData() (*BTreeNode, bool) {
-
-	if !guard.active {
-		return nil, false
-	}
-
-	return guard.btreeNode, true
 }
 
 // DeletePage is used to call the delete function of the buffer pool manager in a thread-safe manner.
@@ -65,7 +52,6 @@ func (guard *WriteGuard) DeletePage() bool {
 		guard.active = false
 		guard.page.mutex.Unlock()
 
-		guard.btreeNode = nil
 		guard.page = nil
 		guard.bufferPool = nil
 	}

@@ -8,7 +8,7 @@ import (
 type ReadGuard struct {
 	active     bool
 	page       *Frame
-	btreeNode  *BTreeNode
+	codec      codec.SlottedPageCodec
 	bufferPool BufferPoolManager
 }
 
@@ -25,14 +25,11 @@ func (bufferPool *SimpleBufferPoolManager) NewReadGuard(pageId uint64) (*ReadGua
 
 	page.mutex.RLock()
 
-	btreeNode := new(BTreeNode)
-	btreeNode.deserialize(page.data)
-
 	guard := &ReadGuard{
 		active:     true,
 		page:       page,
 		bufferPool: bufferPool,
-		btreeNode:  btreeNode,
+		codec:      codec.DefaultSlottedPageCodec(),
 	}
 
 	return guard, nil
