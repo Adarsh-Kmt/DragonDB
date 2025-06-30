@@ -2,6 +2,8 @@ package buffer_pool_manager
 
 import (
 	"log/slog"
+
+	codec "github.com/Adarsh-Kmt/DragonDB/page_codec"
 )
 
 // WriteGuard is used to provide exclusive write access to a page stored in a frame in the buffer pool manager.
