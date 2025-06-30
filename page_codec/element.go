@@ -3,6 +3,8 @@ package page_codec
 import (
 	"bytes"
 	"encoding/binary"
+	"fmt"
+	"log/slog"
 )
 
 type SlottedPageCodec struct {
@@ -13,8 +15,8 @@ type SlottedPageCodec struct {
 type Element struct {
 	Key                  []byte
 	Value                []byte
-	LeftChildNodePageId  uint32
-	RightChildNodePageId uint32
+	LeftChildNodePageId  uint64
+	RightChildNodePageId uint64
 }
 
 func DefaultSlottedPageCodec() SlottedPageCodec {
@@ -57,11 +59,11 @@ func (codec SlottedPageCodec) decodeElement(elementBytes []byte) Element {
 	pointer += valueLength
 
 	// decode left child node page ID
-	e.LeftChildNodePageId = binary.LittleEndian.Uint32(elementBytes[pointer:])
-	pointer += 4
+	e.LeftChildNodePageId = binary.LittleEndian.Uint64(elementBytes[pointer:])
+	pointer += 8
 
 	// decode right child node page ID
-	e.RightChildNodePageId = binary.LittleEndian.Uint32(elementBytes[pointer:])
+	e.RightChildNodePageId = binary.LittleEndian.Uint64(elementBytes[pointer:])
 
 	return e
 
@@ -70,6 +72,8 @@ func (codec SlottedPageCodec) decodeElement(elementBytes []byte) Element {
 // encodeSlot takes an element struct and returns an encoded slice of bytes representing this element
 func (codec SlottedPageCodec) encodeElement(element Element) []byte {
 
+	fmt.Println()
+	slog.Info("Encoding element...", "function", "encodeElement", "at", "SlottedPageCodec")
 	b := make([]byte, 0)
 
 	b = binary.LittleEndian.AppendUint16(b, uint16(len(element.Key)))
@@ -80,9 +84,9 @@ func (codec SlottedPageCodec) encodeElement(element Element) []byte {
 
 	b = append(b, element.Value...)
 
-	b = binary.LittleEndian.AppendUint32(b, element.LeftChildNodePageId)
+	b = binary.LittleEndian.AppendUint64(b, element.LeftChildNodePageId)
 
-	b = binary.LittleEndian.AppendUint32(b, element.RightChildNodePageId)
+	b = binary.LittleEndian.AppendUint64(b, element.RightChildNodePageId)
 
 	return b
 }
@@ -90,6 +94,8 @@ func (codec SlottedPageCodec) encodeElement(element Element) []byte {
 // setValue sets the value field in the element. only use if len(new_value) <= len(old_value)
 func (codec SlottedPageCodec) setValue(elementBytes []byte, value []byte) {
 
+	fmt.Println()
+	slog.Info("Setting value in element...", "function", "setValue", "at", "SlottedPageCodec")
 	pointer := 0
 
 	keySize := binary.LittleEndian.Uint16(elementBytes[pointer:])
@@ -104,7 +110,7 @@ func (codec SlottedPageCodec) setValue(elementBytes []byte, value []byte) {
 
 }
 
-func (codec SlottedPageCodec) setRightChildNodePageId(elementBytes []byte, rightChildNodePageId uint32) {
+func (codec SlottedPageCodec) setRightChildNodePageId(elementBytes []byte, rightChildNodePageId uint64) {
 
 	pointer := 0
 
@@ -117,13 +123,13 @@ func (codec SlottedPageCodec) setRightChildNodePageId(elementBytes []byte, right
 	pointer += 2
 	pointer += int(valueSize)
 
-	pointer += 4
+	pointer += 8
 
-	binary.LittleEndian.PutUint32(elementBytes[pointer:], rightChildNodePageId)
+	binary.LittleEndian.PutUint64(elementBytes[pointer:], rightChildNodePageId)
 
 }
 
-func (codec SlottedPageCodec) setLeftChildNodePageId(elementBytes []byte, leftChildNodePageId uint32) {
+func (codec SlottedPageCodec) setLeftChildNodePageId(elementBytes []byte, leftChildNodePageId uint64) {
 
 	pointer := 0
 
@@ -137,12 +143,12 @@ func (codec SlottedPageCodec) setLeftChildNodePageId(elementBytes []byte, leftCh
 
 	pointer += int(valueSize)
 
-	binary.LittleEndian.PutUint32(elementBytes[pointer:], leftChildNodePageId)
+	binary.LittleEndian.PutUint64(elementBytes[pointer:], leftChildNodePageId)
 
 }
 
 // FindElement is used to return the value corresponding to a key, or the next page ID where this key could be found
-func (codec SlottedPageCodec) FindElement(page []byte, key []byte) (value []byte, nextPageId uint32, found bool) {
+func (codec SlottedPageCodec) FindElement(page []byte, key []byte) (value []byte, nextPageId uint64, found bool) {
 
 	_, elements := codec.getAllSlotsAndElements(page)
 
@@ -190,7 +196,7 @@ func (codec SlottedPageCodec) PutValue(page []byte, key []byte, value []byte) bo
 	header := codec.decodePageHeader(headerBytes)
 
 	// calculate space required to store element
-	elementSpaceRequired := 2 + len(key) + 2 + len(value) + 4 + 4
+	elementSpaceRequired := 2 + len(key) + 2 + len(value) + 8 + 8
 
 	// if size(current_element_value) >= size(new_element_value)
 	if len(oldElement.Value) >= len(value) {
@@ -253,8 +259,10 @@ func (codec SlottedPageCodec) PutValue(page []byte, key []byte, value []byte) bo
 }
 
 // InsertElement is used to insert a key value pair in a page
-func (codec SlottedPageCodec) InsertElement(page []byte, key []byte, value []byte, leftChildNodePageId uint32, rightChildNodePageId uint32) bool {
+func (codec SlottedPageCodec) InsertElement(page []byte, key []byte, value []byte, leftChildNodePageId uint64, rightChildNodePageId uint64) bool {
 
+	fmt.Println()
+	slog.Info("Inserting element in page...", "key", string(key), "value", string(value), "left_child_node_page_ID", leftChildNodePageId, "right_child_node_page_ID", rightChildNodePageId, "function", "InsertElement", "at", "SlottedPageCodec")
 	defer codec.updateCRC(page)
 
 	// extract header bytes from page
@@ -264,21 +272,26 @@ func (codec SlottedPageCodec) InsertElement(page []byte, key []byte, value []byt
 	header := codec.decodePageHeader(headerBytes)
 
 	// calculate space required to store element
-	elementSpaceRequired := 2 + len(key) + 2 + len(value) + 4 + 4
+	elementSpaceRequired := 2 + len(key) + 2 + len(value) + 8 + 8
 
 	// calculate space required to store new slot
 	slotSpaceRequired := codec.slotConfig.slotSize
 
+	//slog.Info("Inserting element", "key", string(key), "value", string(value), "leftChildNodePageId", leftChildNodePageId, "rightChildNodePageId", rightChildNodePageId)
+	slog.Info("Element space required", "size", elementSpaceRequired, "function", "InsertElement", "at", "SlottedPageCodec")
+
 	// check if free space region has enough space to accomodate new element
 	if !codec.isAdequate(page, elementSpaceRequired+slotSpaceRequired) {
 
+		slog.Info("Not enough space in free space region", "function", "InsertElement", "at", "SlottedPageCodec")
+		slog.Info("checking if compaction will help...", "function", "InsertElement", "at", "SlottedPageCodec")
 		// if free space is not adequate, check if performing compaction will help
 		if !codec.shouldCompact(page, elementSpaceRequired+slotSpaceRequired) {
-
+			slog.Info("Compaction will not help", "function", "InsertElement", "at", "SlottedPageCodec")
 			// if compaction doesnt free up enough space, return false.
 			return false
 		} else {
-
+			slog.Info("Compaction will help, initiating compaction....", "function", "InsertElement", "at", "SlottedPageCodec")
 			// if compaction frees up enough space to insert new element + new slot, perform compaction
 			codec.compact(page)
 
@@ -298,7 +311,6 @@ func (codec SlottedPageCodec) InsertElement(page []byte, key []byte, value []byt
 
 	// append new element to end of free space region
 	header.freeSpaceEnd = codec.appendElement(page, header.freeSpaceEnd, newElement)
-
 	// create new slot
 	newSlot := Slot{
 		elementSize:    codec.calculateElementSize(newElement),
@@ -344,6 +356,7 @@ func (codec SlottedPageCodec) isAdequate(page []byte, spaceRequired int) bool {
 
 	freeSpace := header.freeSpaceEnd - header.freeSpaceBegin
 
+	slog.Info("Checking if page has enough space...", "requiredSpace", spaceRequired, "freeSpace", freeSpace, "function", "isAdequate", "at", "SlottedPageCodec")
 	return freeSpace >= uint16(spaceRequired)
 }
 
@@ -490,7 +503,8 @@ func (codec SlottedPageCodec) linearSearch(page []byte, key []byte) (slot []byte
 }
 
 func (codec SlottedPageCodec) appendElement(page []byte, freeSpaceEnd uint16, element Element) (updatedFreeSpaceEnd uint16) {
-
+	fmt.Println()
+	slog.Info("Appending element to page", "key", string(element.Key), "value", string(element.Value), "leftChildNodePageId", element.LeftChildNodePageId, "rightChildNodePageId", element.RightChildNodePageId, "function", "appendElement", "at", "SlottedPageCodec")
 	elementBytes := codec.encodeElement(element)
 
 	copy(page[int(freeSpaceEnd)-len(elementBytes):], elementBytes)
@@ -579,8 +593,8 @@ func (codec SlottedPageCodec) calculateElementSize(element Element) (size uint16
 	keyFieldSize := len(element.Key)
 	valueLengthFieldSize := 2
 	valueFieldSize := len(element.Value)
-	leftChildNodePageIdFieldSize := 4
-	rightChildNodePageIfFieldSize := 4
+	leftChildNodePageIdFieldSize := 8
+	rightChildNodePageIfFieldSize := 8
 
 	return uint16(keyLengthFieldSize + keyFieldSize + valueLengthFieldSize + valueFieldSize + leftChildNodePageIdFieldSize + rightChildNodePageIfFieldSize)
 }

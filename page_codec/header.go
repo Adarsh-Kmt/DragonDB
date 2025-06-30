@@ -2,7 +2,9 @@ package page_codec
 
 import (
 	"encoding/binary"
+	"fmt"
 	"hash/crc32"
+	"log/slog"
 )
 
 type Header struct {
@@ -51,7 +53,23 @@ func defaultHeaderConfig() HeaderConfig {
 // decodePageHeader takes a slice of bytes representing a slotted page header, and returns a deserialized header object
 func (codec SlottedPageCodec) decodePageHeader(headerBytes []byte) Header {
 
+	fmt.Println()
+
+	slog.Info("Decoding page header...", "function", "decodePageHeader", "at", "SlottedPageCodec")
 	h := Header{}
+
+	if isPageEmpty(headerBytes) {
+		// If the page is empty, return an empty header
+		h.numSlots = 0
+		h.freeSpaceBegin = uint16(codec.headerConfig.headerSize)
+		h.freeSpaceEnd = 4096
+		h.garbageSize = 0
+		h.isLeafNode = true // Default to leaf node type for empty pages
+		h.crc = 0
+
+		slog.Info("Decoded page header", "is leaf node", h.isLeafNode, "number of slots", h.numSlots, "free space begin", h.freeSpaceBegin, "free space end", h.freeSpaceEnd, "garbage size", h.garbageSize, "function", "decodePageHeader", "at", "SlottedPageCodec") // CRC is zero for empty pages
+		return h
+	}
 	h.crc = binary.LittleEndian.Uint32(headerBytes[codec.headerConfig.crcOffset:])
 
 	if headerBytes[codec.headerConfig.nodeTypeOffset] == codec.headerConfig.leafNodeType {
@@ -65,13 +83,26 @@ func (codec SlottedPageCodec) decodePageHeader(headerBytes []byte) Header {
 	h.freeSpaceEnd = binary.LittleEndian.Uint16(headerBytes[codec.headerConfig.freeSpaceEndOffset:])
 	h.garbageSize = binary.LittleEndian.Uint16(headerBytes[codec.headerConfig.garbageSizeOffset:])
 
+	slog.Info("Decoded Page Header", "is leaf node", h.isLeafNode, "number of slots", h.numSlots, "free space begin", h.freeSpaceBegin, "free space end", h.freeSpaceEnd, "garbage size", h.garbageSize, "function", "decodePageHeader", "at", "SlottedPageCodec")
 	return h
 
 }
 
+func isPageEmpty(page []byte) bool {
+	fmt.Println()
+	slog.Info("Checking if page is empty...", "function", "isPageEmpty", "at", "SlottedPageCodec")
+	for _, b := range page {
+		if b != 0 {
+			slog.Info("Page is not empty", "function", "isPageEmpty", "at", "SlottedPageCodec")
+			return false
+		}
+	}
+	slog.Info("Page is empty", "function", "isPageEmpty", "at", "SlottedPageCodec")
+	return true
+}
+
 // setCRC is used to set the value of the CRC field in the header
 func (codec SlottedPageCodec) setCRC(headerBytes []byte, crc uint32) {
-
 	binary.LittleEndian.PutUint32(headerBytes[codec.headerConfig.crcOffset:], crc)
 }
 

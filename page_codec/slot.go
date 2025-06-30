@@ -3,6 +3,8 @@ package page_codec
 import (
 	"bytes"
 	"encoding/binary"
+	"fmt"
+	"log/slog"
 )
 
 type Slot struct {
@@ -35,17 +37,22 @@ func defaultSlotConfig() SlotConfig {
 // decodeSlot takes a slice of bytes representing a slot, and returns a decoded slot struct
 func (codec SlottedPageCodec) decodeSlot(slotBytes []byte) Slot {
 
+	fmt.Println()
+	slog.Info("Decoding slot...", "function", "decodeSlot", "at", "SlottedPageCodec")
 	s := Slot{}
 
 	s.elementSize = binary.LittleEndian.Uint16(slotBytes[codec.slotConfig.elementSizeOffset:])
 	s.elementPointer = binary.LittleEndian.Uint16(slotBytes[codec.slotConfig.elementPointerOffset:])
 
+	slog.Info("Decoded slot", "elementSize", s.elementSize, "elementPointer", s.elementPointer, "function", "decodeSlot", "at", "SlottedPageCodec")
 	return s
 }
 
 // encodeSlot takes a slot struct and returns an encoded slice of bytes representing this slot
 func (codec SlottedPageCodec) encodeSlot(slot Slot) []byte {
 
+	fmt.Println()
+	slog.Info("Encoding slot...", "function", "encodeSlot", "at", "SlottedPageCodec")
 	b := make([]byte, 0)
 
 	b = binary.LittleEndian.AppendUint16(b, slot.elementSize)
@@ -74,6 +81,8 @@ func (codec SlottedPageCodec) isElementDeleted(slot Slot) bool {
 // appendSlot is used to insert a slot at a particular offset in the page
 func (codec SlottedPageCodec) appendSlot(page []byte, freeSpaceBegin uint16, slot Slot) (updatedFreeSpaceBegin uint16) {
 
+	fmt.Println()
+	slog.Info("Appending slot to page...", "function", "appendSlot", "at", "SlottedPageCodec")
 	slotBytes := codec.encodeSlot(slot)
 	copy(page[freeSpaceBegin:], slotBytes)
 
@@ -83,6 +92,8 @@ func (codec SlottedPageCodec) appendSlot(page []byte, freeSpaceBegin uint16, slo
 // insertSlot inserts a slot into the slot region while maintaining the sorted nature of the slot region. It also returns the left and right child node page ID of the element after insertion
 func (codec SlottedPageCodec) InsertSlot(page []byte, newSlot Slot, newElement Element) (updatedFreeSpaceBegin uint16) {
 
+	fmt.Println()
+	slog.Info("Inserting slot into page...", "function", "InsertSlot", "at", "SlottedPageCodec")
 	// initialize pointer to beginning of slot region
 	pointer := codec.headerConfig.headerSize
 
@@ -159,10 +170,13 @@ func (codec SlottedPageCodec) InsertSlot(page []byte, newSlot Slot, newElement E
 		header.freeSpaceBegin = codec.appendSlot(page, header.freeSpaceBegin, currSlot)
 	}
 
-	if greaterElementBytes != nil {
+	if header.numSlots == 0 {
+		return header.freeSpaceBegin
+	}
+	if len(greaterElementBytes) != 0 {
 		codec.setLeftChildNodePageId(greaterElementBytes, newElement.RightChildNodePageId)
 	}
-	if smallerElementBytes != nil {
+	if len(smallerElementBytes) != 0 {
 		codec.setRightChildNodePageId(smallerElementBytes, newElement.LeftChildNodePageId)
 	}
 
