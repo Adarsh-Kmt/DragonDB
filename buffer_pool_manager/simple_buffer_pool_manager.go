@@ -220,7 +220,7 @@ func (bufferPool *SimpleBufferPoolManager) fetchPage(pageId PageID) (*Frame, err
 
 			// handle error correctly.
 			if err := bufferPool.disk.write(int64(frame.pageId)*int64(bufferPool.pageSize), frame.data); err != nil {
-
+				return nil, err
 			}
 		}
 
