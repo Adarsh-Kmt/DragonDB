@@ -38,7 +38,7 @@ func setupFile(filePath string) {
 func (ds *DirectIODiskManagerTestSuite) SetupSuite() {
 
 	setupFile("test_file")
-	diskManager, err := NewDirectIODiskManager("test_file")
+	diskManager, _, err := NewDirectIODiskManager("test_file")
 	ds.Suite.Assert().NoError(err)
 	ds.diskManager = diskManager
 }
