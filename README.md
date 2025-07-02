@@ -47,10 +47,6 @@ Currently working on:
   <img src="assets/DragonDB Architecture v2.png" alt="Architecture Diagram" width="1000"/>
 </p>
 
-<p align="center">
-  <img src="assets/DragonDB Architecture-2.png" alt="Architecture Diagram" width="600"/>
-</p>
-
 
 --- 
 ## Buffer Pool Manager
