@@ -22,7 +22,7 @@ type BufferPoolManager interface {
 	// public methods
 
 	// NewPage allocates a new page in the file and returns its page ID.
-	NewPage() uint64
+	NewPage() (uint64, error)
 
 	NewWriteGuard(pageId uint64) (*WriteGuard, error)
 	NewReadGuard(pageId uint64) (*ReadGuard, error)
@@ -148,7 +148,7 @@ func NewSimpleBufferPoolManager(poolSize int, pageSize int, replacer Replacer, d
 }
 
 // NewPage is a thread-safe function that allocates a new page in the file, and returns its page ID.
-func (bufferPool *SimpleBufferPoolManager) NewPage() uint64 {
+func (bufferPool *SimpleBufferPoolManager) NewPage() (uint64, error) {
 
 	return bufferPool.disk.allocatePage()
 }
@@ -302,11 +302,7 @@ func (bufferPool *SimpleBufferPoolManager) deletePage(pageId uint64) (bool, erro
 	// 8. Deallocate page in file.
 	bufferPool.disk.deallocatePage(pageId)
 
-	// // 9. Free up space.
-	// frame.data =
-
-	// 10. Reset dirty, version, pageId fields of the frame
-	frame.dirty = false
+	// 9. Reset dirty, version, pageId fields of the frame
 	frame.pageId = 0
 	frame.pinCount = 0
 
@@ -395,6 +391,11 @@ func (bufferPool *SimpleBufferPoolManager) releaseAllFrameBuffers() error {
 	return nil
 }
 
+func releaseFrameBuffer(buffer []byte) error {
+
+	return unix.Munlock(buffer)
+}
+
 func createFrameBuffer(size int) ([]byte, error) {
 
 	data := directio.AlignedBlock(size)
@@ -407,9 +408,4 @@ func createFrameBuffer(size int) ([]byte, error) {
 		return nil, err
 	}
 	return data, nil
-}
-
-func releaseFrameBuffer(buffer []byte) error {
-
-	return unix.Munlock(buffer)
 }

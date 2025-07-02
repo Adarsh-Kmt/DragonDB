@@ -180,7 +180,7 @@ func (codec SlottedPageCodec) FindElement(page []byte, key []byte) (value []byte
 	return nil, nextPageId, false
 }
 
-func (codec SlottedPageCodec) PutValue(page []byte, key []byte, value []byte) bool {
+func (codec SlottedPageCodec) SetValue(page []byte, key []byte, value []byte) bool {
 	defer codec.updateCRC(page)
 
 	// search for slot, element corresponding to key
@@ -277,7 +277,6 @@ func (codec SlottedPageCodec) InsertElement(page []byte, key []byte, value []byt
 	// calculate space required to store new slot
 	slotSpaceRequired := codec.slotConfig.slotSize
 
-	//slog.Info("Inserting element", "key", string(key), "value", string(value), "leftChildNodePageId", leftChildNodePageId, "rightChildNodePageId", rightChildNodePageId)
 	slog.Info("Element space required", "size", elementSpaceRequired, "function", "InsertElement", "at", "SlottedPageCodec")
 
 	// check if free space region has enough space to accomodate new element
@@ -470,7 +469,7 @@ func (codec SlottedPageCodec) Split(page []byte, rightNode []byte) (extraKey []b
 	return extraKey, extraValue
 }
 
-func (codec SlottedPageCodec) linearSearch(page []byte, key []byte) (slot []byte, element []byte, found int) {
+func (codec SlottedPageCodec) linearSearch(page []byte, key []byte) (slotBytes []byte, elementBytes []byte, found int) {
 
 	header := codec.decodePageHeader(page[:codec.headerConfig.headerSize])
 
@@ -478,24 +477,24 @@ func (codec SlottedPageCodec) linearSearch(page []byte, key []byte) (slot []byte
 
 	for range int(header.numSlots) {
 
-		slotBytes := page[pointer : pointer+codec.slotConfig.slotSize]
-		currSlot := codec.decodeSlot(slotBytes)
+		currSlotBytes := page[pointer : pointer+codec.slotConfig.slotSize]
+		currSlot := codec.decodeSlot(currSlotBytes)
 		pointer += 4
 
-		slot = slotBytes
+		slotBytes = currSlotBytes
 
 		if !codec.isElementDeleted(currSlot) {
 
-			elementBytes := page[currSlot.elementPointer : currSlot.elementPointer+currSlot.elementSize]
-			currElement := codec.decodeElement(elementBytes)
+			currElementBytes := page[currSlot.elementPointer : currSlot.elementPointer+currSlot.elementSize]
+			currElement := codec.decodeElement(currElementBytes)
 
-			element = elementBytes
+			elementBytes = currElementBytes
 
 			result := bytes.Compare(currElement.Key, key)
 			if result == 0 {
-				return slotBytes, elementBytes, result
+				return currSlotBytes, currElementBytes, result
 			} else if result == 1 {
-				return slot, element, result
+				return slotBytes, elementBytes, result
 			}
 		}
 	}

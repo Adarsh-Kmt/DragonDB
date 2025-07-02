@@ -45,7 +45,7 @@ func (codec MetaDataCodec) EncodeMetaDataPage(metadata *MetaData) []byte {
 	return data
 }
 
-// deserializeFreeListPage decodes the byte slice from disk into the in-memory
+// decodeMetaDataPage decodes the byte slice from disk into the in-memory
 // list of deallocated page IDs. This restores the free list after a database restart.
 func (codec MetaDataCodec) DecodeMetaDataPage(data []byte) *MetaData {
 

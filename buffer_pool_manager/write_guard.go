@@ -98,6 +98,7 @@ func (guard *WriteGuard) Done() bool {
 
 }
 
+// Page Content Functions
 func (guard *WriteGuard) InsertElement(key []byte, value []byte, leftChildNodePageId uint64, rightChildNodePageId uint64) bool {
 
 	if !guard.active {
@@ -131,7 +132,7 @@ func (guard *WriteGuard) SetValue(key []byte, value []byte) bool {
 		return false
 	}
 
-	return guard.codec.PutValue(guard.page.data, key, value)
+	return guard.codec.SetValue(guard.page.data, key, value)
 }
 
 func (guard *WriteGuard) Split(rightNodeGuard *WriteGuard) (extraKey []byte, extraValue []byte) {
