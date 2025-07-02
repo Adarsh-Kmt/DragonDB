@@ -40,8 +40,8 @@ Currently working on:
 1. The database server, refer to the [DatabaseServerImpl](https://github.com/Adarsh-Kmt/DragonDB/tree/DatabaseServerImpl) branch.
 2. The buffer pool manager, refer to the [BufferPoolManagerImpl](https://github.com/Adarsh-Kmt/DragonDB/tree/BufferPoolManagerImpl) branch.
 3. The page codec, refer to the [PageCodecImpl](https://github.com/Adarsh-Kmt/DragonDB/tree/PageCodecImpl) branch.
+4. The B-Tree, refer to the [DataStructureLayerImpl](https://github.com/Adarsh-Kmt/DragonDB/tree/DataStructureLayerImpl) branch.
 
----
 ## DragonDB Architecture
 <p align="center">
   <img src="assets/DragonDB Architecture v2.png" alt="Architecture Diagram" width="1000"/>
@@ -51,8 +51,6 @@ Currently working on:
   <img src="assets/DragonDB Architecture-2.png" alt="Architecture Diagram" width="600"/>
 </p>
 
-
---- 
 ## Buffer Pool Manager
 <p align="center">
   <img src="assets/Buffer Pool Manager v2.png" alt="Architecture Diagram" width="1000"/>
