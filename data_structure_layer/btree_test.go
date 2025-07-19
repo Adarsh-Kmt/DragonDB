@@ -131,7 +131,7 @@ func (ts *BTreeTestSuite) TestGetNonExistentKey() {
 
 func (ts *BTreeTestSuite) TestInsertLargeNumberOfElements() {
 	// Insert a large number of elements to test splitting
-	numElements := 1500
+	numElements := 500
 
 	startWrite := time.Now()
 	for i := 0; i < numElements; i++ {

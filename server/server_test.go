@@ -6,8 +6,10 @@ import (
 	"log"
 	"log/slog"
 	"net"
+	"os"
 	"testing"
 
+	"github.com/Adarsh-Kmt/DragonDB/buffer_pool_manager"
 	"github.com/Adarsh-Kmt/DragonDB/data_structure_layer"
 	"github.com/stretchr/testify/suite"
 )
@@ -20,7 +22,17 @@ type DatabaseServerTestSuite struct {
 
 func (test *DatabaseServerTestSuite) SetupTest() {
 
-	server, err := NewServer(":8080", data_structure_layer.NewHashMap())
+	testFile := "dragon.db"
+
+	disk, actualMetadata, err := buffer_pool_manager.NewDirectIODiskManager(testFile)
+
+	test.Require().NoError(err)
+
+	replacer := buffer_pool_manager.NewLRUReplacer()
+	bufferPoolManager, err := buffer_pool_manager.NewSimpleBufferPoolManager(10, 4096, replacer, disk)
+	test.Require().NoError(err)
+
+	server, err := NewServer(":8080", data_structure_layer.NewBTree(bufferPoolManager, actualMetadata))
 
 	test.Suite.Require().NoError(err)
 
@@ -56,6 +68,9 @@ func (test *DatabaseServerTestSuite) TearDownTest() {
 	slog.Info("received shutdown message")
 
 	test.conn.Close()
+
+	// Clean up test file
+	os.Remove("dragon.db")
 }
 
 func createInsertRequest(key uint16, value []byte) []byte {
