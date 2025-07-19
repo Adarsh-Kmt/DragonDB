@@ -2,6 +2,7 @@ package buffer_pool_manager
 
 import (
 	"container/list"
+	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
@@ -15,10 +16,10 @@ type LRUReplacerTestSuite struct {
 func (rs *LRUReplacerTestSuite) SetupTest() {
 
 	l := list.New()
-	frame5 := l.PushFront(5)
-	frame1 := l.PushFront(1)
-	frame4 := l.PushFront(4)
-	frame3 := l.PushFront(3)
+	frame5 := l.PushFront(FrameID(5))
+	frame1 := l.PushFront(FrameID(1))
+	frame4 := l.PushFront(FrameID(4))
+	frame3 := l.PushFront(FrameID(3))
 
 	frameMap := map[FrameID]*list.Element{}
 
@@ -30,6 +31,7 @@ func (rs *LRUReplacerTestSuite) SetupTest() {
 	replacer := LRUReplacer{
 		frameMap: frameMap,
 		list:     l,
+		mutex:    &sync.Mutex{},
 	}
 
 	rs.replacer = replacer
