@@ -109,13 +109,15 @@ func (disk *DirectIODiskManager) write(offset int64, data []byte) error {
 	fmt.Println()
 	slog.Info("Writing data to offset", "offset", offset, "size", len(data), "function", "write", "at", "DirectIODiskManager")
 
-	_, err := disk.file.Seek(offset, 0)
-	if err != nil {
-		slog.Error("Failed to seek to offset", "offset", offset, "error", err.Error(), "function", "write", "at", "DirectIODiskManager")
-		return err
-	}
+	// the WriteAt function internally calls the pwrite system call that writes data to the offset in a thread safe manner.
+	// The following operation is performed atomically by:
 
-	n, err := disk.file.Write(data)
+	// file.seek(new_offset)
+	// file.write(data)
+	// file.seek(original_offset)
+
+	n, err := disk.file.WriteAt(data, offset)
+
 	if err != nil {
 		slog.Error("Failed to write data", "error", err.Error(), "function", "write", "at", "DirectIODiskManager")
 		return err
@@ -132,15 +134,19 @@ func (disk *DirectIODiskManager) read(offset int64, size int) ([]byte, error) {
 
 	fmt.Println()
 	slog.Info("Reading data from offset", "offset", offset, "size", size, "function", "read", "at", "DirectIODiskManager")
-	_, err := disk.file.Seek(offset, 0)
-	if err != nil {
-		slog.Info("Failed to seek to offset", "offset", offset, "error", err.Error(), "function", "read", "at", "DirectIODiskManager")
-		return nil, err
-	}
+
 	slog.Info("allocating aligned block for read", "size", size, "function", "read", "at", "DirectIODiskManager")
 	data := directio.AlignedBlock(size)
 
-	n, err := disk.file.Read(data)
+	// The readAt function internally calls the pread system call that reads data at the offset in a thread safe manner.
+	// The following operation is performed atomically by:
+
+	// file.seek(new_offset)
+	// file.read(data)
+	// file.seek(original_offset)
+
+	n, err := disk.file.ReadAt(data, offset)
+
 	if err != nil {
 		slog.Error("Failed to read data", "error", err.Error(), "function", "read", "at", "DirectIODiskManager")
 		return nil, err
