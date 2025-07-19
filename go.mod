@@ -5,6 +5,7 @@ go 1.24.2
 require (
 	github.com/ncw/directio v1.0.5
 	github.com/stretchr/testify v1.10.0
+	golang.org/x/sys v0.33.0
 )
 
 require (

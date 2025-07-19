@@ -2,8 +2,12 @@ package data_structure_layer
 
 import (
 	"fmt"
+
+	"log/slog"
 	"os"
 	"testing"
+	"time"
+
 
 	"github.com/Adarsh-Kmt/DragonDB/buffer_pool_manager"
 	codec "github.com/Adarsh-Kmt/DragonDB/page_codec"
@@ -18,6 +22,17 @@ type BTreeTestSuite struct {
 }
 
 func (ts *BTreeTestSuite) SetupTest() {
+
+
+	// handler := slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
+	// 	Level: slog.LevelWarn, // Only show WARN, ERROR, etc.
+	// })
+
+	// logger := slog.New(handler)
+
+	// slog.SetDefault(logger)
+
+
 	// Create test file
 	testFile := "dragon.db"
 
@@ -120,7 +135,10 @@ func (ts *BTreeTestSuite) TestGetNonExistentKey() {
 
 func (ts *BTreeTestSuite) TestInsertLargeNumberOfElements() {
 	// Insert a large number of elements to test splitting
-	numElements := 100
+
+	numElements := 500
+
+	startWrite := time.Now()
 
 	for i := 0; i < numElements; i++ {
 		key := []byte(fmt.Sprintf("key_%04d", i))
@@ -129,6 +147,9 @@ func (ts *BTreeTestSuite) TestInsertLargeNumberOfElements() {
 		err := ts.btree.Insert(key, value)
 		ts.Require().NoError(err)
 	}
+
+
+	startRead := time.Now()
 
 	// Verify all elements can be retrieved
 	for i := 0; i < numElements; i++ {
@@ -139,30 +160,46 @@ func (ts *BTreeTestSuite) TestInsertLargeNumberOfElements() {
 		ts.Require().NoError(err)
 		ts.Assert().Equal(expectedValue, retrievedValue)
 	}
+
+	slog.Error("Write benchmark", fmt.Sprintf("Time taken to insert %d elements:", numElements), time.Since(startWrite))
+	slog.Error("Read benchmark", fmt.Sprintf("Time taken to retrieve %d elements:", numElements), time.Since(startRead))
+
 }
 
 func (ts *BTreeTestSuite) TestInsertWithSplitting() {
 	// Insert elements that will cause page splits
 	// Using keys that will fill up pages and force splits
+
+	numElements := 4
+
 	largeValue := make([]byte, 1000) // Large value to fill pages quickly
 	for i := range largeValue {
 		largeValue[i] = byte('A' + (i % 26))
 	}
 
+	startWrite := time.Now()
 	// Insert multiple large elements
-	for i := 0; i < 10; i++ {
+	for i := range numElements {
+
 		key := []byte(fmt.Sprintf("large_key_%02d", i))
 		err := ts.btree.Insert(key, largeValue)
 		ts.Require().NoError(err)
 	}
 
 	// Verify all elements can be retrieved
-	for i := 0; i < 10; i++ {
+
+	startRead := time.Now()
+	for i := range numElements {
+
 		key := []byte(fmt.Sprintf("large_key_%02d", i))
 		retrievedValue, err := ts.btree.Get(key)
 		ts.Require().NoError(err)
 		ts.Assert().Equal(largeValue, retrievedValue)
 	}
+
+	slog.Error(fmt.Sprintf("Time taken to insert %d large elements:", numElements), "duration", time.Since(startWrite))
+	slog.Error(fmt.Sprintf("Time taken to retrieve %d large elements:", numElements), "duration", time.Since(startRead))
+
 }
 
 func (ts *BTreeTestSuite) TestEmptyTree() {

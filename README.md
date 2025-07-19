@@ -42,6 +42,7 @@ Currently working on:
 3. The page codec, refer to the [PageCodecImpl](https://github.com/Adarsh-Kmt/DragonDB/tree/PageCodecImpl) branch.
 4. The B-Tree, refer to the [DataStructureLayerImpl](https://github.com/Adarsh-Kmt/DragonDB/tree/DataStructureLayerImpl) branch.
 
+
 ## Architecture
 <p align="center">
   <img src="assets/DragonDB Architecture v2.png" alt="Architecture Diagram" width="1000"/>

@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"fmt"
 	"log/slog"
+
 	"sync"
+
 
 	bpm "github.com/Adarsh-Kmt/DragonDB/buffer_pool_manager"
 	codec "github.com/Adarsh-Kmt/DragonDB/page_codec"
@@ -18,22 +20,27 @@ type DataStructureLayer interface {
 }
 
 type BTree struct {
+
 	rootNodePageIdMutex *sync.RWMutex
 	metadata            *codec.MetaData
 	bufferPoolManager   bpm.BufferPoolManager
+
 }
 
 func NewBTree(bufferPoolManager bpm.BufferPoolManager, metadata *codec.MetaData) *BTree {
 
 	return &BTree{
+
 		rootNodePageIdMutex: &sync.RWMutex{},
 		metadata:            metadata,
 		bufferPoolManager:   bufferPoolManager,
+
 	}
 }
 func (btree *BTree) Get(key []byte) ([]byte, error) {
 	fmt.Println()
 	slog.Info("Starting Get operation", "key", string(key), "function", "Get", "at", "btree")
+
 
 	btree.rootNodePageIdMutex.RLock()
 	rootNodePageId := btree.metadata.RootNodePageId
@@ -47,7 +54,9 @@ func (btree *BTree) Get(key []byte) ([]byte, error) {
 	}
 
 	slog.Info("Creating read guard for root node", "root_node_page_ID", btree.metadata.RootNodePageId, "function", "Get", "at", "btree")
+
 	rootNodeGuard, err := btree.bufferPoolManager.NewReadGuard(rootNodePageId)
+
 
 	if err != nil {
 		slog.Error("Failed to create read guard for root node", "error", err.Error(), "function", "Get", "at", "btree")
@@ -95,6 +104,7 @@ func (btree *BTree) Insert(key []byte, value []byte) error {
 	fmt.Println()
 	slog.Info("Starting Insert operation", "key", string(key), "value", string(value), "function", "Insert", "at", "btree")
 
+
 	btree.rootNodePageIdMutex.RLock()
 	rootNodePageId := btree.metadata.RootNodePageId
 	btree.rootNodePageIdMutex.RUnlock()
@@ -103,6 +113,7 @@ func (btree *BTree) Insert(key []byte, value []byte) error {
 		slog.Info("Creating new root node for BTree", "function", "Insert", "at", "btree")
 		// create a new root node.
 		newRootPageId := btree.bufferPoolManager.NewPage()
+
 		btree.metadata.RootNodePageId = newRootPageId
 
 		slog.Info("New root node created", "page_ID", newRootPageId, "function", "Insert", "at", "btree")
@@ -121,6 +132,7 @@ func (btree *BTree) Insert(key []byte, value []byte) error {
 			return fmt.Errorf("failed to insert first element into new root")
 		}
 		rootGuard.SetDirtyFlag()
+
 
 		btree.rootNodePageIdMutex.Lock()
 		btree.metadata.RootNodePageId = newRootPageId
@@ -146,7 +158,14 @@ func (btree *BTree) Insert(key []byte, value []byte) error {
 	if extraKey != nil {
 		slog.Info("Creating new root node due to split", "extra_key", string(extraKey), "left_child_page_ID", leftChildNodePageId, "right_child_page_ID", rightChildNodePageId, "function", "Insert", "at", "btree")
 
-		newRootPageId := btree.bufferPoolManager.NewPage()
+
+		newRootPageId, err := btree.bufferPoolManager.NewPage()
+
+		if err != nil {
+			slog.Error("Failed to create new root node page", "error", err.Error(), "function", "writeTraversal", "at", "btree")
+			return err
+		}
+
 		newRootGuard, err := btree.bufferPoolManager.NewWriteGuard(newRootPageId)
 		if err != nil {
 			slog.Error("Failed to create new root guard", "error", err.Error(), "function", "Insert", "at", "btree")
@@ -158,6 +177,7 @@ func (btree *BTree) Insert(key []byte, value []byte) error {
 		newRootGuard.SetDirtyFlag()
 
 		btree.metadata.RootNodePageId = newRootGuard.GetPageId()
+
 
 		btree.rootNodePageIdMutex.Lock()
 		btree.metadata.RootNodePageId = newRootPageId
@@ -188,7 +208,12 @@ func (btree *BTree) writeTraversal(key []byte, value []byte, guard *bpm.WriteGua
 			return nil, nil, 0, 0, nil
 		}
 
-		rightNodePageId := btree.bufferPoolManager.NewPage()
+		rightNodePageId, err := btree.bufferPoolManager.NewPage()
+
+		if err != nil {
+			slog.Error("Failed to create new right node page", "error", err.Error(), "function", "writeTraversal", "at", "btree")
+			return nil, nil, 0, 0, err
+		}
 
 		rightNodeGuard, err := btree.bufferPoolManager.NewWriteGuard(rightNodePageId)
 		slog.Info("current leaf node too full, split required", "key", string(key), "page_ID", guard.GetPageId(), "function", "writeTraversal", "at", "btree")
@@ -243,7 +268,12 @@ func (btree *BTree) writeTraversal(key []byte, value []byte, guard *bpm.WriteGua
 				return nil, nil, 0, 0, nil
 			}
 
-			rightNodePageId := btree.bufferPoolManager.NewPage()
+			rightNodePageId, err := btree.bufferPoolManager.NewPage()
+
+			if err != nil {
+				slog.Error("Failed to create new right node page", "error", err.Error(), "function", "writeTraversal", "at", "btree")
+				return nil, nil, 0, 0, err
+			}
 
 			rightNodeGuard, err := btree.bufferPoolManager.NewWriteGuard(rightNodePageId)
 
@@ -304,7 +334,12 @@ func (btree *BTree) writeTraversal(key []byte, value []byte, guard *bpm.WriteGua
 					return nil, nil, 0, 0, nil
 				}
 
-				rightNodePageId := btree.bufferPoolManager.NewPage()
+				rightNodePageId, err := btree.bufferPoolManager.NewPage()
+
+				if err != nil {
+					slog.Error("Failed to create new right node page", "error", err.Error(), "function", "writeTraversal", "at", "btree")
+					return nil, nil, 0, 0, err
+				}
 
 				rightNodeGuard, err := btree.bufferPoolManager.NewWriteGuard(rightNodePageId)
 

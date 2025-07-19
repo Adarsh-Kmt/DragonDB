@@ -11,13 +11,31 @@ import (
 	"github.com/ncw/directio"
 )
 
+// Disk Manager is responsible for reading, writing, allocating and deallocating pages on disk.
 type DiskManager interface {
+
+	// write function writes data to a particular offset in the file.
 	write(offset int64, data []byte) error
+
+	// reads a specified amount of data starting from a particular offset in the file.
 	read(offset int64, size int) ([]byte, error)
-	allocatePage() uint64
+
+	// allocatePage allocates a page in the file and returns a new page ID for use.
+	// It reuses a deallocated page ID if available, otherwise increments maxAllocatedPageId and returns a new page ID.
+	allocatePage() (uint64, error)
+
+	// deallocatePage marks a page ID as free and adds it to the free list, making it available for future allocation.
 	deallocatePage(pageId uint64)
+
+	// writes the serialized metadata page to file, then closes the file.
 	close() error
 }
+
+// DirectIODiskManager uses Direct I/O to read/write pages of data directly between user process memory and disk controller.
+
+// Direct I/O bypasses the kernel page cache, this is useful because:
+// 1. It prevents the file data from being cached twice, once in kernel page cache, and once in database process memory.
+// 2. It gives the database complete control over when data is flushed to disk.
 
 type DirectIODiskManager struct {
 	file     *os.File
@@ -29,13 +47,19 @@ type DirectIODiskManager struct {
 func NewDirectIODiskManager(filePath string) (*DirectIODiskManager, *codec.MetaData, error) {
 
 	fmt.Println()
+
+	// flag represents whether a dragon.db file exists in the given file path or not.
 	newFileCreated := false
+
+	// check if a dragon.db file exists in the the current directory.
 	if _, err := os.Stat(filePath); errors.Is(err, os.ErrNotExist) {
 		slog.Info("dragon.db file does not exist, creating new file...", "filePath", filePath, "function", "NewDirectIODiskManager", "at", "DirectIODiskManager")
 		newFileCreated = true
 	}
 
 	slog.Info("Opening file in DIRECT I/O mode", "function", "NewDirectIODiskManager", "at", "DirectIODiskManager")
+
+	// Create a dragon.db file if it does not exist, initialize a file descriptor with Direct I/O flag, and read/write permissions.
 	file, err := directio.OpenFile(filePath, os.O_RDWR|os.O_CREATE, 0644)
 
 	if err != nil {
@@ -48,6 +72,7 @@ func NewDirectIODiskManager(filePath string) (*DirectIODiskManager, *codec.MetaD
 		mutex: &sync.Mutex{},
 	}
 
+	// if a new file had to be created, create a meta data page, and write it to disk.
 	if newFileCreated {
 		disk.metadata = &codec.MetaData{
 			DeallocatedPageIdList: []uint64{},
@@ -78,19 +103,21 @@ func NewDirectIODiskManager(filePath string) (*DirectIODiskManager, *codec.MetaD
 
 }
 
-// writes data to a particular offset in the file.
+// write function writes data to a particular offset in the file.
 func (disk *DirectIODiskManager) write(offset int64, data []byte) error {
 
 	fmt.Println()
 	slog.Info("Writing data to offset", "offset", offset, "size", len(data), "function", "write", "at", "DirectIODiskManager")
 
-	_, err := disk.file.Seek(offset, 0)
-	if err != nil {
-		slog.Error("Failed to seek to offset", "offset", offset, "error", err.Error(), "function", "write", "at", "DirectIODiskManager")
-		return err
-	}
+	// the WriteAt function internally calls the pwrite system call that writes data to the offset in a thread safe manner.
+	// The following operation is performed atomically by:
 
-	n, err := disk.file.Write(data)
+	// file.seek(new_offset)
+	// file.write(data)
+	// file.seek(original_offset)
+
+	n, err := disk.file.WriteAt(data, offset)
+
 	if err != nil {
 		slog.Error("Failed to write data", "error", err.Error(), "function", "write", "at", "DirectIODiskManager")
 		return err
@@ -107,15 +134,19 @@ func (disk *DirectIODiskManager) read(offset int64, size int) ([]byte, error) {
 
 	fmt.Println()
 	slog.Info("Reading data from offset", "offset", offset, "size", size, "function", "read", "at", "DirectIODiskManager")
-	_, err := disk.file.Seek(offset, 0)
-	if err != nil {
-		slog.Info("Failed to seek to offset", "offset", offset, "error", err.Error(), "function", "read", "at", "DirectIODiskManager")
-		return nil, err
-	}
+
 	slog.Info("allocating aligned block for read", "size", size, "function", "read", "at", "DirectIODiskManager")
 	data := directio.AlignedBlock(size)
 
-	n, err := disk.file.Read(data)
+	// The readAt function internally calls the pread system call that reads data at the offset in a thread safe manner.
+	// The following operation is performed atomically by:
+
+	// file.seek(new_offset)
+	// file.read(data)
+	// file.seek(original_offset)
+
+	n, err := disk.file.ReadAt(data, offset)
+
 	if err != nil {
 		slog.Error("Failed to read data", "error", err.Error(), "function", "read", "at", "DirectIODiskManager")
 		return nil, err
@@ -128,8 +159,8 @@ func (disk *DirectIODiskManager) read(offset int64, size int) ([]byte, error) {
 }
 
 // allocatePage allocates a page in the file and returns a new page ID for use.
-// It reuses a deallocated page ID if available, otherwise increments and returns a new page ID.
-func (disk *DirectIODiskManager) allocatePage() uint64 {
+// It reuses a deallocated page ID if available, otherwise increments maxAllocatedPageId and returns a new page ID.
+func (disk *DirectIODiskManager) allocatePage() (uint64, error) {
 
 	fmt.Println()
 	disk.mutex.Lock()
@@ -140,7 +171,7 @@ func (disk *DirectIODiskManager) allocatePage() uint64 {
 		pageId := disk.metadata.DeallocatedPageIdList[0]
 		slog.Info(fmt.Sprintf("allocating existing page with page ID = %d", pageId), "function", "allocatePage", "at", "DirectIODiskManager")
 		disk.metadata.DeallocatedPageIdList = disk.metadata.DeallocatedPageIdList[1:]
-		return pageId
+		return pageId, nil
 	} else {
 		pageId := disk.metadata.MaxAllocatedPageId + 1
 		disk.metadata.MaxAllocatedPageId++
@@ -149,14 +180,13 @@ func (disk *DirectIODiskManager) allocatePage() uint64 {
 		err := disk.write(int64(pageId)*PAGE_SIZE, make([]byte, PAGE_SIZE))
 		if err != nil {
 			slog.Error("Failed to write new page", "pageId", pageId, "error", err.Error(), "function", "allocatePage", "at", "DirectIODiskManager")
-			return 0
+			return 0, err
 		}
-		return pageId
+		return pageId, nil
 	}
 }
 
-// deallocatePage marks a page ID as free and adds it to the free list,
-// making it available for future allocation.
+// deallocatePage marks a page ID as free and adds it to the free list, making it available for future allocation.
 func (disk *DirectIODiskManager) deallocatePage(pageId uint64) {
 
 	fmt.Println()
@@ -166,7 +196,7 @@ func (disk *DirectIODiskManager) deallocatePage(pageId uint64) {
 	disk.mutex.Unlock()
 }
 
-// writes the serialized freelist page to file, then closes the file.
+// writes the serialized metadata page to file, then closes the file.
 func (disk *DirectIODiskManager) close() error {
 
 	fmt.Println()
