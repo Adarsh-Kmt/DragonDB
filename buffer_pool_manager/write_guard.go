@@ -69,7 +69,7 @@ func (guard *WriteGuard) GetPageId() uint64 {
 	return guard.page.pageId
 }
 
-// SetDirtyFlag is used to set the dirty flag of the frame in the buffer pool manager 
+// SetDirtyFlag is used to set the dirty flag of the frame in the buffer pool manager
 // where the page is stored/
 func (guard *WriteGuard) SetDirtyFlag() bool {
 
