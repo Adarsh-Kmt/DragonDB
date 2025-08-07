@@ -80,18 +80,26 @@ func NewDirectIODiskManager(filePath string) (*DirectIODiskManager, *codec.MetaD
 			// root node does not exist
 			RootNodePageId: 0,
 		}
+
 		slog.Info("writing new metadata page", "function", "NewDirectIODiskManager", "at", "DirectIODiskManager")
+
 		if err = disk.write(METADATA_PAGE_ID*PAGE_SIZE, disk.codec.EncodeMetaDataPage(disk.metadata)); err != nil {
+
 			slog.Error("Failed to write metadata page", "error", err.Error(), "function", "NewDirectIODiskManager", "at", "DirectIODiskManager")
+
 			return nil, nil, err
 		}
+
 		slog.Info("New metadata page written successfully", "function", "NewDirectIODiskManager", "at", "DirectIODiskManager")
 
 	} else {
+
 		slog.Info("Reading metadata page from existing file", "function", "NewDirectIODiskManager", "at", "DirectIODiskManager")
+
 		metaDataPage, err := disk.read(METADATA_PAGE_ID*PAGE_SIZE, PAGE_SIZE)
 
 		if err != nil {
+
 			slog.Error("Failed to read metadata page", "error", err.Error(), "function", "NewDirectIODiskManager", "at", "DirectIODiskManager")
 			return nil, nil, err
 		}
@@ -110,7 +118,7 @@ func (disk *DirectIODiskManager) write(offset int64, data []byte) error {
 	slog.Info("Writing data to offset", "offset", offset, "size", len(data), "function", "write", "at", "DirectIODiskManager")
 
 	// the WriteAt function internally calls the pwrite system call that writes data to the offset in a thread safe manner.
-	// The following operation is performed atomically by:
+	// The following set of operations are performed atomically:
 
 	// file.seek(new_offset)
 	// file.write(data)
@@ -136,10 +144,11 @@ func (disk *DirectIODiskManager) read(offset int64, size int) ([]byte, error) {
 	slog.Info("Reading data from offset", "offset", offset, "size", size, "function", "read", "at", "DirectIODiskManager")
 
 	slog.Info("allocating aligned block for read", "size", size, "function", "read", "at", "DirectIODiskManager")
-	data := directio.AlignedBlock(size)
+
+	data := make([]byte, size)
 
 	// The readAt function internally calls the pread system call that reads data at the offset in a thread safe manner.
-	// The following operation is performed atomically by:
+	// The following set of operations are performed atomically:
 
 	// file.seek(new_offset)
 	// file.read(data)
@@ -166,22 +175,43 @@ func (disk *DirectIODiskManager) allocatePage() (uint64, error) {
 	disk.mutex.Lock()
 	defer disk.mutex.Unlock()
 
+	// check if deallocated pages exist in the file.
+	// A deallocated page is a page that was previously allocated, but is no longer useful, and can be reused.
 	if len(disk.metadata.DeallocatedPageIdList) > 0 {
 
 		pageId := disk.metadata.DeallocatedPageIdList[0]
+
 		slog.Info(fmt.Sprintf("allocating existing page with page ID = %d", pageId), "function", "allocatePage", "at", "DirectIODiskManager")
+
 		disk.metadata.DeallocatedPageIdList = disk.metadata.DeallocatedPageIdList[1:]
 		return pageId, nil
-	} else {
-		pageId := disk.metadata.MaxAllocatedPageId + 1
-		disk.metadata.MaxAllocatedPageId++
-		slog.Info(fmt.Sprintf("allocating new page with page ID = %d", pageId), "function", "allocatePage", "at", "DirectIODiskManager")
 
-		err := disk.write(int64(pageId)*PAGE_SIZE, make([]byte, PAGE_SIZE))
+	} else {
+
+		// if all pages in the file are currently allocated, we check the file size.
+		fileStats, err := disk.file.Stat()
+
 		if err != nil {
-			slog.Error("Failed to write new page", "pageId", pageId, "error", err.Error(), "function", "allocatePage", "at", "DirectIODiskManager")
 			return 0, err
 		}
+
+		// if the number of pages in the file = max allocated page ID + 1 (plus one because page IDs start from 0),
+		// then the file is full and doesnt have free pages, so we add 16 pages to the end of the file.
+		if disk.metadata.MaxAllocatedPageId+1 == (uint64(fileStats.Size()) / PAGE_SIZE) {
+
+			err := disk.write(int64(disk.metadata.MaxAllocatedPageId+1)*PAGE_SIZE, make([]byte, PAGE_SIZE*16))
+
+			if err != nil {
+				slog.Error("Failed to write new page", "pageId", disk.metadata.MaxAllocatedPageId, "error", err.Error(), "function", "allocatePage", "at", "DirectIODiskManager")
+				return 0, err
+			}
+		}
+
+		pageId := disk.metadata.MaxAllocatedPageId + 1
+		disk.metadata.MaxAllocatedPageId++
+
+		slog.Info(fmt.Sprintf("allocating new page with page ID = %d", pageId), "function", "allocatePage", "at", "DirectIODiskManager")
+
 		return pageId, nil
 	}
 }
@@ -191,6 +221,7 @@ func (disk *DirectIODiskManager) deallocatePage(pageId uint64) {
 
 	fmt.Println()
 	slog.Info(fmt.Sprintf("deallocating page with page ID = %d", pageId), "function", "deallocatePage", "at", "DirectIODiskManager")
+
 	disk.mutex.Lock()
 	disk.metadata.DeallocatedPageIdList = append(disk.metadata.DeallocatedPageIdList, pageId)
 	disk.mutex.Unlock()
@@ -201,17 +232,22 @@ func (disk *DirectIODiskManager) close() error {
 
 	fmt.Println()
 	slog.Info("Closing DirectIODiskManager...", "function", "close", "at", "DirectIODiskManager")
+
 	freelistPageData := disk.codec.EncodeMetaDataPage(disk.metadata)
 
 	slog.Info("Writing metadata page before closing", "function", "close", "at", "DirectIODiskManager")
 
 	if err := disk.write(METADATA_PAGE_ID*PAGE_SIZE, freelistPageData); err != nil {
+
 		slog.Error("Failed to write metadata page", "error", err.Error(), "function", "close", "at", "DirectIODiskManager")
+
 		return err
 	}
 
 	if err := disk.file.Close(); err != nil {
+
 		slog.Error("Failed to close file", "error", err.Error(), "function", "close", "at", "DirectIODiskManager")
+
 		return err
 	}
 

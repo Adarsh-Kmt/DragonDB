@@ -34,6 +34,7 @@ func (bufferPool *SimpleBufferPoolManager) NewReadGuard(pageId uint64) (*ReadGua
 		codec:      codec.DefaultSlottedPageCodec(),
 	}
 
+	guard.codec.PrintElements(page.data)
 	return guard, nil
 
 }

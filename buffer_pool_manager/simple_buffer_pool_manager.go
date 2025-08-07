@@ -2,11 +2,9 @@ package buffer_pool_manager
 
 import (
 	"fmt"
-	"log"
 	"log/slog"
 	"sync"
 
-	"github.com/ncw/directio"
 	"golang.org/x/sys/unix"
 )
 
@@ -23,6 +21,9 @@ type BufferPoolManager interface {
 
 	// NewPage allocates a new page in the file and returns its page ID.
 	NewPage() (uint64, error)
+
+	// If page is allocated in the file, but guard couldn't be acquired, then the allocated page must be added to the deallocatedPageId list.
+	CleanupPage(pageID uint64)
 
 	NewWriteGuard(pageId uint64) (*WriteGuard, error)
 	NewReadGuard(pageId uint64) (*ReadGuard, error)
@@ -153,18 +154,24 @@ func (bufferPool *SimpleBufferPoolManager) NewPage() (uint64, error) {
 	return bufferPool.disk.allocatePage()
 }
 
+// If page is allocated in the file, but guard couldn't be acquired, then the allocated page must be added to the deallocatedPageId list.
+func (bufferPool *SimpleBufferPoolManager) CleanupPage(pageID uint64) {
+
+	bufferPool.disk.deallocatePage(pageID)
+}
+
 // fetchPage returns a pointer to the frame storing the page with a given page ID.
 // DO NOT call fetchPage directly, as it is not thread-safe.
 // Always use a page guard to access page data.
 func (bufferPool *SimpleBufferPoolManager) fetchPage(pageId uint64) (*Frame, error) {
 
 	bufferPool.lookupMutex.RLock()
-	slog.Info(fmt.Sprintf("fetching page %d", pageId))
-	slog.Info(fmt.Sprintf("page table => %v", bufferPool.pageTable))
+	slog.Info(fmt.Sprintf("fetching page %d", pageId), "function", "fetchPage", "at", "buffer Pool Manager")
+	slog.Info(fmt.Sprintf("page table => %v", bufferPool.pageTable), "function", "fetchPage", "at", "buffer Pool Manager")
 	frameId, exists := bufferPool.pageTable[pageId]
 	if exists {
 
-		slog.Info(fmt.Sprintf("page %d found in memory", pageId))
+		slog.Info(fmt.Sprintf("page %d found in memory", pageId), "function", "fetchPage", "at", "buffer Pool Manager")
 		frame := bufferPool.frames[frameId]
 
 		frame.pinCountMutex.Lock()
@@ -210,7 +217,7 @@ func (bufferPool *SimpleBufferPoolManager) fetchPage(pageId uint64) (*Frame, err
 	data, err := bufferPool.disk.read(int64(pageId)*int64(bufferPool.pageSize), bufferPool.pageSize)
 
 	if err != nil {
-		slog.Error("Failed to read page from disk", "pageId", pageId, "error", err.Error())
+		slog.Error("Failed to read page from disk", "pageId", pageId, "error", err.Error(), "function", "fetchPage", "at", "buffer Pool Manager")
 		return nil, err
 	}
 
@@ -220,15 +227,19 @@ func (bufferPool *SimpleBufferPoolManager) fetchPage(pageId uint64) (*Frame, err
 	if len(bufferPool.freeFrames) > 0 {
 
 		newFrameId = bufferPool.freeFrames[0]
-		log.Printf("free frame chosen => %d", newFrameId)
+
+		slog.Info(fmt.Sprintf("free frame chosen => %d", newFrameId), "function", "fetchPage", "at", "buffer Pool Manager")
+
 		bufferPool.freeFrames = bufferPool.freeFrames[1:]
-		log.Printf("free frame list => %v", bufferPool.freeFrames)
+
+		slog.Info(fmt.Sprintf("free frame list => %v", bufferPool.freeFrames), "function", "fetchPage", "at", "buffer Pool Manager")
 	} else {
 		newFrameId = bufferPool.replacer.victim()
 
 		frame := bufferPool.frames[newFrameId]
 
 		delete(bufferPool.pageTable, frame.pageId)
+
 		if frame.dirty {
 
 			// handle error correctly.
@@ -283,26 +294,18 @@ func (bufferPool *SimpleBufferPoolManager) deletePage(pageId uint64) (bool, erro
 	}
 	frame.pinCountMutex.Unlock()
 
-	// 5. If frame stores a dirty page, write to disk.
-	if frame.dirty {
-
-		if err := bufferPool.disk.write(int64(frame.pageId)*int64(bufferPool.pageSize), frame.data); err != nil {
-			return true, err
-		}
-	}
-
 	bufferPool.frameAllocationMutex.Lock()
-	// 6. Add frameId to freeFrames.
+	// 5. Add frameId to freeFrames.
 	bufferPool.freeFrames = append(bufferPool.freeFrames, frameId)
 	bufferPool.frameAllocationMutex.Unlock()
 
-	// 7. Delete page table entry.
+	// 6. Delete page table entry.
 	delete(bufferPool.pageTable, pageId)
 
-	// 8. Deallocate page in file.
+	// 7. Deallocate page in file.
 	bufferPool.disk.deallocatePage(pageId)
 
-	// 9. Reset dirty, version, pageId fields of the frame
+	// 8. Reset dirty, version, pageId fields of the frame
 	frame.pageId = 0
 	frame.pinCount = 0
 
@@ -398,7 +401,7 @@ func releaseFrameBuffer(buffer []byte) error {
 
 func createFrameBuffer(size int) ([]byte, error) {
 
-	data := directio.AlignedBlock(size)
+	data := AllocateAlignedBuffer()
 
 	if len(data) < size {
 		return nil, fmt.Errorf("buffer size is less than requested size")

@@ -597,3 +597,13 @@ func (codec SlottedPageCodec) calculateElementSize(element Element) (size uint16
 
 	return uint16(keyLengthFieldSize + keyFieldSize + valueLengthFieldSize + valueFieldSize + leftChildNodePageIdFieldSize + rightChildNodePageIfFieldSize)
 }
+
+func (codec SlottedPageCodec) PrintElements(page []byte) {
+
+	_, elements := codec.getAllSlotsAndElements(page)
+
+	for i, element := range elements {
+		slog.Info(fmt.Sprintf("Element %d: Key: %s, LeftChildNodePageId: %d, RightChildNodePageId: %d", i, string(element.Key), element.LeftChildNodePageId, element.RightChildNodePageId), "function", "printElements", "at", "SlottedPageCodec")
+
+	}
+}
