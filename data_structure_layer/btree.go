@@ -151,8 +151,15 @@ func (btree *BTree) Insert(key []byte, value []byte) error {
 		slog.Info("Creating new root node due to split", "extra_key", string(extraKey), "left_child_page_ID", leftChildNodePageId, "right_child_page_ID", rightChildNodePageId, "function", "Insert", "at", "btree")
 
 		newRootPageId, err := btree.bufferPoolManager.NewPage()
+
+		if err != nil {
+			slog.Error("Failed to create new root node page", "error", err.Error(), "function", "Insert", "at", "btree")
+			return err
+		}
+
 		newRootGuard, err := btree.bufferPoolManager.NewWriteGuard(newRootPageId)
 		if err != nil {
+			btree.bufferPoolManager.CleanupPage(newRootPageId)
 			slog.Error("Failed to create new root guard", "error", err.Error(), "function", "Insert", "at", "btree")
 			return err
 		}
@@ -203,6 +210,7 @@ func (btree *BTree) writeTraversal(key []byte, value []byte, guard *bpm.WriteGua
 		slog.Info("Creating new right node guard", "right_node_page_ID", rightNodePageId, "function", "writeTraversal", "at", "btree")
 
 		if err != nil {
+			btree.bufferPoolManager.CleanupPage(rightNodePageId)
 			return nil, nil, 0, 0, err
 		}
 		defer rightNodeGuard.Done()
@@ -254,6 +262,7 @@ func (btree *BTree) writeTraversal(key []byte, value []byte, guard *bpm.WriteGua
 			rightNodePageId, err := btree.bufferPoolManager.NewPage()
 
 			if err != nil {
+
 				slog.Error("Failed to create new right node page", "error", err.Error(), "function", "writeTraversal", "at", "btree")
 				return nil, nil, 0, 0, err
 			}
@@ -261,6 +270,7 @@ func (btree *BTree) writeTraversal(key []byte, value []byte, guard *bpm.WriteGua
 			rightNodeGuard, err := btree.bufferPoolManager.NewWriteGuard(rightNodePageId)
 
 			if err != nil {
+				btree.bufferPoolManager.CleanupPage(rightNodePageId)
 				return nil, nil, 0, 0, err
 			}
 			slog.Info("Creating new right node guard", "right_node_page_ID", rightNodePageId, "function", "writeTraversal", "at", "btree")
@@ -327,6 +337,7 @@ func (btree *BTree) writeTraversal(key []byte, value []byte, guard *bpm.WriteGua
 				slog.Info("Creating new right node guard", "right_node_page_ID", rightNodePageId, "function", "writeTraversal", "at", "btree")
 
 				if err != nil {
+					btree.bufferPoolManager.CleanupPage(rightNodePageId)
 					return nil, nil, 0, 0, err
 				}
 

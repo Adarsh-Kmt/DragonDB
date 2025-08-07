@@ -24,6 +24,9 @@ type BufferPoolManager interface {
 	// NewPage allocates a new page in the file and returns its page ID.
 	NewPage() (uint64, error)
 
+	// If page is allocated in the file, but guard couldn't be acquired, then the allocated page must be added to the deallocatedPageId list.
+	CleanupPage(pageID uint64)
+
 	NewWriteGuard(pageId uint64) (*WriteGuard, error)
 	NewReadGuard(pageId uint64) (*ReadGuard, error)
 
@@ -151,6 +154,12 @@ func NewSimpleBufferPoolManager(poolSize int, pageSize int, replacer Replacer, d
 func (bufferPool *SimpleBufferPoolManager) NewPage() (uint64, error) {
 
 	return bufferPool.disk.allocatePage()
+}
+
+// If page is allocated in the file, but guard couldn't be acquired, then the allocated page must be added to the deallocatedPageId list.
+func (bufferPool *SimpleBufferPoolManager) CleanupPage(pageID uint64) {
+
+	bufferPool.disk.deallocatePage(pageID)
 }
 
 // fetchPage returns a pointer to the frame storing the page with a given page ID.
