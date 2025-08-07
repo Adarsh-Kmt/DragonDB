@@ -15,7 +15,7 @@ type ReadGuard struct {
 }
 
 // NewReadGuard returns an active read guard.
-// All read guards corresponding to a page share a RW lock.
+// All guards corresponding to a page share a RW lock.
 func (bufferPool *SimpleBufferPoolManager) NewReadGuard(pageId uint64) (*ReadGuard, error) {
 
 	page, err := bufferPool.fetchPage(pageId)
@@ -34,10 +34,12 @@ func (bufferPool *SimpleBufferPoolManager) NewReadGuard(pageId uint64) (*ReadGua
 		codec:      codec.DefaultSlottedPageCodec(),
 	}
 
+	guard.codec.PrintElements(page.data)
 	return guard, nil
 
 }
 
+// GetPageId returns the page ID of the page corresponding to the read guard.
 func (guard *ReadGuard) GetPageId() uint64 {
 
 	if !guard.active {
@@ -64,6 +66,9 @@ func (guard *ReadGuard) Done() bool {
 	return true
 }
 
+// FindElement calls the equivalent FindElement function of the page codec,
+// which checks if an <key, value> pair exists in a B-Tree node
+// or returns the page ID of the child node that must be checked next.
 func (guard *ReadGuard) FindElement(key []byte) (value []byte, nextPageId uint64, found bool) {
 
 	if !guard.active {
@@ -73,6 +78,7 @@ func (guard *ReadGuard) FindElement(key []byte) (value []byte, nextPageId uint64
 	return guard.codec.FindElement(guard.page.data, key)
 }
 
+// IsLeafNode returns true of the node is a leaf node.
 func (guard *ReadGuard) IsLeafNode() bool {
 
 	if !guard.active {

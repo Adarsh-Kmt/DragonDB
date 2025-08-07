@@ -80,7 +80,7 @@ func (disk *OSBufferedDiskManager) read(offset int64, size int) ([]byte, error) 
 
 // allocatePage allocates a page in the file and returns a new page ID for use.
 // It reuses a deallocated page ID if available, otherwise increments and returns a new page ID.
-func (disk *OSBufferedDiskManager) allocatePage() uint64 {
+func (disk *OSBufferedDiskManager) allocatePage() (uint64, error) {
 
 	disk.mutex.Lock()
 	defer disk.mutex.Unlock()
@@ -89,11 +89,11 @@ func (disk *OSBufferedDiskManager) allocatePage() uint64 {
 
 		pageId := disk.deallocatedPageIdList[0]
 		disk.deallocatedPageIdList = disk.deallocatedPageIdList[1:]
-		return pageId
+		return pageId, nil
 	} else {
 		pageId := disk.maxAllocatedPageId + 1
 		disk.maxAllocatedPageId++
-		return pageId
+		return pageId, nil
 	}
 }
 
