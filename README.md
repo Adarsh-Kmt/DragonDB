@@ -57,7 +57,7 @@ DragonDB is built with a layered architecture consisting of four main components
 - Performs Insert/Get/Split/Merge operations on the B-Tree node.
 - Follows slotted page layout.
 <p align="center">
-  <img src="assets/5. B-Tree Node Slotted Page Layout.png" alt="Architecture Diagram" width="1000"/>
+  <img src="assets/Slotted Page Format/5. B-Tree Node Slotted Page Format.png" alt="Architecture Diagram" width="1000"/>
 </p>
 
 ### Buffer Pool Manager
