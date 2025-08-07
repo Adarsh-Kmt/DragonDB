@@ -161,7 +161,7 @@ func (ts *BTreeTestSuite) TestInsertWithSplitting() {
 	// Insert elements that will cause page splits
 	// Using keys that will fill up pages and force splits
 
-	numElements := 4
+	numElements := 10
 	largeValue := make([]byte, 1000) // Large value to fill pages quickly
 	for i := range largeValue {
 		largeValue[i] = byte('A' + (i % 26))
