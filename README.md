@@ -144,10 +144,18 @@ if err != nil {
 - Immediate cleanup on I/O failure.
 
 ### 4. Direct I/O Performance Optimization
-**Problem**: Standard I/O operations suffered from double-buffering and unpredictable kernel cache behavior.
+**Problem**: Buffered I/O operations suffered from double-buffering and unpredictable kernel cache behavior.
+
+<p align="center">
+  <img src="assets/Buffered I:O/Buffered I:O.png" alt="Architecture Diagram" width="1000"/>
+</p>
 
 **Solution**: Custom Direct I/O implementation:
 - Data from disk is transferred directly to user space memory using Direct I/O, bypassing the kernel page cache.
+
+<p align="center">
+  <img src="assets/Direct I:O/Direct I:O.png" alt="Architecture Diagram" width="1000"/>
+</p>
 
 ## Development Branches
 
