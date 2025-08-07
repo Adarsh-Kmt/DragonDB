@@ -2,11 +2,9 @@ package buffer_pool_manager
 
 import (
 	"fmt"
-	"log"
 	"log/slog"
 	"sync"
 
-	"github.com/ncw/directio"
 	"golang.org/x/sys/unix"
 )
 
@@ -403,7 +401,7 @@ func releaseFrameBuffer(buffer []byte) error {
 
 func createFrameBuffer(size int) ([]byte, error) {
 
-	data := directio.AlignedBlock(size)
+	data := AllocateAlignedBuffer()
 
 	if len(data) < size {
 		return nil, fmt.Errorf("buffer size is less than requested size")
