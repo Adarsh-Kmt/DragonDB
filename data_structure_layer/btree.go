@@ -98,6 +98,8 @@ func (btree *BTree) Get(key []byte) ([]byte, error) {
 		return nil, err
 	}
 
+	defer rootNodeGuard.Done()
+
 	slog.Info("Starting read traversal", "function", "Get", "at", "btree")
 	return btree.readTraversal(key, rootNodeGuard)
 }
@@ -106,7 +108,6 @@ func (btree *BTree) readTraversal(key []byte, guard *bpm.ReadGuard) ([]byte, err
 	fmt.Println()
 	slog.Info("read traversal underway...", "key", string(key), "page ID", guard.GetPageId(), "function", "readTraversal", "at", "btree")
 
-	defer guard.Done()
 	value, nextPageId, found := guard.FindElement(key)
 
 	slog.Info("Element search result", "key", string(key), "found", found, "next_page_ID", nextPageId, "is_leaf_node", guard.IsLeafNode(), "function", "readTraversal", "at", "btree")
@@ -131,6 +132,8 @@ func (btree *BTree) readTraversal(key []byte, guard *bpm.ReadGuard) ([]byte, err
 		return nil, err
 	}
 
+	defer childNodeGuard.Done()
+
 	return btree.readTraversal(key, childNodeGuard)
 }
 
@@ -146,6 +149,7 @@ func (btree *BTree) Insert(key []byte, value []byte) error {
 		return err
 	}
 
+	defer rootNodeGuard.Done()
 	extraKey, extraValue, leftChildNodePageId, rightChildNodePageId, err := btree.writeTraversal(key, value, rootNodeGuard)
 
 	if err != nil {
@@ -189,7 +193,6 @@ func (btree *BTree) writeTraversal(key []byte, value []byte, guard *bpm.WriteGua
 
 	fmt.Println()
 	slog.Info("write traversal underway...", "key", key, "page_ID", guard.GetPageId(), "is_leaf_node", guard.IsLeafNode(), "function", "writeTraversal", "at", "btree")
-	defer guard.Done()
 
 	_, nextPageId, found := guard.FindElement(key)
 
@@ -312,6 +315,8 @@ func (btree *BTree) writeTraversal(key []byte, value []byte, guard *bpm.WriteGua
 
 				return nil, nil, 0, 0, err
 			}
+
+			defer childNodeGuard.Done()
 
 			extraKey, extraValue, leftChildNodePageId, rightChildNodePageId, err = btree.writeTraversal(key, value, childNodeGuard)
 
