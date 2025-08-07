@@ -44,12 +44,12 @@ Currently working on:
 
 ## Architecture
 <p align="center">
-  <img src="assets/DragonDB Architecture v2.png" alt="Architecture Diagram" width="1000"/>
+  <img src="assets/Architecture/DragonDB Architecture v2.png" alt="Architecture Diagram" width="1000"/>
 </p>
 
 ## Buffer Pool Manager
 <p align="center">
-  <img src="assets/Buffer Pool Manager v2.png" alt="Architecture Diagram" width="1000"/>
+  <img src="assets/Architecture/Buffer Pool Manager v2.png" alt="Architecture Diagram" width="1000"/>
 </p>
 
 
