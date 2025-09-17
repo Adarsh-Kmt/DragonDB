@@ -24,7 +24,7 @@ func (test *DatabaseServerTestSuite) SetupTest() {
 
 	testFile := "dragon.db"
 
-	disk, actualMetadata, err := buffer_pool_manager.NewDirectIODiskManager(testFile)
+	disk, actualMetadata, _, err := buffer_pool_manager.NewDirectIODiskManager(testFile)
 
 	test.Require().NoError(err)
 
@@ -32,7 +32,7 @@ func (test *DatabaseServerTestSuite) SetupTest() {
 	bufferPoolManager, err := buffer_pool_manager.NewSimpleBufferPoolManager(10, 4096, replacer, disk)
 	test.Require().NoError(err)
 
-	server, err := NewServer(":8080", data_structure_layer.NewBTree(bufferPoolManager, actualMetadata))
+	server, err := NewServer(":8080", data_structure_layer.NewBTree(0, bufferPoolManager, actualMetadata))
 
 	test.Suite.Require().NoError(err)
 

@@ -33,7 +33,7 @@ func (ts *BTreeTestSuite) SetupTest() {
 	testFile := "dragon.db"
 
 	// Initialize disk manager
-	disk, actualMetadata, err := buffer_pool_manager.NewDirectIODiskManager(testFile)
+	disk, actualMetadata, _, err := buffer_pool_manager.NewDirectIODiskManager(testFile)
 	ts.Require().NoError(err)
 
 	ts.disk = disk
@@ -45,7 +45,7 @@ func (ts *BTreeTestSuite) SetupTest() {
 	ts.Require().NoError(err)
 
 	// Create BTree
-	ts.btree = NewBTree(bufferPoolManager, ts.metadata)
+	ts.btree = NewBTree(0, bufferPoolManager, ts.metadata)
 }
 
 func (ts *BTreeTestSuite) TearDownTest() {
@@ -66,7 +66,7 @@ func (ts *BTreeTestSuite) TestInsertSingleElement() {
 	ts.Require().NoError(err)
 
 	// Verify root node was created
-	ts.Assert().NotEqual(uint64(0), ts.metadata.RootNodePageId)
+	ts.Assert().NotEqual(uint64(0), ts.btree.rootNodePageId)
 
 	// Retrieve the element
 	retrievedValue, err := ts.btree.Get(key)
