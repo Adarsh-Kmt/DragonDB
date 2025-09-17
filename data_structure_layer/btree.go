@@ -14,22 +14,29 @@ type DataStructureLayer interface {
 	Get(key []byte) ([]byte, error)
 	Insert(key []byte, value []byte) error
 	Delete(key []byte) error
-	Close() error
+	Close()
 }
 
+// update root node page in meta data in Close function
 type BTree struct {
+	BTreeId             uint64
+	rootNodePageId      uint64
 	rootNodePageIdMutex *sync.RWMutex
 	metadata            *codec.MetaData
 	bufferPoolManager   bpm.BufferPoolManager
 }
 
-func NewBTree(bufferPoolManager bpm.BufferPoolManager, metadata *codec.MetaData) *BTree {
+func NewBTree(BTreeId uint64, bufferPoolManager bpm.BufferPoolManager, metadata *codec.MetaData) *BTree {
 
-	return &BTree{
+	btree := &BTree{
+		BTreeId:             BTreeId,
+		rootNodePageId:      metadata.BTreeRootPages[BTreeId],
 		rootNodePageIdMutex: &sync.RWMutex{},
 		metadata:            metadata,
 		bufferPoolManager:   bufferPoolManager,
 	}
+
+	return btree
 }
 
 func (btree *BTree) fetchRootNodeReadGuard() (*bpm.ReadGuard, error) {
@@ -37,20 +44,20 @@ func (btree *BTree) fetchRootNodeReadGuard() (*bpm.ReadGuard, error) {
 	btree.rootNodePageIdMutex.RLock()
 	defer btree.rootNodePageIdMutex.RUnlock()
 
-	if btree.metadata.RootNodePageId == 0 {
+	if btree.rootNodePageId == 0 {
 		slog.Info("Root node not found, tree is empty", "function", "fetchRootNodeReadGuard", "at", "btree")
 		return nil, fmt.Errorf("root node does not exist")
 	} else {
-		return btree.bufferPoolManager.NewReadGuard(btree.metadata.RootNodePageId)
+		return btree.bufferPoolManager.NewReadGuard(btree.rootNodePageId)
 	}
 }
 
 func (btree *BTree) fetchRootNodeWriteGuard() (*bpm.WriteGuard, error) {
 
 	btree.rootNodePageIdMutex.RLock()
-	if btree.metadata.RootNodePageId != uint64(0) {
-		slog.Info("Root node already exists, proceeding with insert", "root_node_page_ID", btree.metadata.RootNodePageId, "function", "fetchRootNodeWriteGuard", "at", "btree")
-		rootNodeWriteGuard, err := btree.bufferPoolManager.NewWriteGuard(btree.metadata.RootNodePageId)
+	if btree.rootNodePageId != uint64(0) {
+		slog.Info("Root node already exists, proceeding with insert", "root_node_page_ID", btree.rootNodePageId, "function", "fetchRootNodeWriteGuard", "at", "btree")
+		rootNodeWriteGuard, err := btree.bufferPoolManager.NewWriteGuard(btree.rootNodePageId)
 		btree.rootNodePageIdMutex.RUnlock()
 		return rootNodeWriteGuard, err
 
@@ -61,9 +68,9 @@ func (btree *BTree) fetchRootNodeWriteGuard() (*bpm.WriteGuard, error) {
 	btree.rootNodePageIdMutex.Lock()
 	defer btree.rootNodePageIdMutex.Unlock()
 
-	if btree.metadata.RootNodePageId != uint64(0) {
+	if btree.rootNodePageId != uint64(0) {
 
-		return btree.bufferPoolManager.NewWriteGuard(btree.metadata.RootNodePageId)
+		return btree.bufferPoolManager.NewWriteGuard(btree.rootNodePageId)
 	}
 
 	// create a new root node.
@@ -83,14 +90,14 @@ func (btree *BTree) fetchRootNodeWriteGuard() (*bpm.WriteGuard, error) {
 		btree.bufferPoolManager.CleanupPage(rootNodePageId)
 		return nil, err
 	}
-	btree.metadata.RootNodePageId = rootNodePageId
+	btree.rootNodePageId = rootNodePageId
 	return rootNodePageGuard, nil
 }
 func (btree *BTree) Get(key []byte) ([]byte, error) {
 	fmt.Println()
 	slog.Info("Starting Get operation", "key", string(key), "function", "Get", "at", "btree")
 
-	slog.Info("Creating read guard for root node", "root_node_page_ID", btree.metadata.RootNodePageId, "function", "Get", "at", "btree")
+	slog.Info("Creating read guard for root node", "root_node_page_ID", btree.rootNodePageId, "function", "Get", "at", "btree")
 	rootNodeGuard, err := btree.fetchRootNodeReadGuard()
 
 	if err != nil {
@@ -179,10 +186,10 @@ func (btree *BTree) Insert(key []byte, value []byte) error {
 		newRootGuard.SetDirtyFlag()
 
 		btree.rootNodePageIdMutex.Lock()
-		btree.metadata.RootNodePageId = newRootPageId
+		btree.rootNodePageId = newRootPageId
 		btree.rootNodePageIdMutex.Unlock()
 
-		slog.Info("New root node set", "new_root_page_ID", btree.metadata.RootNodePageId, "function", "Insert", "at", "btree")
+		slog.Info("New root node set", "new_root_page_ID", btree.rootNodePageId, "function", "Insert", "at", "btree")
 
 	}
 
@@ -378,6 +385,7 @@ func (btree *BTree) Delete(key []byte) error {
 	return nil
 }
 
-func (btree *BTree) Close() error {
-	return btree.bufferPoolManager.Close()
+func (btree *BTree) Close() {
+	btree.metadata.BTreeRootPages[btree.BTreeId] = btree.rootNodePageId
+
 }
