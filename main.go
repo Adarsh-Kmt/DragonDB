@@ -9,7 +9,7 @@ import (
 func main() {
 
 	cache := buffer_pool_manager.NewLRUReplacer()
-	disk, metadata, err := buffer_pool_manager.NewDirectIODiskManager("dragon.db")
+	disk, metadata, _, err := buffer_pool_manager.NewDirectIODiskManager("dragon.db")
 
 	if err != nil {
 		panic(err)
@@ -21,7 +21,7 @@ func main() {
 		panic(err)
 	}
 
-	btree := dtl.NewBTree(bufferPoolManager, metadata)
+	btree := dtl.NewBTree(0, bufferPoolManager, metadata)
 
 	server, err := server.NewServer(":8080", btree)
 

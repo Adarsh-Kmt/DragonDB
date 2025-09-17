@@ -44,7 +44,7 @@ type DirectIODiskManager struct {
 	mutex    *sync.Mutex
 }
 
-func NewDirectIODiskManager(filePath string) (*DirectIODiskManager, *codec.MetaData, error) {
+func NewDirectIODiskManager(filePath string) (disk *DirectIODiskManager, metadata *codec.MetaData, isNewDatabase bool, err error) {
 
 	fmt.Println()
 
@@ -63,10 +63,10 @@ func NewDirectIODiskManager(filePath string) (*DirectIODiskManager, *codec.MetaD
 	file, err := directio.OpenFile(filePath, os.O_RDWR|os.O_CREATE, 0644)
 
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, false, err
 	}
 
-	disk := &DirectIODiskManager{
+	disk = &DirectIODiskManager{
 		file:  file,
 		codec: codec.DefaultMetaDataCodec(),
 		mutex: &sync.Mutex{},
@@ -75,10 +75,11 @@ func NewDirectIODiskManager(filePath string) (*DirectIODiskManager, *codec.MetaD
 	// if a new file had to be created, create a meta data page, and write it to disk.
 	if newFileCreated {
 		disk.metadata = &codec.MetaData{
+			CurrBTreeId:           0,
 			DeallocatedPageIdList: []uint64{},
 			MaxAllocatedPageId:    0,
 			// root node does not exist
-			RootNodePageId: 0,
+			BTreeRootPages: make(map[uint64]uint64),
 		}
 
 		slog.Info("writing new metadata page", "function", "NewDirectIODiskManager", "at", "DirectIODiskManager")
@@ -87,10 +88,12 @@ func NewDirectIODiskManager(filePath string) (*DirectIODiskManager, *codec.MetaD
 
 			slog.Error("Failed to write metadata page", "error", err.Error(), "function", "NewDirectIODiskManager", "at", "DirectIODiskManager")
 
-			return nil, nil, err
+			return nil, nil, false, err
 		}
 
 		slog.Info("New metadata page written successfully", "function", "NewDirectIODiskManager", "at", "DirectIODiskManager")
+
+		return disk, disk.metadata, true, nil
 
 	} else {
 
@@ -101,13 +104,13 @@ func NewDirectIODiskManager(filePath string) (*DirectIODiskManager, *codec.MetaD
 		if err != nil {
 
 			slog.Error("Failed to read metadata page", "error", err.Error(), "function", "NewDirectIODiskManager", "at", "DirectIODiskManager")
-			return nil, nil, err
+			return nil, nil, false, err
 		}
 
 		disk.metadata = disk.codec.DecodeMetaDataPage(metaDataPage)
-	}
 
-	return disk, disk.metadata, nil
+		return disk, disk.metadata, false, nil
+	}
 
 }
 
