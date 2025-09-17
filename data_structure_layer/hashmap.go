@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"sync"
 )
+
 // dummy data structure layer to test the database server, because I'm too lazy to build a B-Tree from scratch rn.
 type HashMap struct {
 	store map[uint16][]byte
@@ -66,6 +67,6 @@ func (hm *HashMap) Delete(key []byte) error {
 	return nil
 }
 
-func (hm *HashMap) Close() error {
-	return nil
+func (hm *HashMap) Close() {
+	return
 }
