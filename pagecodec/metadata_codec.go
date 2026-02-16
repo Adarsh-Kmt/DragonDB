@@ -1,13 +1,14 @@
-package page_codec
+package pagecodec
 
 import "encoding/binary"
 
-// add currBTreeId
+// add currBPlusTreeId
 type MetaData struct {
-	CurrBTreeId           uint64
-	BTreeRootPages        map[uint64]uint64
-	DeallocatedPageIdList []uint64
+	CurrBPlusTreeId       uint64
+	RootPages             map[uint64]uint64
 	MaxAllocatedPageId    uint64
+	DeallocatedPageIdList []uint64
+	FirstLeafNodePages    map[uint64]uint64
 }
 
 type MetaDataCodec struct {
@@ -25,14 +26,14 @@ func (codec MetaDataCodec) EncodeMetaDataPage(metadata *MetaData) []byte {
 
 	pointer := 0
 
-	binary.LittleEndian.PutUint64(data[pointer:pointer+8], metadata.CurrBTreeId)
+	binary.LittleEndian.PutUint64(data[pointer:pointer+8], metadata.CurrBPlusTreeId)
 	pointer += 8
 
-	binary.LittleEndian.PutUint64(data[pointer:pointer+8], uint64(len(metadata.BTreeRootPages)))
+	binary.LittleEndian.PutUint64(data[pointer:pointer+8], uint64(len(metadata.RootPages)))
 	pointer += 8
 
-	for BTreeId, rootPage := range metadata.BTreeRootPages {
-		binary.LittleEndian.PutUint64(data[pointer:pointer+8], BTreeId)
+	for BPlusTreeId, rootPage := range metadata.RootPages {
+		binary.LittleEndian.PutUint64(data[pointer:pointer+8], BPlusTreeId)
 		pointer += 8
 		binary.LittleEndian.PutUint64(data[pointer:pointer+8], rootPage)
 		pointer += 8
@@ -49,6 +50,15 @@ func (codec MetaDataCodec) EncodeMetaDataPage(metadata *MetaData) []byte {
 		pointer += 8
 	}
 
+	binary.LittleEndian.PutUint64(data[pointer:pointer+8], uint64(len(metadata.FirstLeafNodePages)))
+	pointer += 8
+	for BPlusTreeId, firstLeafNodePage := range metadata.FirstLeafNodePages {
+		binary.LittleEndian.PutUint64(data[pointer:pointer+8], BPlusTreeId)
+		pointer += 8
+		binary.LittleEndian.PutUint64(data[pointer:pointer+8], firstLeafNodePage)
+		pointer += 8
+	}
+
 	return data
 }
 
@@ -58,21 +68,21 @@ func (codec MetaDataCodec) DecodeMetaDataPage(data []byte) *MetaData {
 
 	pointer := 0
 
-	currBTreeId := binary.LittleEndian.Uint64(data[pointer : pointer+8])
+	currBPlusTreeId := binary.LittleEndian.Uint64(data[pointer : pointer+8])
 	pointer += 8
 
-	BTreeRootPagesLength := binary.LittleEndian.Uint64(data[pointer : pointer+8])
+	BPlusTreeRootPagesLength := binary.LittleEndian.Uint64(data[pointer : pointer+8])
 	pointer += 8
 
-	BTreeRootPages := make(map[uint64]uint64, 0)
+	BPlusTreeRootPages := make(map[uint64]uint64, 0)
 
-	for range int(BTreeRootPagesLength) {
-		BTreeId := binary.LittleEndian.Uint64(data[pointer : pointer+8])
+	for range int(BPlusTreeRootPagesLength) {
+		BPlusTreeId := binary.LittleEndian.Uint64(data[pointer : pointer+8])
 		pointer += 8
 		rootPage := binary.LittleEndian.Uint64(data[pointer : pointer+8])
 		pointer += 8
 
-		BTreeRootPages[BTreeId] = rootPage
+		BPlusTreeRootPages[BPlusTreeId] = rootPage
 	}
 
 	maxAllocatedPageId := binary.LittleEndian.Uint64(data[pointer : pointer+8])
@@ -88,10 +98,24 @@ func (codec MetaDataCodec) DecodeMetaDataPage(data []byte) *MetaData {
 		pointer += 8
 	}
 
+	FirstLeafNodePages := make(map[uint64]uint64, 0)
+
+	FirstLeafNodePagesLength := binary.LittleEndian.Uint64(data[pointer : pointer+8])
+	pointer += 8
+
+	for range int(FirstLeafNodePagesLength) {
+		BPlusTreeId := binary.LittleEndian.Uint64(data[pointer : pointer+8])
+		pointer += 8
+		rootPage := binary.LittleEndian.Uint64(data[pointer : pointer+8])
+		pointer += 8
+
+		FirstLeafNodePages[BPlusTreeId] = rootPage
+	}
 	return &MetaData{
-		CurrBTreeId:           currBTreeId,
-		BTreeRootPages:        BTreeRootPages,
+		CurrBPlusTreeId:       currBPlusTreeId,
+		RootPages:             BPlusTreeRootPages,
 		MaxAllocatedPageId:    maxAllocatedPageId,
 		DeallocatedPageIdList: deallocatedPageIdList,
+		FirstLeafNodePages:    FirstLeafNodePages,
 	}
 }
