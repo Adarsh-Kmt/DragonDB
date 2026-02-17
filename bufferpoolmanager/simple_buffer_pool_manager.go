@@ -1,4 +1,4 @@
-package buffer_pool_manager
+package bufferpoolmanager
 
 import (
 	"fmt"
@@ -50,6 +50,8 @@ type BufferPoolManager interface {
 	// unpinPage marks a page as no longer being used by any client.
 	// If the page is dirty, it remains in the buffer pool until flushed.
 	unpinPage(pageID uint64) bool
+
+	PrintAllPages()
 }
 
 type Frame struct {
@@ -146,6 +148,14 @@ func NewSimpleBufferPoolManager(poolSize int, pageSize int, replacer Replacer, d
 		poolSize:             poolSize,
 		pageSize:             pageSize,
 	}, nil
+}
+
+func (bufferPool *SimpleBufferPoolManager) PrintAllPages() {
+
+	for pageId, frameId := range bufferPool.pageTable {
+
+		slog.Info(fmt.Sprintf("page-id %d frame-id %d data = %v", pageId, frameId, bufferPool.frames[frameId]))
+	}
 }
 
 // NewPage is a thread-safe function that allocates a new page in the file, and returns its page ID.

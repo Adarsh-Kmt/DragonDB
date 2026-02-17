@@ -9,8 +9,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/Adarsh-Kmt/DragonDB/buffer_pool_manager"
-	"github.com/Adarsh-Kmt/DragonDB/data_structure_layer"
+	bplustree "github.com/Adarsh-Kmt/DragonDB/bplustree"
+	bpm "github.com/Adarsh-Kmt/DragonDB/bufferpoolmanager"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -24,15 +24,15 @@ func (test *DatabaseServerTestSuite) SetupTest() {
 
 	testFile := "dragon.db"
 
-	disk, actualMetadata, _, err := buffer_pool_manager.NewDirectIODiskManager(testFile)
+	disk, actualMetadata, _, err := bpm.NewDirectIODiskManager(testFile)
 
 	test.Require().NoError(err)
 
-	replacer := buffer_pool_manager.NewLRUReplacer()
-	bufferPoolManager, err := buffer_pool_manager.NewSimpleBufferPoolManager(10, 4096, replacer, disk)
+	replacer := bpm.NewLRUReplacer()
+	bufferPoolManager, err := bpm.NewSimpleBufferPoolManager(10, 4096, replacer, disk)
 	test.Require().NoError(err)
 
-	server, err := NewServer(":8080", data_structure_layer.NewBTree(0, bufferPoolManager, actualMetadata))
+	server, err := NewServer(":8080", bplustree.NewBPlusTree(0, bufferPoolManager, actualMetadata))
 
 	test.Suite.Require().NoError(err)
 

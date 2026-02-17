@@ -1,4 +1,4 @@
-package data_structure_layer
+package bplustree
 
 import (
 	"encoding/binary"

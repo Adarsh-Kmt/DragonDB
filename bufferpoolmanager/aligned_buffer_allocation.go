@@ -1,4 +1,4 @@
-package buffer_pool_manager
+package bufferpoolmanager
 
 import "unsafe"
 

@@ -1,4 +1,4 @@
-package buffer_pool_manager
+package bufferpoolmanager
 
 import (
 	"encoding/binary"
@@ -7,7 +7,7 @@ import (
 	"sync"
 	"testing"
 
-	codec "github.com/Adarsh-Kmt/DragonDB/page_codec"
+	codec "github.com/Adarsh-Kmt/DragonDB/pagecodec"
 	"github.com/ncw/directio"
 	"github.com/stretchr/testify/suite"
 )
