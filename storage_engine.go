@@ -108,6 +108,5 @@ func (engine *StorageEngine) NewBPlusTreeIterator(BPlusTreeId uint64) (*bplustre
 
 		engine.openBPlusTrees[BPlusTreeId] = BPlusTree
 	}
-
-	return bplustree.NewBPlusIterator(BPlusTree), nil
+	return bplustree.NewBPlusIterator(BPlusTree)
 }
