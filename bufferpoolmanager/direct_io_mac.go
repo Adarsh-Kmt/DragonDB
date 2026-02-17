@@ -1,7 +1,7 @@
 //go:build darwin
 // +build darwin
 
-package buffer_pool_manager
+package bufferpoolmanager
 
 import (
 	"fmt"

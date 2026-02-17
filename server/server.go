@@ -8,20 +8,20 @@ import (
 	"sync"
 	"time"
 
-	dtl "github.com/Adarsh-Kmt/DragonDB/data_structure_layer"
+	bplustree "github.com/Adarsh-Kmt/DragonDB/bplustree"
 )
 
 type Server struct {
 	addr     string
 	listener net.Listener
 
-	dataStructureLayer dtl.DataStructureLayer
+	bPlusTree *bplustree.BPlusTree
 
 	shutdown     chan struct{}
 	shutdownOnce *sync.Once
 }
 
-func NewServer(addr string, dataStructureLayer dtl.DataStructureLayer) (*Server, error) {
+func NewServer(addr string, bPlusTree *bplustree.BPlusTree) (*Server, error) {
 
 	listener, err := net.Listen("tcp", addr)
 
@@ -29,11 +29,11 @@ func NewServer(addr string, dataStructureLayer dtl.DataStructureLayer) (*Server,
 		return nil, err
 	}
 	return &Server{
-		dataStructureLayer: dataStructureLayer,
-		listener:           listener,
-		addr:               addr,
-		shutdown:           make(chan struct{}),
-		shutdownOnce:       &sync.Once{},
+		bPlusTree:    bPlusTree,
+		listener:     listener,
+		addr:         addr,
+		shutdown:     make(chan struct{}),
+		shutdownOnce: &sync.Once{},
 	}, nil
 }
 
@@ -105,7 +105,7 @@ func (server *Server) handleRequest(conn net.Conn) {
 		}
 
 		// call insert function
-		err = server.dataStructureLayer.Insert(key, value)
+		err = server.bPlusTree.Insert(key, value)
 
 		// handle error
 		if err != nil {
@@ -135,7 +135,7 @@ func (server *Server) handleRequest(conn net.Conn) {
 		}
 
 		// call delete function
-		err = server.dataStructureLayer.Delete(key)
+		err = server.bPlusTree.Delete(key)
 
 		// handle error
 		if err != nil {
@@ -167,7 +167,7 @@ func (server *Server) handleRequest(conn net.Conn) {
 		slog.Info(fmt.Sprintf("received get request for key %d", key))
 
 		// call get function
-		value, err := server.dataStructureLayer.Get(key)
+		value, err := server.bPlusTree.Get(key)
 
 		slog.Info(fmt.Sprintf("value => %v", value))
 
@@ -281,7 +281,7 @@ func (server *Server) Shutdown() {
 
 	slog.Info("shutdown initiated...")
 	server.shutdownOnce.Do(func() {
-		server.dataStructureLayer.Close()
+		server.bPlusTree.Close()
 		server.listener.Close()
 		close(server.shutdown)
 

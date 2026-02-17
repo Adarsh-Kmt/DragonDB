@@ -5,89 +5,109 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/Adarsh-Kmt/DragonDB/buffer_pool_manager"
-	"github.com/Adarsh-Kmt/DragonDB/data_structure_layer"
-	codec "github.com/Adarsh-Kmt/DragonDB/page_codec"
+	bplustree "github.com/Adarsh-Kmt/DragonDB/bplustree"
+	bpm "github.com/Adarsh-Kmt/DragonDB/bufferpoolmanager"
+	codec "github.com/Adarsh-Kmt/DragonDB/pagecodec"
 )
 
 type StorageEngine struct {
-	currBTreeId uint64
+	currBPlusTreeId uint64
 
-	openBTreesMutex *sync.Mutex
-	openBTrees      map[uint64]*data_structure_layer.BTree
-	metadata        *codec.MetaData
+	openBPlusTreesMutex *sync.Mutex
+	openBPlusTrees      map[uint64]*bplustree.BPlusTree
+	metadata            *codec.MetaData
 
-	bufferPoolManager buffer_pool_manager.BufferPoolManager
+	bufferPoolManager bpm.BufferPoolManager
 	// WAL dependency
 
 }
 
 func NewStorageEngine() (engine *StorageEngine, isNewDatabase bool, err error) {
 
-	cache := buffer_pool_manager.NewLRUReplacer()
-	disk, metadata, isNewDatabase, err := buffer_pool_manager.NewDirectIODiskManager("dragon.db")
+	cache := bpm.NewLRUReplacer()
+	disk, metadata, isNewDatabase, err := bpm.NewDirectIODiskManager("dragon.db")
 
 	if err != nil {
 		return nil, false, err
 	}
 
-	bufferPoolManager, err := buffer_pool_manager.NewSimpleBufferPoolManager(5, 4096, cache, disk)
+	bufferPoolManager, err := bpm.NewSimpleBufferPoolManager(5, 4096, cache, disk)
 
 	if err != nil {
 		return nil, false, err
 	}
 
 	return &StorageEngine{
-		currBTreeId: metadata.CurrBTreeId,
+		currBPlusTreeId: metadata.CurrBPlusTreeId,
 
-		openBTreesMutex: &sync.Mutex{},
-		openBTrees:      make(map[uint64]*data_structure_layer.BTree),
+		openBPlusTreesMutex: &sync.Mutex{},
+		openBPlusTrees:      make(map[uint64]*bplustree.BPlusTree),
 
 		metadata:          metadata,
 		bufferPoolManager: bufferPoolManager,
 	}, isNewDatabase, err
 
 }
-func (engine *StorageEngine) NewBTree() (BTreeId uint64) {
+func (engine *StorageEngine) NewBPlusTree() (BPlusTreeId uint64) {
 
-	BTreeId = atomic.AddUint64(&engine.currBTreeId, 1)
-	return BTreeId
+	BPlusTreeId = atomic.AddUint64(&engine.currBPlusTreeId, 1)
+	return BPlusTreeId
 }
 
-func (engine *StorageEngine) OpenBTree(BTreeId uint64) *data_structure_layer.BTree {
+func (engine *StorageEngine) OpenBPlusTree(BPlusTreeId uint64) (*bplustree.BPlusTree, error) {
 
-	engine.openBTreesMutex.Lock()
-	defer engine.openBTreesMutex.Unlock()
+	engine.openBPlusTreesMutex.Lock()
+	defer engine.openBPlusTreesMutex.Unlock()
 
-	btree, exists := engine.openBTrees[BTreeId]
+	btree, exists := engine.openBPlusTrees[BPlusTreeId]
 
 	if exists {
-		return btree
+		return btree, nil
 	}
-	btree = data_structure_layer.NewBTree(BTreeId, engine.bufferPoolManager, engine.metadata)
-	engine.openBTrees[BTreeId] = btree
-	return btree
+
+	return nil, fmt.Errorf("BPlusTree doesnt exist")
 }
 
-func (engine *StorageEngine) CloseBTree(BTreeId uint64) error {
+func (engine *StorageEngine) CloseBPlusTree(BPlusTreeId uint64) error {
 
-	engine.openBTreesMutex.Lock()
-	defer engine.openBTreesMutex.Unlock()
+	engine.openBPlusTreesMutex.Lock()
+	defer engine.openBPlusTreesMutex.Unlock()
 
-	btree, exists := engine.openBTrees[BTreeId]
+	btree, exists := engine.openBPlusTrees[BPlusTreeId]
 
 	if !exists {
 		return fmt.Errorf("can't close B-Tree twice")
 	}
 	btree.Close()
-	delete(engine.openBTrees, BTreeId)
+	delete(engine.openBPlusTrees, BPlusTreeId)
 
 	return nil
 }
 func (engine *StorageEngine) Close() error {
-	engine.metadata.CurrBTreeId = engine.currBTreeId
-	for _, btree := range engine.openBTrees {
+	engine.metadata.CurrBPlusTreeId = engine.currBPlusTreeId
+	for _, btree := range engine.openBPlusTrees {
 		btree.Close()
 	}
 	return engine.bufferPoolManager.Close()
+}
+
+func (engine *StorageEngine) NewBPlusTreeIterator(BPlusTreeId uint64) (*bplustree.BPlusTreeIterator, error) {
+
+	engine.openBPlusTreesMutex.Lock()
+	defer engine.openBPlusTreesMutex.Unlock()
+
+	BPlusTree, ok := engine.openBPlusTrees[BPlusTreeId]
+
+	if !ok {
+
+		BPlusTree, err := engine.OpenBPlusTree(BPlusTreeId)
+
+		if err != nil {
+			return nil, err
+		}
+
+		engine.openBPlusTrees[BPlusTreeId] = BPlusTree
+	}
+
+	return bplustree.NewBPlusIterator(BPlusTree), nil
 }

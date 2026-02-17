@@ -146,7 +146,7 @@ func (codec InternalNodeCodec) InsertElement(page []byte, key []byte, leftChildN
 	elementSpaceRequired := 2 + len(key) + 8 + 8
 
 	// calculate space required to store new slot
-	slotSpaceRequired := codec.slotCodec.GetSlotSize()
+	slotSpaceRequired := codec.slotCodec.getSlotSize()
 
 	//slog.Info("Element space required", "size", elementSpaceRequired, "function", "InsertElement", "at", "InternalNodeCodec")
 
@@ -209,7 +209,7 @@ func (codec InternalNodeCodec) getAllSlotsAndElements(page []byte) ([]Slot, []In
 
 	for range int(header.numSlots) {
 
-		slotBytes := page[pointer : pointer+codec.slotCodec.GetSlotSize()]
+		slotBytes := page[pointer : pointer+codec.slotCodec.getSlotSize()]
 
 		slot := codec.slotCodec.decodeSlot(slotBytes)
 		pointer += 4
@@ -246,6 +246,7 @@ func (codec InternalNodeCodec) putAllSlotsAndElements(page []byte, slots []Slot,
 	codec.headerCodec.setGarbageSize(headerBytes, 0)
 	codec.headerCodec.setFreeSpaceBegin(headerBytes, freeSpaceBegin)
 	codec.headerCodec.setFreeSpaceEnd(headerBytes, freeSpaceEnd)
+	codec.headerCodec.SetIsPageFilled(headerBytes, true)
 }
 
 // DeleteElement is used to delete a key value pair, if it exists
@@ -259,13 +260,13 @@ func (codec InternalNodeCodec) DeleteElement(page []byte, key []byte) bool {
 	defer codec.headerCodec.updateCRC(page)
 
 	// reset element pointer in slot
-	codec.slotCodec.setElementPointer(slotBytes, codec.slotCodec.GetDeletedElementPointerVal())
+	codec.slotCodec.setElementPointer(slotBytes, codec.slotCodec.getDeletedElementPointerVal())
 
 	// update garbage size
 	headerBytes := page[:codec.headerCodec.getHeaderSize()]
 	header := codec.headerCodec.decodePageHeader(headerBytes)
 
-	codec.headerCodec.setGarbageSize(headerBytes, header.garbageSize+uint16(len(elementBytes)+codec.slotCodec.GetSlotSize()))
+	codec.headerCodec.setGarbageSize(headerBytes, header.garbageSize+uint16(len(elementBytes)+codec.slotCodec.getSlotSize()))
 
 	return true
 }
@@ -327,7 +328,7 @@ func (codec InternalNodeCodec) linearSearch(page []byte, key []byte) (slotBytes 
 
 	for range int(header.numSlots) {
 
-		currSlotBytes := page[pointer : pointer+codec.slotCodec.GetSlotSize()]
+		currSlotBytes := page[pointer : pointer+codec.slotCodec.getSlotSize()]
 		currSlot := codec.slotCodec.decodeSlot(currSlotBytes)
 		pointer += 4
 
@@ -388,7 +389,7 @@ func (codec InternalNodeCodec) InsertSlot(page []byte, newSlot Slot, key []byte,
 	for range int(header.numSlots) {
 
 		// extract slot from page
-		slotBytes := page[pointer : pointer+codec.slotCodec.GetSlotSize()]
+		slotBytes := page[pointer : pointer+codec.slotCodec.getSlotSize()]
 
 		// decode slot from slot bytes
 		existingSlot := codec.slotCodec.decodeSlot(slotBytes)
@@ -428,14 +429,14 @@ func (codec InternalNodeCodec) InsertSlot(page []byte, newSlot Slot, key []byte,
 			}
 		}
 
-		pointer = pointer + codec.slotCodec.GetSlotSize()
+		pointer = pointer + codec.slotCodec.getSlotSize()
 	}
 
 	// calculate number of slots in page greater than new slot
 	numSlotsGreater := len(greaterSlots) - 1
 
 	// caluclate offset in page from which insertion of all slots in list should begin
-	header.freeSpaceBegin = header.freeSpaceBegin - uint16(numSlotsGreater*codec.slotCodec.GetSlotSize())
+	header.freeSpaceBegin = header.freeSpaceBegin - uint16(numSlotsGreater*codec.slotCodec.getSlotSize())
 
 	// insert each slot into the page
 	for _, currSlot := range greaterSlots {

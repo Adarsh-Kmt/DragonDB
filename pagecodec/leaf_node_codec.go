@@ -211,7 +211,7 @@ func (codec LeafNodeCodec) InsertElement(page []byte, key []byte, value []byte) 
 	elementSpaceRequired := 2 + len(key) + 2 + len(value)
 
 	// calculate space required to store new slot
-	slotSpaceRequired := codec.slotCodec.GetSlotSize()
+	slotSpaceRequired := codec.slotCodec.getSlotSize()
 
 	//slog.Info("LeafNodeElement space required", "size", elementSpaceRequired, "function", "InsertElement", "at", "LeafNodeCodec")
 
@@ -278,7 +278,7 @@ func (codec LeafNodeCodec) getAllSlotsAndElements(page []byte) ([]Slot, []LeafNo
 
 	for range int(header.numSlots) {
 
-		slotBytes := page[pointer : pointer+codec.slotCodec.GetSlotSize()]
+		slotBytes := page[pointer : pointer+codec.slotCodec.getSlotSize()]
 
 		slot := codec.slotCodec.decodeSlot(slotBytes)
 		pointer += 4
@@ -330,13 +330,13 @@ func (codec LeafNodeCodec) DeleteElement(page []byte, key []byte) bool {
 	defer codec.headerCodec.updateCRC(page)
 
 	// reset element pointer in slot
-	codec.slotCodec.setElementPointer(slotBytes, codec.slotCodec.GetDeletedElementPointerVal())
+	codec.slotCodec.setElementPointer(slotBytes, codec.slotCodec.getDeletedElementPointerVal())
 
 	// update garbage size
 	headerBytes := page[:codec.headerCodec.getHeaderSize()]
 	header := codec.headerCodec.decodePageHeader(headerBytes)
 
-	codec.headerCodec.setGarbageSize(headerBytes, header.garbageSize+uint16(len(elementBytes)+codec.slotCodec.GetSlotSize()))
+	codec.headerCodec.setGarbageSize(headerBytes, header.garbageSize+uint16(len(elementBytes)+codec.slotCodec.getSlotSize()))
 
 	return true
 }
@@ -400,7 +400,7 @@ func (codec LeafNodeCodec) linearSearch(page []byte, key []byte) (slotBytes []by
 
 	for range int(header.numSlots) {
 
-		currSlotBytes := page[pointer : pointer+codec.slotCodec.GetSlotSize()]
+		currSlotBytes := page[pointer : pointer+codec.slotCodec.getSlotSize()]
 		currSlot := codec.slotCodec.decodeSlot(currSlotBytes)
 		pointer += 4
 
@@ -458,7 +458,7 @@ func (codec LeafNodeCodec) InsertSlot(page []byte, newSlot Slot, key []byte) (up
 	for range int(header.numSlots) {
 
 		// extract slot from page
-		slotBytes := page[pointer : pointer+codec.slotCodec.GetSlotSize()]
+		slotBytes := page[pointer : pointer+codec.slotCodec.getSlotSize()]
 
 		// decode slot from slot bytes
 		existingSlot := codec.slotCodec.decodeSlot(slotBytes)
@@ -496,14 +496,14 @@ func (codec LeafNodeCodec) InsertSlot(page []byte, newSlot Slot, key []byte) (up
 			}
 		}
 
-		pointer = pointer + codec.slotCodec.GetSlotSize()
+		pointer = pointer + codec.slotCodec.getSlotSize()
 	}
 
 	// calculate number of slots in page greater than new slot
 	numSlotsGreater := len(greaterSlots) - 1
 
 	// caluclate offset in page from which insertion of all slots in list should begin
-	header.freeSpaceBegin = header.freeSpaceBegin - uint16(numSlotsGreater*codec.slotCodec.GetSlotSize())
+	header.freeSpaceBegin = header.freeSpaceBegin - uint16(numSlotsGreater*codec.slotCodec.getSlotSize())
 
 	// insert each slot into the page
 	for _, currSlot := range greaterSlots {

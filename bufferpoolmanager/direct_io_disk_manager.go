@@ -1,4 +1,4 @@
-package buffer_pool_manager
+package bufferpoolmanager
 
 import (
 	"errors"
@@ -7,7 +7,7 @@ import (
 	"os"
 	"sync"
 
-	codec "github.com/Adarsh-Kmt/DragonDB/page_codec"
+	codec "github.com/Adarsh-Kmt/DragonDB/pagecodec"
 	"github.com/ncw/directio"
 )
 
@@ -75,11 +75,11 @@ func NewDirectIODiskManager(filePath string) (disk *DirectIODiskManager, metadat
 	// if a new file had to be created, create a meta data page, and write it to disk.
 	if newFileCreated {
 		disk.metadata = &codec.MetaData{
-			CurrBTreeId:           0,
+			CurrBPlusTreeId:       0,
 			DeallocatedPageIdList: []uint64{},
 			MaxAllocatedPageId:    0,
 			// root node does not exist
-			BTreeRootPages: make(map[uint64]uint64),
+			RootPages: make(map[uint64]uint64),
 		}
 
 		slog.Info("writing new metadata page", "function", "NewDirectIODiskManager", "at", "DirectIODiskManager")

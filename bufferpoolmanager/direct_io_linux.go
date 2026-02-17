@@ -1,7 +1,7 @@
 //go:build linux
 // +build linux
 
-package buffer_pool_manager
+package bufferpoolmanager
 
 import (
 	"os"

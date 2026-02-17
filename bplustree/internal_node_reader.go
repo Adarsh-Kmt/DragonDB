@@ -1,7 +1,7 @@
-package data_structure_layer
+package bplustree
 
 import (
-	bpm "github.com/Adarsh-Kmt/DragonDB/buffer_pool_manager"
+	bpm "github.com/Adarsh-Kmt/DragonDB/bufferpoolmanager"
 	codec "github.com/Adarsh-Kmt/DragonDB/pagecodec"
 )
 

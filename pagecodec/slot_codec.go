@@ -44,10 +44,10 @@ func defaultSlotCodec() SlotCodec {
 	}
 }
 
-func (codec SlotCodec) GetSlotSize() int {
+func (codec SlotCodec) getSlotSize() int {
 	return codec.config.slotSize
 }
-func (codec SlotCodec) GetDeletedElementPointerVal() uint16 {
+func (codec SlotCodec) getDeletedElementPointerVal() uint16 {
 	return codec.config.deletedElementPointerVal
 }
 
