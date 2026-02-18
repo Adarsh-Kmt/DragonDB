@@ -100,7 +100,7 @@ func (codec HeaderCodec) decodePageHeader(headerBytes []byte) *Header {
 		h.isLeafNode = true // Default to leaf node type for empty pages
 		h.crc = 0
 
-		//slog.Info("Decoded page header", "is leaf node", h.isLeafNode, "number of slots", h.numSlots, "free space begin", h.freeSpaceBegin, "free space end", h.freeSpaceEnd, "garbage size", h.garbageSize, "function", "decodePageHeader", "at", "HeaderCodec") // CRC is zero for empty pages
+		slog.Info("Decoded page header", "is leaf node", h.isLeafNode, "number of slots", h.numSlots, "free space begin", h.freeSpaceBegin, "free space end", h.freeSpaceEnd, "garbage size", h.garbageSize, "function", "decodePageHeader", "at", "HeaderCodec") // CRC is zero for empty pages
 		return h
 	}
 	h.crc = binary.LittleEndian.Uint32(headerBytes[codec.config.crcOffset:])

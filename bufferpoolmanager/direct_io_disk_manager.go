@@ -78,6 +78,7 @@ func NewDirectIODiskManager(filePath string) (disk *DirectIODiskManager, metadat
 			CurrBPlusTreeId:       0,
 			DeallocatedPageIdList: []uint64{},
 			MaxAllocatedPageId:    0,
+			FirstLeafNodePages:    make(map[uint64]uint64),
 			// root node does not exist
 			RootPages: make(map[uint64]uint64),
 		}
