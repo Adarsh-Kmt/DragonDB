@@ -9,44 +9,7 @@ A B-Tree based database storage engine, written in Go.
 Check out my [substack](https://adarshkmt.substack.com/s/building-a-database), where I'll be explaining how I built it, layer by layer.
 
 ## Architecture
-<p align="center">
-  <img src="assets/Architecture/DragonDB Architecture v2.png" alt="Architecture Diagram" width="1000"/>
-</p>
-DragonDB is built with a layered architecture consisting of four main components:
-
-1. **Database Server** - Handles client connections and query processing
-2. **Data Structure Layer** - B-tree implementation for key-value storage and retrieval
-3. **Buffer Pool Manager** - Memory management and page caching with LRU replacement
-4. **Disk Manager** - Direct I/O operations with page allocation and deallocation
-
-## Components
-
-### Data Structure Layer (B-Tree)
-- Supports concurrent Get and Insert operations.
-- Automatic B-Tree node splitting.
-
-### Page Codec
-- Interprets byte array as a B-Tree node.
-- Performs Insert/Get/Split/Merge operations on the B-Tree node.
-- Follows slotted page layout.
-<p align="center">
-  <img src="assets/Slotted Page Format/5. B-Tree Node Slotted Page Format.png" alt="Architecture Diagram" width="1000"/>
-</p>
-
-### Buffer Pool Manager
-- LRU page replacement policy.
-- Pin-based memory management preventing premature page eviction.
-- Concurrent access support with frame-level locking.
-- Page-aligned buffer allocation.
-
-<p align="center">
-  <img src="assets/Architecture/Buffer Pool Manager v2.png" alt="Architecture Diagram" width="1000"/>
-</p>
-
-### Direct I/O Disk Manager
-- Bypasses kernel page cache for predictable performance
-- Batch file extension (16 pages at once) to reduce I/O overhead
-- Atomic read/write operations using pread/pwrite system calls
+Checkout [architecture.md](https://github.com/Adarsh-Kmt/DragonDB/blob/master/architecture.md) for an overview.
 
 ## Installation and Setup
 
@@ -61,27 +24,6 @@ cd DragonDB
 go mod tidy
 go build ./...
 ```
-
-
-### Usage Example
-
-```go
-// Insert key-value pair
-err := btree.Insert([]byte("user:123"), []byte(`{"name": "Alice", "age": 30}`))
-if err != nil {
-    log.Printf("Insert failed: %v", err)
-}
-
-// Retrieve value by key
-value, err := btree.Get([]byte("user:123"))
-if err != nil {
-    log.Printf("Get failed: %v", err)
-} else {
-    log.Printf("Retrieved: %s", string(value))
-}
-```
-
-
 
 ## Technical Challenges Solved
 
@@ -120,24 +62,15 @@ if err != nil {
 **Problem**: Buffered I/O operations suffered from double-buffering and unpredictable kernel cache behavior.
 
 <p align="center">
-  <img src="assets/Buffered I:O/Buffered I:O.png" alt="Architecture Diagram" width="1000"/>
+  <img src="assets/Buffered IO/Buffered IO.png" alt="Architecture Diagram" width="1000"/>
 </p>
 
 **Solution**: Custom Direct I/O implementation:
 - Data from disk is transferred directly to user space memory using Direct I/O, bypassing the kernel page cache.
 
 <p align="center">
-  <img src="assets/Direct I:O/Direct I:O.png" alt="Architecture Diagram" width="1000"/>
+  <img src="assets/Direct IO/Direct IO.png" alt="Architecture Diagram" width="1000"/>
 </p>
-
-## Development Branches
-
-- [Master](https://github.com/Adarsh-Kmt/DragonDB/tree/master) - Stable release branch
-- [DatabaseServerImpl](https://github.com/Adarsh-Kmt/DragonDB/tree/DatabaseServerImpl) - Database server development
-- [BufferPoolManagerImpl](https://github.com/Adarsh-Kmt/DragonDB/tree/BufferPoolManagerImpl) - Buffer pool manager implementation
-- [PageCodecImpl](https://github.com/Adarsh-Kmt/DragonDB/tree/PageCodecImpl) - B-Tree Node operations
-- [DataStructureLayerImpl](https://github.com/Adarsh-Kmt/DragonDB/tree/DataStructureLayerImpl) - B tree implementation
-
 
 ## License:
 
