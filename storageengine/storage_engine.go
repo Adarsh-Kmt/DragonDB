@@ -54,18 +54,14 @@ func (engine *StorageEngine) NewBPlusTree() (BPlusTreeId uint64) {
 	return BPlusTreeId
 }
 
-func (engine *StorageEngine) OpenBPlusTree(BPlusTreeId uint64) (*bplustree.BPlusTree, error) {
+func (engine *StorageEngine) OpenBPlusTree(BPlusTreeId uint64) (btree *bplustree.BPlusTree, exists bool) {
 
 	engine.openBPlusTreesMutex.Lock()
 	defer engine.openBPlusTreesMutex.Unlock()
 
-	btree, exists := engine.openBPlusTrees[BPlusTreeId]
+	btree, exists = engine.openBPlusTrees[BPlusTreeId]
 
-	if exists {
-		return btree, nil
-	}
-
-	return nil, fmt.Errorf("BPlusTree doesnt exist")
+	return btree, exists
 }
 
 func (engine *StorageEngine) CloseBPlusTree(BPlusTreeId uint64) error {
@@ -100,10 +96,10 @@ func (engine *StorageEngine) NewBPlusTreeIterator(BPlusTreeId uint64) (*bplustre
 
 	if !ok {
 
-		BPlusTree, err := engine.OpenBPlusTree(BPlusTreeId)
+		BPlusTree, exists := engine.OpenBPlusTree(BPlusTreeId)
 
-		if err != nil {
-			return nil, err
+		if !exists {
+			return nil, fmt.Errorf("B Plus Tree doesnt exist")
 		}
 
 		engine.openBPlusTrees[BPlusTreeId] = BPlusTree
