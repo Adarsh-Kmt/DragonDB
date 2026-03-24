@@ -106,3 +106,8 @@ func (engine *StorageEngine) NewBPlusTreeIterator(BPlusTreeId uint64) (*bplustre
 	}
 	return bplustree.NewBPlusIterator(BPlusTree)
 }
+
+func (engine *StorageEngine) GetCurrBPlusTreeId() uint64 {
+
+	return engine.currBPlusTreeId
+}
