@@ -445,8 +445,8 @@ func (codec LeafNodeCodec) calculateElementSize(element LeafNodeElement) (size u
 // insertSlot inserts a slot into the slot region while maintaining the sorted nature of the slot region. It also returns the left and right child node page ID of the element after insertion
 func (codec LeafNodeCodec) InsertSlot(page []byte, newSlot Slot, key []byte) (updatedFreeSpaceBegin uint16) {
 
-	fmt.Println()
-	slog.Info("Inserting slot into page...", "function", "InsertSlot", "at", "SlotCodec")
+	//fmt.Println()
+	//slog.Info("Inserting slot into page...", "function", "InsertSlot", "at", "SlotCodec")
 	// initialize pointer to beginning of slot region
 	pointer := codec.headerCodec.config.headerSize
 
@@ -537,8 +537,8 @@ func (codec LeafNodeCodec) PrintElements(page []byte) {
 }
 
 func (codec LeafNodeCodec) appendElement(page []byte, freeSpaceEnd uint16, element LeafNodeElement) (updatedFreeSpaceEnd uint16) {
-	fmt.Println()
-	slog.Info("Appending element to page", "key", string(element.Key), "function", "appendElement", "at", "SlottedPageCodec")
+	//fmt.Println()
+	//slog.Info("Appending element to page", "key", string(element.Key), "function", "appendElement", "at", "SlottedPageCodec")
 	elementBytes := codec.encodeElement(element)
 	// Debug: print elementBytes
 	//fmt.Printf("[DEBUG] elementBytes: %v\n", elementBytes)

@@ -176,12 +176,12 @@ func (bufferPool *SimpleBufferPoolManager) CleanupPage(pageID uint64) {
 func (bufferPool *SimpleBufferPoolManager) fetchPage(pageId uint64) (*Frame, error) {
 
 	bufferPool.lookupMutex.RLock()
-	slog.Info(fmt.Sprintf("fetching page %d", pageId), "function", "fetchPage", "at", "buffer Pool Manager")
-	slog.Info(fmt.Sprintf("page table => %v", bufferPool.pageTable), "function", "fetchPage", "at", "buffer Pool Manager")
+	//slog.Info(fmt.Sprintf("fetching page %d", pageId), "function", "fetchPage", "at", "buffer Pool Manager")
+	//slog.Info(fmt.Sprintf("page table => %v", bufferPool.pageTable), "function", "fetchPage", "at", "buffer Pool Manager")
 	frameId, exists := bufferPool.pageTable[pageId]
 	if exists {
 
-		slog.Info(fmt.Sprintf("page %d found in memory", pageId), "function", "fetchPage", "at", "buffer Pool Manager")
+		//slog.Info(fmt.Sprintf("page %d found in memory", pageId), "function", "fetchPage", "at", "buffer Pool Manager")
 		frame := bufferPool.frames[frameId]
 
 		frame.pinCountMutex.Lock()
@@ -227,7 +227,7 @@ func (bufferPool *SimpleBufferPoolManager) fetchPage(pageId uint64) (*Frame, err
 	data, err := bufferPool.disk.read(int64(pageId)*int64(bufferPool.pageSize), bufferPool.pageSize)
 
 	if err != nil {
-		slog.Error("Failed to read page from disk", "pageId", pageId, "error", err.Error(), "function", "fetchPage", "at", "buffer Pool Manager")
+		//slog.Error("Failed to read page from disk", "pageId", pageId, "error", err.Error(), "function", "fetchPage", "at", "buffer Pool Manager")
 		return nil, err
 	}
 
@@ -238,11 +238,11 @@ func (bufferPool *SimpleBufferPoolManager) fetchPage(pageId uint64) (*Frame, err
 
 		newFrameId = bufferPool.freeFrames[0]
 
-		slog.Info(fmt.Sprintf("free frame chosen => %d", newFrameId), "function", "fetchPage", "at", "buffer Pool Manager")
+		//slog.Info(fmt.Sprintf("free frame chosen => %d", newFrameId), "function", "fetchPage", "at", "buffer Pool Manager")
 
 		bufferPool.freeFrames = bufferPool.freeFrames[1:]
 
-		slog.Info(fmt.Sprintf("free frame list => %v", bufferPool.freeFrames), "function", "fetchPage", "at", "buffer Pool Manager")
+		//slog.Info(fmt.Sprintf("free frame list => %v", bufferPool.freeFrames), "function", "fetchPage", "at", "buffer Pool Manager")
 	} else {
 		newFrameId = bufferPool.replacer.victim()
 

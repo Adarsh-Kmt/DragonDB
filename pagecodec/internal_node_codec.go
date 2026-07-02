@@ -131,7 +131,7 @@ func (codec InternalNodeCodec) FindNextChildNodePageId(page []byte, key []byte) 
 // InsertElement is used to insert a key value pair in a page
 func (codec InternalNodeCodec) InsertElement(page []byte, key []byte, leftChildNodePageId uint64, rightChildNodePageId uint64) bool {
 
-	fmt.Println()
+	//fmt.Println()
 	slog.Info("Inserting element in page...", "key", string(key), "left_child_node_page_ID", leftChildNodePageId, "right_child_node_page_ID", rightChildNodePageId, "function", "InsertElement", "at", "InternalNodeCodec")
 	defer codec.headerCodec.updateCRC(page)
 
@@ -153,7 +153,7 @@ func (codec InternalNodeCodec) InsertElement(page []byte, key []byte, leftChildN
 	// check if free space region has enough space to accomodate new element
 	if !codec.headerCodec.isAdequate(page, elementSpaceRequired+slotSpaceRequired) {
 
-		slog.Info("Not enough space in free space region", "function", "InsertElement", "at", "InternalNodeCodec")
+		//slog.Info("Not enough space in free space region", "function", "InsertElement", "at", "InternalNodeCodec")
 		//slog.Info("checking if compaction will help...", "function", "InsertElement", "at", "InternalNodeCodec")
 		// if free space is not adequate, check if performing compaction will help
 		if !codec.headerCodec.shouldCompact(page, elementSpaceRequired+slotSpaceRequired) {
@@ -375,7 +375,7 @@ func (codec InternalNodeCodec) calculateElementSize(element InternalNodeElement)
 func (codec InternalNodeCodec) InsertSlot(page []byte, newSlot Slot, key []byte, leftChildNodePageId uint64, rightChildNodePageId uint64) (updatedFreeSpaceBegin uint16) {
 
 	fmt.Println()
-	slog.Info("Inserting slot into page...", "function", "InsertSlot", "at", "SlotCodec")
+	//slog.Info("Inserting slot into page...", "function", "InsertSlot", "at", "SlotCodec")
 	// initialize pointer to beginning of slot region
 	pointer := codec.headerCodec.config.headerSize
 
@@ -478,7 +478,7 @@ func (codec InternalNodeCodec) PrintElements(page []byte) {
 
 func (codec InternalNodeCodec) appendElement(page []byte, freeSpaceEnd uint16, element InternalNodeElement) (updatedFreeSpaceEnd uint16) {
 	fmt.Println()
-	slog.Info("Appending element to page", "key", string(element.Key), "leftChildNodePageId", element.LeftChildNodePageId, "rightChildNodePageId", element.RightChildNodePageId, "function", "appendElement", "at", "SlottedPageCodec")
+	//slog.Info("Appending element to page", "key", string(element.Key), "leftChildNodePageId", element.LeftChildNodePageId, "rightChildNodePageId", element.RightChildNodePageId, "function", "appendElement", "at", "SlottedPageCodec")
 	elementBytes := codec.encodeElement(element)
 
 	copy(page[int(freeSpaceEnd)-len(elementBytes):], elementBytes)
