@@ -279,17 +279,9 @@ func (codec InternalNodeCodec) compact(page []byte) {
 	codec.putAllSlotsAndElements(page, slots, elements)
 }
 
-func (codec InternalNodeCodec) SplitNode(leftNode []byte, rightNode []byte, rightNodePageId uint64) (extraKey []byte) {
+func (codec InternalNodeCodec) FindSplitNodeIndex(leftNode []byte) int {
 
-	defer codec.headerCodec.updateCRC(leftNode)
-	defer codec.headerCodec.updateCRC(rightNode)
-
-	leftNodeHeaderBytes := leftNode[:codec.headerCodec.getHeaderSize()]
-	leftNodeHeader := codec.headerCodec.decodePageHeader(leftNodeHeaderBytes)
-
-	rightNodeHeaderBytes := rightNode[:codec.headerCodec.getHeaderSize()]
-
-	slots, elements := codec.getAllSlotsAndElements(leftNode)
+	slots, _ := codec.getAllSlotsAndElements(leftNode)
 
 	totalDataRegionSize := codec.headerCodec.getTotalDataRegionSize(slots)
 
@@ -302,16 +294,32 @@ func (codec InternalNodeCodec) SplitNode(leftNode []byte, rightNode []byte, righ
 		index++
 	}
 
-	leftSlots := slots[:index]
-	leftElements := elements[:index]
+	return index
 
-	rightSlots := slots[index:]
-	rightElements := elements[index:]
+}
 
-	extraKey = elements[index].Key
+func (codec InternalNodeCodec) SplitNode(leftNode []byte, rightNode []byte, rightNodePageId uint64, splitIndex int) (extraKey []byte) {
 
-	codec.putAllSlotsAndElements(leftNode, leftSlots, leftElements)
-	codec.putAllSlotsAndElements(rightNode, rightSlots, rightElements)
+	defer codec.headerCodec.updateCRC(leftNode)
+	defer codec.headerCodec.updateCRC(rightNode)
+
+	leftNodeHeaderBytes := leftNode[:codec.headerCodec.getHeaderSize()]
+	leftNodeHeader := codec.headerCodec.decodePageHeader(leftNodeHeaderBytes)
+
+	rightNodeHeaderBytes := rightNode[:codec.headerCodec.getHeaderSize()]
+
+	slots, elements := codec.getAllSlotsAndElements(leftNode)
+
+	leftSlots := slots[:splitIndex]
+	leftElements := elements[:splitIndex]
+
+	rightSlots := slots[splitIndex+1:]
+	rightElements := elements[splitIndex+1:]
+
+	extraKey = elements[splitIndex].Key
+
+	codec.PutAllSlotsAndElements(leftNode, leftSlots, leftElements)
+	codec.PutAllSlotsAndElements(rightNode, rightSlots, rightElements)
 
 	codec.headerCodec.setNextLeafNodePageId(rightNodeHeaderBytes, leftNodeHeader.nextLeafNodePageId)
 	codec.headerCodec.setNextLeafNodePageId(leftNodeHeaderBytes, rightNodePageId)

@@ -349,17 +349,9 @@ func (codec LeafNodeCodec) compact(page []byte) {
 	codec.putAllSlotsAndElements(page, slots, elements)
 }
 
-func (codec LeafNodeCodec) SplitNode(leftNode []byte, rightNode []byte, rightNodePageId uint64) (extraKey []byte) {
+func (codec LeafNodeCodec) FindSplitNodeIndex(leftNode []byte) int {
 
-	defer codec.headerCodec.updateCRC(leftNode)
-	defer codec.headerCodec.updateCRC(rightNode)
-
-	leftNodeHeaderBytes := leftNode[:codec.headerCodec.getHeaderSize()]
-	leftNodeHeader := codec.headerCodec.decodePageHeader(leftNodeHeaderBytes)
-
-	rightNodeHeaderBytes := rightNode[:codec.headerCodec.getHeaderSize()]
-
-	slots, elements := codec.getAllSlotsAndElements(leftNode)
+	slots, _ := codec.getAllSlotsAndElements(leftNode)
 
 	totalDataRegionSize := codec.headerCodec.getTotalDataRegionSize(slots)
 
@@ -371,19 +363,34 @@ func (codec LeafNodeCodec) SplitNode(leftNode []byte, rightNode []byte, rightNod
 		leftNodeDataRegionSize += slots[index].elementSize
 		index++
 	}
-	slog.Info("!!!!!!!!!!!!!!!")
-	slog.Info("splitting node")
-	leftSlots := slots[:index]
-	leftElements := elements[:index]
-	slog.Info(fmt.Sprintf("elements being moved to left node %d ", len(leftSlots)))
-	rightSlots := slots[index:]
-	rightElements := elements[index:]
 
-	extraKey = elements[index].Key
-	slog.Info("moving elements to left node")
-	codec.putAllSlotsAndElements(leftNode, leftSlots, leftElements)
-	slog.Info("moving elements to right node")
-	codec.putAllSlotsAndElements(rightNode, rightSlots, rightElements)
+	return index
+}
+func (codec LeafNodeCodec) SplitNode(leftNode []byte, rightNode []byte, rightNodePageId uint64, splitIndex int) (extraKey []byte) {
+
+	defer codec.headerCodec.updateCRC(leftNode)
+	defer codec.headerCodec.updateCRC(rightNode)
+
+	leftNodeHeaderBytes := leftNode[:codec.headerCodec.getHeaderSize()]
+	leftNodeHeader := codec.headerCodec.decodePageHeader(leftNodeHeaderBytes)
+
+	rightNodeHeaderBytes := rightNode[:codec.headerCodec.getHeaderSize()]
+
+	slots, elements := codec.getAllSlotsAndElements(leftNode)
+
+	// slog.Info("!!!!!!!!!!!!!!!")
+	// slog.Info("splitting node")
+	leftSlots := slots[:splitIndex]
+	leftElements := elements[:splitIndex]
+	//slog.Info(fmt.Sprintf("elements being moved to left node %d ", len(leftSlots)))
+	rightSlots := slots[splitIndex:]
+	rightElements := elements[splitIndex:]
+
+	extraKey = elements[splitIndex].Key
+	//slog.Info("moving elements to left node")
+	codec.PutAllSlotsAndElements(leftNode, leftSlots, leftElements)
+	//slog.Info("moving elements to right node")
+	codec.PutAllSlotsAndElements(rightNode, rightSlots, rightElements)
 
 	codec.headerCodec.setNextLeafNodePageId(rightNodeHeaderBytes, leftNodeHeader.nextLeafNodePageId)
 	codec.headerCodec.setNextLeafNodePageId(leftNodeHeaderBytes, rightNodePageId)
