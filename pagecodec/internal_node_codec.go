@@ -55,10 +55,52 @@ func (codec InternalNodeCodec) decodeElement(elementBytes []byte) InternalNodeEl
 
 }
 
+func (codec InternalNodeCodec) EncodeAllElements(page []byte) (elementListLength int, payload []byte) {
+
+	_, elements := codec.getAllSlotsAndElements(page)
+
+	data := make([]byte, 0)
+
+	for i := range elements {
+
+		elementBytes := codec.encodeElement(elements[i])
+		data = binary.LittleEndian.AppendUint16(data, uint16(len(elementBytes)))
+		data = append(data, elementBytes...)
+	}
+
+	finalPayload := make([]byte, 0)
+	finalPayload = binary.LittleEndian.AppendUint16(finalPayload, uint16(len(elements)))
+	finalPayload = append(finalPayload, data...)
+
+	return len(elements), finalPayload
+}
+
+func (codec InternalNodeCodec) DecodeAllSlotsAndElements(payload []byte) ([]Slot, []InternalNodeElement) {
+
+	elementList := make([]InternalNodeElement, 0)
+	slotList := make([]Slot, 0)
+
+	pointer := 0
+	elementListSize := int(binary.LittleEndian.Uint16(payload[pointer:]))
+	pointer += 2
+	for range elementListSize {
+
+		elementSize := binary.LittleEndian.Uint16(payload[pointer:])
+		pointer += 2 // Skip the 2-byte size field
+
+		slotList = append(slotList, Slot{elementSize: elementSize})
+		elementBytes := payload[pointer : pointer+int(elementSize)]
+		elementList = append(elementList, codec.decodeElement(elementBytes))
+
+		pointer += int(elementSize)
+	}
+	return slotList, elementList
+}
+
 // encodeSlot takes an element struct and returns an encoded slice of bytes representing this element
 func (codec InternalNodeCodec) encodeElement(element InternalNodeElement) []byte {
 
-	fmt.Println()
+	//fmt.Println()
 	//slog.Info("Encoding element...", "function", "encodeInternalNodeElement", "at", "InternalNodeCodec")
 	b := make([]byte, 0)
 
@@ -131,7 +173,7 @@ func (codec InternalNodeCodec) FindNextChildNodePageId(page []byte, key []byte) 
 // InsertElement is used to insert a key value pair in a page
 func (codec InternalNodeCodec) InsertElement(page []byte, key []byte, leftChildNodePageId uint64, rightChildNodePageId uint64) bool {
 
-	fmt.Println()
+	//fmt.Println()
 	slog.Info("Inserting element in page...", "key", string(key), "left_child_node_page_ID", leftChildNodePageId, "right_child_node_page_ID", rightChildNodePageId, "function", "InsertElement", "at", "InternalNodeCodec")
 	defer codec.headerCodec.updateCRC(page)
 
@@ -153,7 +195,7 @@ func (codec InternalNodeCodec) InsertElement(page []byte, key []byte, leftChildN
 	// check if free space region has enough space to accomodate new element
 	if !codec.headerCodec.isAdequate(page, elementSpaceRequired+slotSpaceRequired) {
 
-		slog.Info("Not enough space in free space region", "function", "InsertElement", "at", "InternalNodeCodec")
+		//slog.Info("Not enough space in free space region", "function", "InsertElement", "at", "InternalNodeCodec")
 		//slog.Info("checking if compaction will help...", "function", "InsertElement", "at", "InternalNodeCodec")
 		// if free space is not adequate, check if performing compaction will help
 		if !codec.headerCodec.shouldCompact(page, elementSpaceRequired+slotSpaceRequired) {
@@ -226,8 +268,8 @@ func (codec InternalNodeCodec) getAllSlotsAndElements(page []byte) ([]Slot, []In
 	return slots, elements
 }
 
-// putAllSlotsAndElements inserts slots and elements into the page, assuming it to be empty
-func (codec InternalNodeCodec) putAllSlotsAndElements(page []byte, slots []Slot, elements []InternalNodeElement) {
+// PutAllSlotsAndElements inserts slots and elements into the page, assuming it to be empty
+func (codec InternalNodeCodec) PutAllSlotsAndElements(page []byte, slots []Slot, elements []InternalNodeElement) {
 
 	freeSpaceBegin := uint16(codec.headerCodec.getHeaderSize())
 	freeSpaceEnd := uint16(4096)
@@ -271,25 +313,50 @@ func (codec InternalNodeCodec) DeleteElement(page []byte, key []byte) bool {
 	return true
 }
 
+func (codec InternalNodeCodec) SetLSN(page []byte, LSN uint64) {
+
+	headerBytes := page[:codec.headerCodec.getHeaderSize()]
+
+	codec.headerCodec.setLSN(headerBytes, LSN)
+}
+
+func (codec InternalNodeCodec) GetLSN(page []byte) (LSN uint64) {
+
+	headerBytes := page[:codec.headerCodec.getHeaderSize()]
+
+	return codec.headerCodec.getLSN(headerBytes)
+}
+
+func (codec InternalNodeCodec) HasEnoughSpaceToInsertElement(page []byte, key []byte) bool {
+
+	totalSpaceRequired := 2 + len(key) + 8 + 8
+
+	if !codec.headerCodec.isAdequate(page, totalSpaceRequired) {
+
+		// if space is not enough, check if performing compaction will free up enough space to insert the element.
+		if !codec.headerCodec.shouldCompact(page, totalSpaceRequired) {
+
+			// if even compaction won't free up enough space to insert the new element, return false.
+			return false
+		} else {
+			codec.compact(page)
+			return true
+		}
+	}
+	return true
+}
+
 // compact is used to remove all garbage that results from performing delete/update operations on the page
 func (codec InternalNodeCodec) compact(page []byte) {
 
 	slots, elements := codec.getAllSlotsAndElements(page)
 
-	codec.putAllSlotsAndElements(page, slots, elements)
+	codec.PutAllSlotsAndElements(page, slots, elements)
 }
 
-func (codec InternalNodeCodec) SplitNode(leftNode []byte, rightNode []byte, rightNodePageId uint64) (extraKey []byte) {
+func (codec InternalNodeCodec) FindSplitNodeIndex(leftNode []byte) int {
 
-	defer codec.headerCodec.updateCRC(leftNode)
-	defer codec.headerCodec.updateCRC(rightNode)
-
-	leftNodeHeaderBytes := leftNode[:codec.headerCodec.getHeaderSize()]
-	leftNodeHeader := codec.headerCodec.decodePageHeader(leftNodeHeaderBytes)
-
-	rightNodeHeaderBytes := rightNode[:codec.headerCodec.getHeaderSize()]
-
-	slots, elements := codec.getAllSlotsAndElements(leftNode)
+	slots, _ := codec.getAllSlotsAndElements(leftNode)
 
 	totalDataRegionSize := codec.headerCodec.getTotalDataRegionSize(slots)
 
@@ -302,16 +369,32 @@ func (codec InternalNodeCodec) SplitNode(leftNode []byte, rightNode []byte, righ
 		index++
 	}
 
-	leftSlots := slots[:index]
-	leftElements := elements[:index]
+	return index
 
-	rightSlots := slots[index:]
-	rightElements := elements[index:]
+}
 
-	extraKey = elements[index].Key
+func (codec InternalNodeCodec) SplitNode(leftNode []byte, rightNode []byte, rightNodePageId uint64, splitIndex int) (extraKey []byte) {
 
-	codec.putAllSlotsAndElements(leftNode, leftSlots, leftElements)
-	codec.putAllSlotsAndElements(rightNode, rightSlots, rightElements)
+	defer codec.headerCodec.updateCRC(leftNode)
+	defer codec.headerCodec.updateCRC(rightNode)
+
+	leftNodeHeaderBytes := leftNode[:codec.headerCodec.getHeaderSize()]
+	leftNodeHeader := codec.headerCodec.decodePageHeader(leftNodeHeaderBytes)
+
+	rightNodeHeaderBytes := rightNode[:codec.headerCodec.getHeaderSize()]
+
+	slots, elements := codec.getAllSlotsAndElements(leftNode)
+
+	leftSlots := slots[:splitIndex]
+	leftElements := elements[:splitIndex]
+
+	rightSlots := slots[splitIndex+1:]
+	rightElements := elements[splitIndex+1:]
+
+	extraKey = elements[splitIndex].Key
+
+	codec.PutAllSlotsAndElements(leftNode, leftSlots, leftElements)
+	codec.PutAllSlotsAndElements(rightNode, rightSlots, rightElements)
 
 	codec.headerCodec.setNextLeafNodePageId(rightNodeHeaderBytes, leftNodeHeader.nextLeafNodePageId)
 	codec.headerCodec.setNextLeafNodePageId(leftNodeHeaderBytes, rightNodePageId)
@@ -367,7 +450,7 @@ func (codec InternalNodeCodec) calculateElementSize(element InternalNodeElement)
 func (codec InternalNodeCodec) InsertSlot(page []byte, newSlot Slot, key []byte, leftChildNodePageId uint64, rightChildNodePageId uint64) (updatedFreeSpaceBegin uint16) {
 
 	fmt.Println()
-	slog.Info("Inserting slot into page...", "function", "InsertSlot", "at", "SlotCodec")
+	//slog.Info("Inserting slot into page...", "function", "InsertSlot", "at", "SlotCodec")
 	// initialize pointer to beginning of slot region
 	pointer := codec.headerCodec.config.headerSize
 
@@ -470,7 +553,7 @@ func (codec InternalNodeCodec) PrintElements(page []byte) {
 
 func (codec InternalNodeCodec) appendElement(page []byte, freeSpaceEnd uint16, element InternalNodeElement) (updatedFreeSpaceEnd uint16) {
 	fmt.Println()
-	slog.Info("Appending element to page", "key", string(element.Key), "leftChildNodePageId", element.LeftChildNodePageId, "rightChildNodePageId", element.RightChildNodePageId, "function", "appendElement", "at", "SlottedPageCodec")
+	//slog.Info("Appending element to page", "key", string(element.Key), "leftChildNodePageId", element.LeftChildNodePageId, "rightChildNodePageId", element.RightChildNodePageId, "function", "appendElement", "at", "SlottedPageCodec")
 	elementBytes := codec.encodeElement(element)
 
 	copy(page[int(freeSpaceEnd)-len(elementBytes):], elementBytes)
@@ -536,7 +619,7 @@ func (codec InternalNodeCodec) appendAllSlotsAndElements(page []byte, slots []Sl
 // 		rightElements = siblingElements
 // 	}
 
-// 	codec.putAllSlotsAndElements(underflowNode, leftSlots, leftElements)
+// 	codec.PutAllSlotsAndElements(underflowNode, leftSlots, leftElements)
 
 // 	headerBytes := underflowNode[:codec.headerCodec.getHeaderSize()]
 

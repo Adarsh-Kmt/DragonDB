@@ -8,9 +8,14 @@ import (
 	"golang.org/x/sys/unix"
 )
 
+type AllocationSource byte
+
 const (
-	PAGE_SIZE        = 4096
-	METADATA_PAGE_ID = 0
+	PAGE_SIZE                 = 4096
+	METADATA_PAGE_ID          = 0
+	FREELIST_ALLOCATION       = AllocationSource(byte(0))
+	FILE_EXPANSION_ALLOCATION = AllocationSource(byte(1))
+	ERROR_ALLOCATION          = AllocationSource(byte(2))
 )
 
 type FrameID int
@@ -20,7 +25,9 @@ type BufferPoolManager interface {
 	// public methods
 
 	// NewPage allocates a new page in the file and returns its page ID.
-	NewPage() (uint64, error)
+	NewPage() (uint64, AllocationSource, error)
+
+	EnsurePageExists(pageId uint64) error
 
 	// If page is allocated in the file, but guard couldn't be acquired, then the allocated page must be added to the deallocatedPageId list.
 	CleanupPage(pageID uint64)
@@ -36,7 +43,7 @@ type BufferPoolManager interface {
 	// private methods
 
 	// flushAllPages writes all dirty pages currently in the buffer pool to disk.
-	flushAllPages() error
+	FlushAllPages() error
 
 	// fetchPage loads a page with the given page ID into the buffer pool,
 	// returning the corresponding frame. If the page is already in memory,
@@ -159,9 +166,13 @@ func (bufferPool *SimpleBufferPoolManager) PrintAllPages() {
 }
 
 // NewPage is a thread-safe function that allocates a new page in the file, and returns its page ID.
-func (bufferPool *SimpleBufferPoolManager) NewPage() (uint64, error) {
+func (bufferPool *SimpleBufferPoolManager) NewPage() (uint64, AllocationSource, error) {
 
 	return bufferPool.disk.allocatePage()
+}
+
+func (bufferPool *SimpleBufferPoolManager) EnsurePageExists(pageId uint64) error {
+	return bufferPool.disk.EnsurePageExists(pageId)
 }
 
 // If page is allocated in the file, but guard couldn't be acquired, then the allocated page must be added to the deallocatedPageId list.
@@ -176,12 +187,12 @@ func (bufferPool *SimpleBufferPoolManager) CleanupPage(pageID uint64) {
 func (bufferPool *SimpleBufferPoolManager) fetchPage(pageId uint64) (*Frame, error) {
 
 	bufferPool.lookupMutex.RLock()
-	slog.Info(fmt.Sprintf("fetching page %d", pageId), "function", "fetchPage", "at", "buffer Pool Manager")
-	slog.Info(fmt.Sprintf("page table => %v", bufferPool.pageTable), "function", "fetchPage", "at", "buffer Pool Manager")
+	//slog.Info(fmt.Sprintf("fetching page %d", pageId), "function", "fetchPage", "at", "buffer Pool Manager")
+	//slog.Info(fmt.Sprintf("page table => %v", bufferPool.pageTable), "function", "fetchPage", "at", "buffer Pool Manager")
 	frameId, exists := bufferPool.pageTable[pageId]
 	if exists {
 
-		slog.Info(fmt.Sprintf("page %d found in memory", pageId), "function", "fetchPage", "at", "buffer Pool Manager")
+		//slog.Info(fmt.Sprintf("page %d found in memory", pageId), "function", "fetchPage", "at", "buffer Pool Manager")
 		frame := bufferPool.frames[frameId]
 
 		frame.pinCountMutex.Lock()
@@ -227,7 +238,7 @@ func (bufferPool *SimpleBufferPoolManager) fetchPage(pageId uint64) (*Frame, err
 	data, err := bufferPool.disk.read(int64(pageId)*int64(bufferPool.pageSize), bufferPool.pageSize)
 
 	if err != nil {
-		slog.Error("Failed to read page from disk", "pageId", pageId, "error", err.Error(), "function", "fetchPage", "at", "buffer Pool Manager")
+		//slog.Error("Failed to read page from disk", "pageId", pageId, "error", err.Error(), "function", "fetchPage", "at", "buffer Pool Manager")
 		return nil, err
 	}
 
@@ -238,11 +249,11 @@ func (bufferPool *SimpleBufferPoolManager) fetchPage(pageId uint64) (*Frame, err
 
 		newFrameId = bufferPool.freeFrames[0]
 
-		slog.Info(fmt.Sprintf("free frame chosen => %d", newFrameId), "function", "fetchPage", "at", "buffer Pool Manager")
+		//slog.Info(fmt.Sprintf("free frame chosen => %d", newFrameId), "function", "fetchPage", "at", "buffer Pool Manager")
 
 		bufferPool.freeFrames = bufferPool.freeFrames[1:]
 
-		slog.Info(fmt.Sprintf("free frame list => %v", bufferPool.freeFrames), "function", "fetchPage", "at", "buffer Pool Manager")
+		//slog.Info(fmt.Sprintf("free frame list => %v", bufferPool.freeFrames), "function", "fetchPage", "at", "buffer Pool Manager")
 	} else {
 		newFrameId = bufferPool.replacer.victim()
 
@@ -355,7 +366,7 @@ func (bufferPool *SimpleBufferPoolManager) unpinPage(pageId uint64) bool {
 }
 
 // flushAllPages is used to write all dirty pages to disk, currently used during database shutdown.
-func (bufferPool *SimpleBufferPoolManager) flushAllPages() error {
+func (bufferPool *SimpleBufferPoolManager) FlushAllPages() error {
 
 	bufferPool.lookupMutex.RLock()
 	defer bufferPool.lookupMutex.RUnlock()
@@ -378,7 +389,7 @@ func (bufferPool *SimpleBufferPoolManager) flushAllPages() error {
 // Close must be executed to ensure correct shutdown of buffer pool manager.
 func (bufferPool *SimpleBufferPoolManager) Close() error {
 
-	if err := bufferPool.flushAllPages(); err != nil {
+	if err := bufferPool.FlushAllPages(); err != nil {
 		return err
 	}
 

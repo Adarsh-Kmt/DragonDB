@@ -2,7 +2,6 @@ package bufferpoolmanager
 
 import (
 	"container/list"
-	"log/slog"
 	"sync"
 )
 
@@ -36,7 +35,7 @@ type LRUReplacer struct {
 
 func NewLRUReplacer() *LRUReplacer {
 
-	slog.Info("Creating new LRUReplacer...", "function", "NewLRUReplacer", "at", "LRUReplacer")
+	//slog.Info("Creating new LRUReplacer...", "function", "NewLRUReplacer", "at", "LRUReplacer")
 	return &LRUReplacer{
 		list:     list.New(),
 		frameMap: make(map[FrameID]*list.Element),
@@ -54,14 +53,14 @@ func (replacer *LRUReplacer) victim() FrameID {
 	frameId := FrameID(replacer.list.Remove(frameElement).(FrameID))
 
 	delete(replacer.frameMap, frameId)
-	slog.Info("Selecting victim frame...", "victim_frame", frameId, "function", "victim", "at", "LRUReplacer")
+	//slog.Info("Selecting victim frame...", "victim_frame", frameId, "function", "victim", "at", "LRUReplacer")
 	return frameId
 }
 
 // inserts the frame ID at the front of the list, it becomes the most recently accessed frame.
 func (replacer *LRUReplacer) insert(frameId FrameID) {
 
-	slog.Info("Inserting frame into LRUReplacer...", "frame_ID", frameId, "function", "insert", "at", "LRUReplacer")
+	//slog.Info("Inserting frame into LRUReplacer...", "frame_ID", frameId, "function", "insert", "at", "LRUReplacer")
 	replacer.mutex.Lock()
 	defer replacer.mutex.Unlock()
 
@@ -72,7 +71,7 @@ func (replacer *LRUReplacer) insert(frameId FrameID) {
 // removes frame from the list once its pin count > 0.
 func (replacer *LRUReplacer) remove(frameId FrameID) {
 
-	slog.Info("Removing frame from LRUReplacer...", "frame_ID", frameId, "function", "remove", "at", "LRUReplacer")
+	//slog.Info("Removing frame from LRUReplacer...", "frame_ID", frameId, "function", "remove", "at", "LRUReplacer")
 	replacer.mutex.Lock()
 	defer replacer.mutex.Unlock()
 

@@ -21,6 +21,8 @@ type Header struct {
 	freeSpaceEnd       uint16
 	garbageSize        uint16
 	nextLeafNodePageId uint64
+
+	LSN uint64
 }
 
 type HeaderConfig struct {
@@ -34,6 +36,7 @@ type HeaderConfig struct {
 	freeSpaceBeginOffset     int
 	freeSpaceEndOffset       int
 	nextLeafNodePageIdOffset int
+	LSNOffset                int
 
 	// constants
 	headerSize       int
@@ -54,8 +57,9 @@ func defaultHeaderConfig() HeaderConfig {
 		freeSpaceEndOffset:       10,
 		garbageSizeOffset:        12,
 		nextLeafNodePageIdOffset: 16,
+		LSNOffset:                24,
 
-		headerSize:       24,
+		headerSize:       32,
 		pageFilledType:   byte(1),
 		pageEmptyType:    byte(0),
 		leafNodeType:     byte(0),
@@ -86,9 +90,9 @@ func (codec HeaderCodec) getInternalNodeType() uint8 {
 // decodePageHeader takes a slice of bytes representing a slotted page header, and returns a deserialized header object
 func (codec HeaderCodec) decodePageHeader(headerBytes []byte) *Header {
 
-	fmt.Println()
+	// fmt.Println()
 
-	slog.Info("Decoding page header...", "function", "decodePageHeader", "at", "HeaderCodec")
+	// slog.Info("Decoding page header...", "function", "decodePageHeader", "at", "HeaderCodec")
 	h := &Header{}
 
 	if headerBytes[codec.config.isPageFilledOffset] == codec.config.pageEmptyType {
@@ -100,7 +104,7 @@ func (codec HeaderCodec) decodePageHeader(headerBytes []byte) *Header {
 		h.isLeafNode = true // Default to leaf node type for empty pages
 		h.crc = 0
 
-		slog.Info("Decoded page header", "is leaf node", h.isLeafNode, "number of slots", h.numSlots, "free space begin", h.freeSpaceBegin, "free space end", h.freeSpaceEnd, "garbage size", h.garbageSize, "function", "decodePageHeader", "at", "HeaderCodec") // CRC is zero for empty pages
+		//slog.Info("Decoded page header", "is leaf node", h.isLeafNode, "number of slots", h.numSlots, "free space begin", h.freeSpaceBegin, "free space end", h.freeSpaceEnd, "garbage size", h.garbageSize, "function", "decodePageHeader", "at", "HeaderCodec") // CRC is zero for empty pages
 		return h
 	}
 	h.crc = binary.LittleEndian.Uint32(headerBytes[codec.config.crcOffset:])
@@ -117,7 +121,7 @@ func (codec HeaderCodec) decodePageHeader(headerBytes []byte) *Header {
 	h.garbageSize = binary.LittleEndian.Uint16(headerBytes[codec.config.garbageSizeOffset:])
 	h.nextLeafNodePageId = binary.LittleEndian.Uint64(headerBytes[codec.config.nextLeafNodePageIdOffset:])
 
-	slog.Info("Decoded Page Header", "is leaf node", h.isLeafNode, "number of slots", h.numSlots, "free space begin", h.freeSpaceBegin, "free space end", h.freeSpaceEnd, "garbage size", h.garbageSize, "function", "decodePageHeader", "at", "HeaderCodec")
+	//slog.Info("Decoded Page Header", "is leaf node", h.isLeafNode, "number of slots", h.numSlots, "free space begin", h.freeSpaceBegin, "free space end", h.freeSpaceEnd, "garbage size", h.garbageSize, "function", "decodePageHeader", "at", "HeaderCodec")
 	return h
 
 }
@@ -189,6 +193,19 @@ func (codec HeaderCodec) setFreeSpaceEnd(headerBytes []byte, freeSpaceEnd uint16
 func (codec HeaderCodec) setNextLeafNodePageId(headerBytes []byte, nextLeafNodePageId uint64) {
 
 	binary.LittleEndian.PutUint64(headerBytes[codec.config.nextLeafNodePageIdOffset:], nextLeafNodePageId)
+}
+
+func (codec HeaderCodec) getNextLeafNodePageId(headerBytes []byte) (nextLeafNodePageId uint64) {
+
+	return binary.LittleEndian.Uint64(headerBytes[codec.config.nextLeafNodePageIdOffset:])
+}
+
+func (codec HeaderCodec) setLSN(headerBytes []byte, LSN uint64) {
+	binary.LittleEndian.PutUint64(headerBytes[codec.config.LSNOffset:], LSN)
+}
+
+func (codec HeaderCodec) getLSN(headerBytes []byte) (LSN uint64) {
+	return binary.LittleEndian.Uint64(headerBytes[codec.config.LSNOffset:])
 }
 
 func generateCRC(data []byte) uint32 {

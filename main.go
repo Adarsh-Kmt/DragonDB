@@ -3,7 +3,8 @@ package main
 import (
 	bplustree "github.com/Adarsh-Kmt/DragonDB/bplustree"
 	bpm "github.com/Adarsh-Kmt/DragonDB/bufferpoolmanager"
-	"github.com/Adarsh-Kmt/DragonDB/server"
+	server "github.com/Adarsh-Kmt/DragonDB/server"
+	lucario "github.com/Adarsh-Kmt/Lucario"
 )
 
 func main() {
@@ -21,7 +22,12 @@ func main() {
 		panic(err)
 	}
 
-	btree := bplustree.NewBPlusTree(0, bufferPoolManager, metadata)
+	wal, err := lucario.NewWAL("./lucario.wal")
+	if err != nil {
+		panic(err)
+	}
+
+	btree := bplustree.NewBPlusTree(0, bufferPoolManager, metadata, wal)
 
 	server, err := server.NewServer(":8080", btree)
 

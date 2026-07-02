@@ -2,8 +2,6 @@ package pagecodec
 
 import (
 	"encoding/binary"
-	"fmt"
-	"log/slog"
 )
 
 type SlotCodec struct {
@@ -54,22 +52,22 @@ func (codec SlotCodec) getDeletedElementPointerVal() uint16 {
 // decodeSlot takes a slice of bytes representing a slot, and returns a decoded slot struct
 func (codec SlotCodec) decodeSlot(slotBytes []byte) Slot {
 
-	fmt.Println()
-	slog.Info("Decoding slot...", "function", "decodeSlot", "at", "SlotCodec")
+	// fmt.Println()
+	// slog.Info("Decoding slot...", "function", "decodeSlot", "at", "SlotCodec")
 	s := Slot{}
 
 	s.elementSize = binary.LittleEndian.Uint16(slotBytes[codec.config.elementSizeOffset:])
 	s.elementPointer = binary.LittleEndian.Uint16(slotBytes[codec.config.elementPointerOffset:])
 
-	slog.Info("Decoded slot", "elementSize", s.elementSize, "elementPointer", s.elementPointer, "function", "decodeSlot", "at", "SlotCodec")
+	//slog.Info("Decoded slot", "elementSize", s.elementSize, "elementPointer", s.elementPointer, "function", "decodeSlot", "at", "SlotCodec")
 	return s
 }
 
 // encodeSlot takes a slot struct and returns an encoded slice of bytes representing this slot
 func (codec SlotCodec) encodeSlot(slot Slot) []byte {
 
-	fmt.Println()
-	slog.Info("Encoding slot...", "function", "encodeSlot", "at", "SlotCodec")
+	// fmt.Println()
+	// slog.Info("Encoding slot...", "function", "encodeSlot", "at", "SlotCodec")
 	b := make([]byte, 0)
 
 	b = binary.LittleEndian.AppendUint16(b, slot.elementSize)
@@ -98,8 +96,8 @@ func (codec SlotCodec) isElementDeleted(slot Slot) bool {
 // appendSlot is used to insert a slot at a particular offset in the page
 func (codec SlotCodec) appendSlot(page []byte, freeSpaceBegin uint16, slot Slot) (updatedFreeSpaceBegin uint16) {
 
-	fmt.Println()
-	slog.Info("Appending slot to page...", "function", "appendSlot", "at", "SlotCodec")
+	// fmt.Println()
+	// slog.Info("Appending slot to page...", "function", "appendSlot", "at", "SlotCodec")
 	slotBytes := codec.encodeSlot(slot)
 	copy(page[freeSpaceBegin:], slotBytes)
 

@@ -57,6 +57,48 @@ func (codec LeafNodeCodec) decodeElement(elementBytes []byte) LeafNodeElement {
 
 }
 
+func (codec LeafNodeCodec) EncodeAllElements(page []byte) (elementListLength int, payload []byte) {
+
+	_, elements := codec.getAllSlotsAndElements(page)
+
+	data := make([]byte, 0)
+
+	for i := range elements {
+
+		elementBytes := codec.encodeElement(elements[i])
+		data = binary.LittleEndian.AppendUint16(data, uint16(len(elementBytes)))
+		data = append(data, elementBytes...)
+	}
+
+	finalPayload := make([]byte, 0)
+	finalPayload = binary.LittleEndian.AppendUint16(finalPayload, uint16(len(elements)))
+	finalPayload = append(finalPayload, data...)
+
+	return len(elements), finalPayload
+}
+
+func (codec LeafNodeCodec) DecodeAllSlotsAndElements(payload []byte) ([]Slot, []LeafNodeElement) {
+
+	elementList := make([]LeafNodeElement, 0)
+	slotList := make([]Slot, 0)
+
+	pointer := 0
+	elementListSize := int(binary.LittleEndian.Uint16(payload[pointer:]))
+	pointer += 2
+	for range elementListSize {
+
+		elementSize := binary.LittleEndian.Uint16(payload[pointer:])
+		pointer += 2 // Skip the 2-byte size field
+
+		slotList = append(slotList, Slot{elementSize: elementSize})
+		elementBytes := payload[pointer : pointer+int(elementSize)]
+		elementList = append(elementList, codec.decodeElement(elementBytes))
+
+		pointer += int(elementSize)
+	}
+	return slotList, elementList
+}
+
 // encodeSlot takes an element struct and returns an encoded slice of bytes representing this element
 func (codec LeafNodeCodec) encodeElement(element LeafNodeElement) []byte {
 
@@ -73,6 +115,18 @@ func (codec LeafNodeCodec) encodeElement(element LeafNodeElement) []byte {
 	b = append(b, element.Value...)
 
 	return b
+}
+
+func (codec LeafNodeCodec) SetNextLeafNodePageId(page []byte, nextLeafNodePageId uint64) {
+
+	headerBytes := page[:codec.headerCodec.getHeaderSize()]
+	codec.headerCodec.setNextLeafNodePageId(headerBytes, nextLeafNodePageId)
+}
+
+func (codec LeafNodeCodec) GetNextLeafNodePageId(page []byte) (nextLeafNodePageId uint64) {
+
+	headerBytes := page[:codec.headerCodec.getHeaderSize()]
+	return codec.headerCodec.getNextLeafNodePageId(headerBytes)
 }
 
 func (codec LeafNodeCodec) SetNodeType(page []byte) {
@@ -116,8 +170,50 @@ func (codec LeafNodeCodec) FindValue(page []byte, key []byte) (value []byte, fou
 
 	return nil, false
 }
+func (codec LeafNodeCodec) SetLSN(page []byte, LSN uint64) {
 
-func (codec LeafNodeCodec) SetValue(page []byte, key []byte, value []byte) bool {
+	headerBytes := page[:codec.headerCodec.getHeaderSize()]
+
+	codec.headerCodec.setLSN(headerBytes, LSN)
+}
+
+func (codec LeafNodeCodec) GetLSN(page []byte) (LSN uint64) {
+
+	headerBytes := page[:codec.headerCodec.getHeaderSize()]
+
+	return codec.headerCodec.getLSN(headerBytes)
+}
+
+func (codec LeafNodeCodec) HasEnoughSpaceToUpdateValue(page []byte, key []byte, oldValue []byte, newValue []byte) bool {
+
+	if len(oldValue) >= len(newValue) {
+		return true
+	}
+
+	return codec.HasEnoughSpaceToInsertElement(page, key, newValue)
+}
+
+func (codec LeafNodeCodec) HasEnoughSpaceToInsertElement(page []byte, key []byte, value []byte) bool {
+
+	totalSpaceRequired := 2 + len(key) + 2 + len(value)
+
+	if !codec.headerCodec.isAdequate(page, totalSpaceRequired) {
+
+		// if space is not enough, check if performing compaction will free up enough space to insert the element.
+		if !codec.headerCodec.shouldCompact(page, totalSpaceRequired) {
+
+			// if even compaction won't free up enough space to insert the new element, return false.
+			return false
+		} else {
+			codec.compact(page)
+			return true
+		}
+	}
+	return true
+}
+
+func (codec LeafNodeCodec) SetValue(page []byte, key []byte, value []byte) {
+
 	defer codec.headerCodec.updateCRC(page)
 
 	// search for slot, element corresponding to key
@@ -132,66 +228,111 @@ func (codec LeafNodeCodec) SetValue(page []byte, key []byte, value []byte) bool 
 	// decode header
 	header := codec.headerCodec.decodePageHeader(headerBytes)
 
-	// calculate space required to store element
-	elementSpaceRequired := 2 + len(key) + 2 + len(value)
-
-	// if size(current_element_value) >= size(new_element_value)
 	if len(oldElement.Value) >= len(value) {
 
-		// update value in place
 		codec.setValueInElement(elementBytes, value)
-
-		// update garbage size field in the header region
 		codec.headerCodec.setGarbageSize(headerBytes, header.garbageSize+uint16(len(oldElement.Value)-len(value)))
-
-	} else {
-
-		// this block is executed if size(current_element_value) < size(new_element_value)
-		// in this case, a new element must be inserted into the free space region
-
-		// check if free space region has enough space to accomodate new element.
-		if !codec.headerCodec.isAdequate(page, elementSpaceRequired) {
-
-			// if space is not enough, check if performing compaction will free up enough space to insert the element.
-			if !codec.headerCodec.shouldCompact(page, elementSpaceRequired) {
-
-				// if even compaction won't free up enough space to insert the new element, return false.
-				return false
-			} else {
-
-				// if compaction is useful, perform compaction first before inserting the new element.
-				codec.compact(page)
-
-				// update the header after compaction
-				headerBytes = page[:codec.headerCodec.getHeaderSize()]
-				header = codec.headerCodec.decodePageHeader(headerBytes)
-			}
-		}
-
-		// create element
-		newElement := LeafNodeElement{
-			Key:   key,
-			Value: value,
-		}
-
-		// append value to end of free space region
-		header.freeSpaceEnd = codec.appendElement(page, header.freeSpaceEnd, newElement)
-
-		// update free space end value
-		codec.headerCodec.setFreeSpaceEnd(headerBytes, header.freeSpaceEnd)
-
-		// update element pointer field in existing slot
-		codec.slotCodec.setElementPointer(slotBytes, header.freeSpaceEnd)
-
-		// update element size field in existing slot
-		codec.slotCodec.setElementSize(slotBytes, codec.calculateElementSize(newElement))
-
-		// update garbage size field in header region
-		codec.headerCodec.setGarbageSize(headerBytes, header.garbageSize+codec.calculateElementSize(oldElement))
-
+		return
 	}
-	return true
+
+	// create element
+	newElement := LeafNodeElement{
+		Key:   key,
+		Value: value,
+	}
+
+	// append value to end of free space region
+	header.freeSpaceEnd = codec.appendElement(page, header.freeSpaceEnd, newElement)
+
+	// update free space end value
+	codec.headerCodec.setFreeSpaceEnd(headerBytes, header.freeSpaceEnd)
+
+	// update element pointer field in existing slot
+	codec.slotCodec.setElementPointer(slotBytes, header.freeSpaceEnd)
+
+	// update element size field in existing slot
+	codec.slotCodec.setElementSize(slotBytes, codec.calculateElementSize(newElement))
+
+	// update garbage size field in header region
+	codec.headerCodec.setGarbageSize(headerBytes, header.garbageSize+codec.calculateElementSize(oldElement))
+
 }
+
+// func (codec LeafNodeCodec) SetValue(page []byte, key []byte, value []byte) bool {
+// 	defer codec.headerCodec.updateCRC(page)
+
+// 	// search for slot, element corresponding to key
+// 	slotBytes, elementBytes, _ := codec.linearSearch(page, key)
+
+// 	// decode existing element
+// 	oldElement := codec.decodeElement(elementBytes)
+
+// 	// extract header bytes from page
+// 	headerBytes := page[:codec.headerCodec.getHeaderSize()]
+
+// 	// decode header
+// 	header := codec.headerCodec.decodePageHeader(headerBytes)
+
+// 	// calculate space required to store element
+// 	elementSpaceRequired := 2 + len(key) + 2 + len(value)
+
+// 	// if size(current_element_value) >= size(new_element_value)
+// 	if len(oldElement.Value) >= len(value) {
+
+// 		// update value in place
+// 		codec.setValueInElement(elementBytes, value)
+
+// 		// update garbage size field in the header region
+// 		codec.headerCodec.setGarbageSize(headerBytes, header.garbageSize+uint16(len(oldElement.Value)-len(value)))
+
+// 	} else {
+
+// 		// this block is executed if size(current_element_value) < size(new_element_value)
+// 		// in this case, a new element must be inserted into the free space region
+
+// 		// check if free space region has enough space to accomodate new element.
+// 		if !codec.headerCodec.isAdequate(page, elementSpaceRequired) {
+
+// 			// if space is not enough, check if performing compaction will free up enough space to insert the element.
+// 			if !codec.headerCodec.shouldCompact(page, elementSpaceRequired) {
+
+// 				// if even compaction won't free up enough space to insert the new element, return false.
+// 				return false
+// 			} else {
+
+// 				// if compaction is useful, perform compaction first before inserting the new element.
+// 				codec.compact(page)
+
+// 				// update the header after compaction
+// 				headerBytes = page[:codec.headerCodec.getHeaderSize()]
+// 				header = codec.headerCodec.decodePageHeader(headerBytes)
+// 			}
+// 		}
+
+// 		// create element
+// 		newElement := LeafNodeElement{
+// 			Key:   key,
+// 			Value: value,
+// 		}
+
+// 		// append value to end of free space region
+// 		header.freeSpaceEnd = codec.appendElement(page, header.freeSpaceEnd, newElement)
+
+// 		// update free space end value
+// 		codec.headerCodec.setFreeSpaceEnd(headerBytes, header.freeSpaceEnd)
+
+// 		// update element pointer field in existing slot
+// 		codec.slotCodec.setElementPointer(slotBytes, header.freeSpaceEnd)
+
+// 		// update element size field in existing slot
+// 		codec.slotCodec.setElementSize(slotBytes, codec.calculateElementSize(newElement))
+
+// 		// update garbage size field in header region
+// 		codec.headerCodec.setGarbageSize(headerBytes, header.garbageSize+codec.calculateElementSize(oldElement))
+
+// 	}
+// 	return true
+// }
 
 // InsertElement is used to insert a key value pair in a page
 func (codec LeafNodeCodec) InsertElement(page []byte, key []byte, value []byte) bool {
@@ -296,7 +437,7 @@ func (codec LeafNodeCodec) getAllSlotsAndElements(page []byte) ([]Slot, []LeafNo
 }
 
 // putAllSlotsAndElements inserts slots and elements into the page, assuming it to be empty
-func (codec LeafNodeCodec) putAllSlotsAndElements(page []byte, slots []Slot, elements []LeafNodeElement) {
+func (codec LeafNodeCodec) PutAllSlotsAndElements(page []byte, slots []Slot, elements []LeafNodeElement) {
 
 	freeSpaceBegin := uint16(codec.headerCodec.getHeaderSize())
 	freeSpaceEnd := uint16(4096)
@@ -346,20 +487,12 @@ func (codec LeafNodeCodec) compact(page []byte) {
 
 	slots, elements := codec.getAllSlotsAndElements(page)
 
-	codec.putAllSlotsAndElements(page, slots, elements)
+	codec.PutAllSlotsAndElements(page, slots, elements)
 }
 
-func (codec LeafNodeCodec) SplitNode(leftNode []byte, rightNode []byte, rightNodePageId uint64) (extraKey []byte) {
+func (codec LeafNodeCodec) FindSplitNodeIndex(leftNode []byte) int {
 
-	defer codec.headerCodec.updateCRC(leftNode)
-	defer codec.headerCodec.updateCRC(rightNode)
-
-	leftNodeHeaderBytes := leftNode[:codec.headerCodec.getHeaderSize()]
-	leftNodeHeader := codec.headerCodec.decodePageHeader(leftNodeHeaderBytes)
-
-	rightNodeHeaderBytes := rightNode[:codec.headerCodec.getHeaderSize()]
-
-	slots, elements := codec.getAllSlotsAndElements(leftNode)
+	slots, _ := codec.getAllSlotsAndElements(leftNode)
 
 	totalDataRegionSize := codec.headerCodec.getTotalDataRegionSize(slots)
 
@@ -371,19 +504,34 @@ func (codec LeafNodeCodec) SplitNode(leftNode []byte, rightNode []byte, rightNod
 		leftNodeDataRegionSize += slots[index].elementSize
 		index++
 	}
-	slog.Info("!!!!!!!!!!!!!!!")
-	slog.Info("splitting node")
-	leftSlots := slots[:index]
-	leftElements := elements[:index]
-	slog.Info(fmt.Sprintf("elements being moved to left node %d ", len(leftSlots)))
-	rightSlots := slots[index:]
-	rightElements := elements[index:]
 
-	extraKey = elements[index].Key
-	slog.Info("moving elements to left node")
-	codec.putAllSlotsAndElements(leftNode, leftSlots, leftElements)
-	slog.Info("moving elements to right node")
-	codec.putAllSlotsAndElements(rightNode, rightSlots, rightElements)
+	return index
+}
+func (codec LeafNodeCodec) SplitNode(leftNode []byte, rightNode []byte, rightNodePageId uint64, splitIndex int) (extraKey []byte) {
+
+	defer codec.headerCodec.updateCRC(leftNode)
+	defer codec.headerCodec.updateCRC(rightNode)
+
+	leftNodeHeaderBytes := leftNode[:codec.headerCodec.getHeaderSize()]
+	leftNodeHeader := codec.headerCodec.decodePageHeader(leftNodeHeaderBytes)
+
+	rightNodeHeaderBytes := rightNode[:codec.headerCodec.getHeaderSize()]
+
+	slots, elements := codec.getAllSlotsAndElements(leftNode)
+
+	// slog.Info("!!!!!!!!!!!!!!!")
+	// slog.Info("splitting node")
+	leftSlots := slots[:splitIndex]
+	leftElements := elements[:splitIndex]
+	//slog.Info(fmt.Sprintf("elements being moved to left node %d ", len(leftSlots)))
+	rightSlots := slots[splitIndex:]
+	rightElements := elements[splitIndex:]
+
+	extraKey = elements[splitIndex].Key
+	//slog.Info("moving elements to left node")
+	codec.PutAllSlotsAndElements(leftNode, leftSlots, leftElements)
+	//slog.Info("moving elements to right node")
+	codec.PutAllSlotsAndElements(rightNode, rightSlots, rightElements)
 
 	codec.headerCodec.setNextLeafNodePageId(rightNodeHeaderBytes, leftNodeHeader.nextLeafNodePageId)
 	codec.headerCodec.setNextLeafNodePageId(leftNodeHeaderBytes, rightNodePageId)
@@ -438,8 +586,8 @@ func (codec LeafNodeCodec) calculateElementSize(element LeafNodeElement) (size u
 // insertSlot inserts a slot into the slot region while maintaining the sorted nature of the slot region. It also returns the left and right child node page ID of the element after insertion
 func (codec LeafNodeCodec) InsertSlot(page []byte, newSlot Slot, key []byte) (updatedFreeSpaceBegin uint16) {
 
-	fmt.Println()
-	slog.Info("Inserting slot into page...", "function", "InsertSlot", "at", "SlotCodec")
+	//fmt.Println()
+	//slog.Info("Inserting slot into page...", "function", "InsertSlot", "at", "SlotCodec")
 	// initialize pointer to beginning of slot region
 	pointer := codec.headerCodec.config.headerSize
 
@@ -530,8 +678,8 @@ func (codec LeafNodeCodec) PrintElements(page []byte) {
 }
 
 func (codec LeafNodeCodec) appendElement(page []byte, freeSpaceEnd uint16, element LeafNodeElement) (updatedFreeSpaceEnd uint16) {
-	fmt.Println()
-	slog.Info("Appending element to page", "key", string(element.Key), "function", "appendElement", "at", "SlottedPageCodec")
+	//fmt.Println()
+	//slog.Info("Appending element to page", "key", string(element.Key), "function", "appendElement", "at", "SlottedPageCodec")
 	elementBytes := codec.encodeElement(element)
 	// Debug: print elementBytes
 	//fmt.Printf("[DEBUG] elementBytes: %v\n", elementBytes)
@@ -566,14 +714,6 @@ func (codec LeafNodeCodec) appendAllSlotsAndElements(page []byte, slots []Slot, 
 	codec.headerCodec.setGarbageSize(headerBytes, 0)
 	codec.headerCodec.SetIsPageFilled(headerBytes, true)
 
-}
-
-func (codec LeafNodeCodec) GetNextLeafNodePageId(page []byte) uint64 {
-
-	headerBytes := page[:codec.headerCodec.getHeaderSize()]
-
-	header := codec.headerCodec.decodePageHeader(headerBytes)
-	return header.nextLeafNodePageId
 }
 
 func (codec LeafNodeCodec) IsSlotDeleted(page []byte, index int) bool {

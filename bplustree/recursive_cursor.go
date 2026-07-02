@@ -13,6 +13,7 @@ type ReadCursor struct {
 type WriteCursor struct {
 	headerCodec codec.HeaderCodec
 	guard       *bpm.WriteGuard
+	parentGuard *bpm.WriteGuard
 }
 
 func NewWriteCursor(wg *bpm.WriteGuard) *WriteCursor {
@@ -52,6 +53,16 @@ func (cursor *WriteCursor) GetCurrentNodeWriteGuard() *bpm.WriteGuard {
 func (cursor *WriteCursor) SetCurrentNodeWriteGuard(guard *bpm.WriteGuard) {
 
 	cursor.guard = guard
+}
+
+func (cursor *WriteCursor) GetCurrentParentNodeWriteGuard() *bpm.WriteGuard {
+
+	return cursor.parentGuard
+}
+
+func (cursor *WriteCursor) SetCurrentParentNodeWriteGuard(guard *bpm.WriteGuard) {
+
+	cursor.parentGuard = guard
 }
 
 func (cursor *WriteCursor) IsLeafNode() bool {
