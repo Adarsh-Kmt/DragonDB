@@ -228,66 +228,111 @@ func (codec LeafNodeCodec) SetValue(page []byte, key []byte, value []byte) {
 	// decode header
 	header := codec.headerCodec.decodePageHeader(headerBytes)
 
-	// calculate space required to store element
-	elementSpaceRequired := 2 + len(key) + 2 + len(value)
-
-	// if size(current_element_value) >= size(new_element_value)
 	if len(oldElement.Value) >= len(value) {
 
-		// update value in place
 		codec.setValueInElement(elementBytes, value)
-
-		// update garbage size field in the header region
 		codec.headerCodec.setGarbageSize(headerBytes, header.garbageSize+uint16(len(oldElement.Value)-len(value)))
-
-	} else {
-
-		// this block is executed if size(current_element_value) < size(new_element_value)
-		// in this case, a new element must be inserted into the free space region
-
-		// check if free space region has enough space to accomodate new element.
-		if !codec.headerCodec.isAdequate(page, elementSpaceRequired) {
-
-			// if space is not enough, check if performing compaction will free up enough space to insert the element.
-			if !codec.headerCodec.shouldCompact(page, elementSpaceRequired) {
-
-				// if even compaction won't free up enough space to insert the new element, return false.
-				return false
-			} else {
-
-				// if compaction is useful, perform compaction first before inserting the new element.
-				codec.compact(page)
-
-				// update the header after compaction
-				headerBytes = page[:codec.headerCodec.getHeaderSize()]
-				header = codec.headerCodec.decodePageHeader(headerBytes)
-			}
-		}
-
-		// create element
-		newElement := LeafNodeElement{
-			Key:   key,
-			Value: value,
-		}
-
-		// append value to end of free space region
-		header.freeSpaceEnd = codec.appendElement(page, header.freeSpaceEnd, newElement)
-
-		// update free space end value
-		codec.headerCodec.setFreeSpaceEnd(headerBytes, header.freeSpaceEnd)
-
-		// update element pointer field in existing slot
-		codec.slotCodec.setElementPointer(slotBytes, header.freeSpaceEnd)
-
-		// update element size field in existing slot
-		codec.slotCodec.setElementSize(slotBytes, codec.calculateElementSize(newElement))
-
-		// update garbage size field in header region
-		codec.headerCodec.setGarbageSize(headerBytes, header.garbageSize+codec.calculateElementSize(oldElement))
-
+		return
 	}
-	return true
+
+	// create element
+	newElement := LeafNodeElement{
+		Key:   key,
+		Value: value,
+	}
+
+	// append value to end of free space region
+	header.freeSpaceEnd = codec.appendElement(page, header.freeSpaceEnd, newElement)
+
+	// update free space end value
+	codec.headerCodec.setFreeSpaceEnd(headerBytes, header.freeSpaceEnd)
+
+	// update element pointer field in existing slot
+	codec.slotCodec.setElementPointer(slotBytes, header.freeSpaceEnd)
+
+	// update element size field in existing slot
+	codec.slotCodec.setElementSize(slotBytes, codec.calculateElementSize(newElement))
+
+	// update garbage size field in header region
+	codec.headerCodec.setGarbageSize(headerBytes, header.garbageSize+codec.calculateElementSize(oldElement))
+
 }
+
+// func (codec LeafNodeCodec) SetValue(page []byte, key []byte, value []byte) bool {
+// 	defer codec.headerCodec.updateCRC(page)
+
+// 	// search for slot, element corresponding to key
+// 	slotBytes, elementBytes, _ := codec.linearSearch(page, key)
+
+// 	// decode existing element
+// 	oldElement := codec.decodeElement(elementBytes)
+
+// 	// extract header bytes from page
+// 	headerBytes := page[:codec.headerCodec.getHeaderSize()]
+
+// 	// decode header
+// 	header := codec.headerCodec.decodePageHeader(headerBytes)
+
+// 	// calculate space required to store element
+// 	elementSpaceRequired := 2 + len(key) + 2 + len(value)
+
+// 	// if size(current_element_value) >= size(new_element_value)
+// 	if len(oldElement.Value) >= len(value) {
+
+// 		// update value in place
+// 		codec.setValueInElement(elementBytes, value)
+
+// 		// update garbage size field in the header region
+// 		codec.headerCodec.setGarbageSize(headerBytes, header.garbageSize+uint16(len(oldElement.Value)-len(value)))
+
+// 	} else {
+
+// 		// this block is executed if size(current_element_value) < size(new_element_value)
+// 		// in this case, a new element must be inserted into the free space region
+
+// 		// check if free space region has enough space to accomodate new element.
+// 		if !codec.headerCodec.isAdequate(page, elementSpaceRequired) {
+
+// 			// if space is not enough, check if performing compaction will free up enough space to insert the element.
+// 			if !codec.headerCodec.shouldCompact(page, elementSpaceRequired) {
+
+// 				// if even compaction won't free up enough space to insert the new element, return false.
+// 				return false
+// 			} else {
+
+// 				// if compaction is useful, perform compaction first before inserting the new element.
+// 				codec.compact(page)
+
+// 				// update the header after compaction
+// 				headerBytes = page[:codec.headerCodec.getHeaderSize()]
+// 				header = codec.headerCodec.decodePageHeader(headerBytes)
+// 			}
+// 		}
+
+// 		// create element
+// 		newElement := LeafNodeElement{
+// 			Key:   key,
+// 			Value: value,
+// 		}
+
+// 		// append value to end of free space region
+// 		header.freeSpaceEnd = codec.appendElement(page, header.freeSpaceEnd, newElement)
+
+// 		// update free space end value
+// 		codec.headerCodec.setFreeSpaceEnd(headerBytes, header.freeSpaceEnd)
+
+// 		// update element pointer field in existing slot
+// 		codec.slotCodec.setElementPointer(slotBytes, header.freeSpaceEnd)
+
+// 		// update element size field in existing slot
+// 		codec.slotCodec.setElementSize(slotBytes, codec.calculateElementSize(newElement))
+
+// 		// update garbage size field in header region
+// 		codec.headerCodec.setGarbageSize(headerBytes, header.garbageSize+codec.calculateElementSize(oldElement))
+
+// 	}
+// 	return true
+// }
 
 // InsertElement is used to insert a key value pair in a page
 func (codec LeafNodeCodec) InsertElement(page []byte, key []byte, value []byte) bool {
