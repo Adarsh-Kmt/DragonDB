@@ -117,6 +117,18 @@ func (codec LeafNodeCodec) encodeElement(element LeafNodeElement) []byte {
 	return b
 }
 
+func (codec LeafNodeCodec) SetNextLeafNodePageId(page []byte, nextLeafNodePageId uint64) {
+
+	headerBytes := page[:codec.headerCodec.getHeaderSize()]
+	codec.headerCodec.setNextLeafNodePageId(headerBytes, nextLeafNodePageId)
+}
+
+func (codec LeafNodeCodec) GetNextLeafNodePageId(page []byte) (nextLeafNodePageId uint64) {
+
+	headerBytes := page[:codec.headerCodec.getHeaderSize()]
+	return codec.headerCodec.getNextLeafNodePageId(headerBytes)
+}
+
 func (codec LeafNodeCodec) SetNodeType(page []byte) {
 
 	codec.headerCodec.SetNodeType(page[:codec.headerCodec.getHeaderSize()], true)
@@ -158,8 +170,50 @@ func (codec LeafNodeCodec) FindValue(page []byte, key []byte) (value []byte, fou
 
 	return nil, false
 }
+func (codec LeafNodeCodec) SetLSN(page []byte, LSN uint64) {
 
-func (codec LeafNodeCodec) SetValue(page []byte, key []byte, value []byte) bool {
+	headerBytes := page[:codec.headerCodec.getHeaderSize()]
+
+	codec.headerCodec.setLSN(headerBytes, LSN)
+}
+
+func (codec LeafNodeCodec) GetLSN(page []byte) (LSN uint64) {
+
+	headerBytes := page[:codec.headerCodec.getHeaderSize()]
+
+	return codec.headerCodec.getLSN(headerBytes)
+}
+
+func (codec LeafNodeCodec) HasEnoughSpaceToUpdateValue(page []byte, key []byte, oldValue []byte, newValue []byte) bool {
+
+	if len(oldValue) >= len(newValue) {
+		return true
+	}
+
+	return codec.HasEnoughSpaceToInsertElement(page, key, newValue)
+}
+
+func (codec LeafNodeCodec) HasEnoughSpaceToInsertElement(page []byte, key []byte, value []byte) bool {
+
+	totalSpaceRequired := 2 + len(key) + 2 + len(value)
+
+	if !codec.headerCodec.isAdequate(page, totalSpaceRequired) {
+
+		// if space is not enough, check if performing compaction will free up enough space to insert the element.
+		if !codec.headerCodec.shouldCompact(page, totalSpaceRequired) {
+
+			// if even compaction won't free up enough space to insert the new element, return false.
+			return false
+		} else {
+			codec.compact(page)
+			return true
+		}
+	}
+	return true
+}
+
+func (codec LeafNodeCodec) SetValue(page []byte, key []byte, value []byte) {
+
 	defer codec.headerCodec.updateCRC(page)
 
 	// search for slot, element corresponding to key
@@ -615,14 +669,6 @@ func (codec LeafNodeCodec) appendAllSlotsAndElements(page []byte, slots []Slot, 
 	codec.headerCodec.setGarbageSize(headerBytes, 0)
 	codec.headerCodec.SetIsPageFilled(headerBytes, true)
 
-}
-
-func (codec LeafNodeCodec) GetNextLeafNodePageId(page []byte) uint64 {
-
-	headerBytes := page[:codec.headerCodec.getHeaderSize()]
-
-	header := codec.headerCodec.decodePageHeader(headerBytes)
-	return header.nextLeafNodePageId
 }
 
 func (codec LeafNodeCodec) IsSlotDeleted(page []byte, index int) bool {

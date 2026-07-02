@@ -313,12 +313,45 @@ func (codec InternalNodeCodec) DeleteElement(page []byte, key []byte) bool {
 	return true
 }
 
+func (codec InternalNodeCodec) SetLSN(page []byte, LSN uint64) {
+
+	headerBytes := page[:codec.headerCodec.getHeaderSize()]
+
+	codec.headerCodec.setLSN(headerBytes, LSN)
+}
+
+func (codec InternalNodeCodec) GetLSN(page []byte) (LSN uint64) {
+
+	headerBytes := page[:codec.headerCodec.getHeaderSize()]
+
+	return codec.headerCodec.getLSN(headerBytes)
+}
+
+func (codec InternalNodeCodec) HasEnoughSpaceToInsertElement(page []byte, key []byte) bool {
+
+	totalSpaceRequired := 2 + len(key) + 8 + 8
+
+	if !codec.headerCodec.isAdequate(page, totalSpaceRequired) {
+
+		// if space is not enough, check if performing compaction will free up enough space to insert the element.
+		if !codec.headerCodec.shouldCompact(page, totalSpaceRequired) {
+
+			// if even compaction won't free up enough space to insert the new element, return false.
+			return false
+		} else {
+			codec.compact(page)
+			return true
+		}
+	}
+	return true
+}
+
 // compact is used to remove all garbage that results from performing delete/update operations on the page
 func (codec InternalNodeCodec) compact(page []byte) {
 
 	slots, elements := codec.getAllSlotsAndElements(page)
 
-	codec.putAllSlotsAndElements(page, slots, elements)
+	codec.PutAllSlotsAndElements(page, slots, elements)
 }
 
 func (codec InternalNodeCodec) FindSplitNodeIndex(leftNode []byte) int {
