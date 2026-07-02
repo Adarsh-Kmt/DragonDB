@@ -71,10 +71,45 @@ func (w *InternalNodeWriter) DeleteKey(key []byte) bool {
 	return w.codec.DeleteElement(w.guard.GetPageData(), key)
 }
 
+func (w *InternalNodeWriter) HasEnoughSpaceToInsertElement(key []byte) bool {
+
+	return w.codec.HasEnoughSpaceToInsertElement(w.guard.GetPageData(), key)
+}
+
+func (w *InternalNodeWriter) SetLSN(LSN uint64) {
+	w.guard.SetDirtyFlag()
+	w.codec.SetLSN(w.guard.GetPageData(), LSN)
+}
+
+func (w *InternalNodeWriter) GetLSN() (LSN uint64) {
+
+	return w.codec.GetLSN(w.guard.GetPageData())
+}
+
+func (w *InternalNodeWriter) EncodeAllElements() (elementListLength int, payload []byte) {
+
+	return w.codec.EncodeAllElements(w.guard.GetPageData())
+}
+
+func GetAllInternalSlotsAndElements(elementListBytes []byte) ([]codec.Slot, []codec.InternalNodeElement) {
+
+	codec := codec.NewInternalNodeCodec()
+	return codec.DecodeAllSlotsAndElements(elementListBytes)
+}
+func (w *InternalNodeWriter) PutAllElements(slots []codec.Slot, elements []codec.InternalNodeElement) {
+	w.guard.SetDirtyFlag()
+	w.codec.PutAllSlotsAndElements(w.guard.GetPageData(), slots, elements)
+}
+
+func (w *InternalNodeWriter) FindSplitIndex() int {
+
+	return w.codec.FindSplitNodeIndex(w.guard.GetPageData())
+}
+
 // Split is used to split a B+ Tree internal node.
 // Some elements remain in the node, others elements are move to the right node passed as a argument.
 // function returns the extra key to be sent to the parent node.
-func (w *InternalNodeWriter) Split(rightNodeWriter *InternalNodeWriter) (extraKey []byte) {
+func (w *InternalNodeWriter) Split(rightNodeWriter *InternalNodeWriter, splitIndex int) (extraKey []byte) {
 
 	if !w.guard.IsActive() {
 		return nil
@@ -82,7 +117,8 @@ func (w *InternalNodeWriter) Split(rightNodeWriter *InternalNodeWriter) (extraKe
 
 	w.guard.SetDirtyFlag()
 	rightNodeWriter.guard.SetDirtyFlag()
-	extraKey = w.codec.SplitNode(w.guard.GetPageData(), rightNodeWriter.guard.GetPageData(), rightNodeWriter.GetPageId())
+
+	extraKey = w.codec.SplitNode(w.guard.GetPageData(), rightNodeWriter.guard.GetPageData(), rightNodeWriter.GetPageId(), splitIndex)
 
 	return extraKey
 }
