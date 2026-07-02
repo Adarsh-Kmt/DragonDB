@@ -33,61 +33,6 @@ func NewBPlusTree(BPlusTreeId uint64, bufferPoolManager bpm.BufferPoolManager, m
 	return bptree
 }
 
-// func (bptree *BPlusTree) fetchRootNodeReadGuard() (*bpm.ReadGuard, error) {
-
-// 	bptree.rootNodePageIdMutex.RLock()
-// 	defer bptree.rootNodePageIdMutex.RUnlock()
-
-// 	if bptree.rootNodePageId == 0 {
-// 		slog.Info("Root node not found, tree is empty", "function", "fetchRootNodeReadGuard", "at", "btree")
-// 		return nil, fmt.Errorf("root node does not exist")
-// 	} else {
-// 		return bptree.bufferPoolManager.NewReadGuard(bptree.rootNodePageId)
-// 	}
-// }
-
-// func (bptree *BPlusTree) fetchRootNodeWriteGuard() (*bpm.WriteGuard, error) {
-
-// 	bptree.rootNodePageIdMutex.RLock()
-// 	if bptree.rootNodePageId != uint64(0) {
-// 		slog.Info("Root node already exists, proceeding with insert", "root_node_page_ID", bptree.rootNodePageId, "function", "fetchRootNodeWriteGuard", "at", "btree")
-// 		rootNodeWriteGuard, err := bptree.bufferPoolManager.NewWriteGuard(bptree.rootNodePageId)
-// 		bptree.rootNodePageIdMutex.RUnlock()
-// 		return rootNodeWriteGuard, err
-
-// 	}
-
-// 	bptree.rootNodePageIdMutex.RUnlock()
-
-// 	bptree.rootNodePageIdMutex.Lock()
-// 	defer bptree.rootNodePageIdMutex.Unlock()
-
-// 	if bptree.rootNodePageId != uint64(0) {
-
-// 		return bptree.bufferPoolManager.NewWriteGuard(bptree.rootNodePageId)
-// 	}
-
-// 	// create a new root node.
-// 	slog.Info("Creating new root node for BPlusTree", "function", "fetchRootNodeWriteGuard", "at", "btree")
-// 	rootNodePageId, err := bptree.bufferPoolManager.NewPage()
-// 	if err != nil {
-
-// 		slog.Error("Failed to create new root node page", "error", err.Error(), "function", "fetchRootNodeWriteGuard", "at", "btree")
-// 		return nil, err
-// 	}
-
-// 	slog.Info("New root node created", "page_ID", rootNodePageId, "function", "fetchRootNodeWriteGuard", "at", "btree")
-
-// 	rootNodePageGuard, err := bptree.bufferPoolManager.NewWriteGuard(rootNodePageId)
-
-// 	if err != nil {
-// 		bptree.bufferPoolManager.CleanupPage(rootNodePageId)
-// 		return nil, err
-// 	}
-// 	bptree.rootNodePageId = rootNodePageId
-// 	return rootNodePageGuard, nil
-// }
-
 func (bptree *BPlusTree) Get(key []byte) ([]byte, error) {
 
 	bptree.bPlusTreeMutex.RLock()
