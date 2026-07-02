@@ -80,7 +80,7 @@ func (bptree *BPlusTree) readTraversal(key []byte, cursor *ReadCursor) ([]byte, 
 
 		if !ok {
 			slog.Info("Key not found in leaf node", "key", string(key), "function", "readTraversal", "at", "btree")
-			return nil, fmt.Errorf("key not found")
+			return nil, fmt.Errorf("%s", fmt.Sprintf("%s", "key "+string(key)+" not found"))
 		}
 
 		slog.Info("Key found, returning value", "key", string(key), "value_length", len(value), "function", "readTraversal", "at", "btree")
@@ -171,18 +171,10 @@ func (bptree *BPlusTree) Insert(key []byte, value []byte) error {
 		if err != nil {
 			return err
 		}
-		bptree.rootNodePageId = rootNodePageId
 	}
 
 	fmt.Println()
 	slog.Info("Starting Insert operation", "key", string(key), "function", "Insert", "at", "bptree")
-
-	rootNodeGuard, err := bptree.bufferPoolManager.NewWriteGuard(bptree.rootNodePageId)
-
-	if err != nil {
-		slog.Error("Failed to create root node guard", "error", err.Error(), "function", "Insert", "at", "bptree")
-		return err
-	}
 
 	defer rootNodeGuard.Done()
 
@@ -447,80 +439,96 @@ func (bptree *BPlusTree) writeTraversal(key []byte, value []byte, cursor *WriteC
 
 			} else {
 
-				rightLeafNodeWriter.InsertKeyValue(key, value)
+				if bptree.rootNodePageId == leafNodeWriter.GetPageId() {
 
+					err := bptree.HandleLeafRootNodeSplit(leafNodeWriter, key, value)
+					return nil, 0, 0, err
+				}
+				parentNodeWriter := NewInternalNodeWriter(cursor.GetCurrentParentNodeWriteGuard())
+
+				return bptree.HandleLeafNodeSplit(leafNodeWriter, parentNodeWriter, key, value)
 			}
-
-			leafNodeWriter.PrintElements()
-			rightLeafNodeWriter.PrintElements()
-
-			return extraKey, leafNodeWriter.GetPageId(), rightLeafNodeWriter.GetPageId(), nil
 
 		}
 
-	}
+		if leafNodeWriter.HasEnoughSpaceToInsertElement(key, value) {
 
-	internalNodeWriter := NewInternalNodeWriter(cursor.GetCurrentNodeWriteGuard())
+			lsn, err := bptree.wal.LogInsertLeafNodeEntryOperation(leafNodeWriter.GetPageId(), key, value)
 
-	nextChildNodePageId := internalNodeWriter.FindNextChildNodePageId(key)
+			if err != nil {
+				return nil, 0, 0, err
+			}
 
-	childNodeWriteGuard, err := bptree.bufferPoolManager.NewWriteGuard(nextChildNodePageId)
+			leafNodeWriter.SetLSN(lsn)
+			leafNodeWriter.InsertKeyValue(key, value)
 
-	if err != nil {
+			return nil, 0, 0, nil
 
-		return nil, 0, 0, err
-	}
+		} else {
 
-	defer childNodeWriteGuard.Done()
+			if bptree.rootNodePageId == leafNodeWriter.GetPageId() {
 
-	cursor.SetCurrentNodeWriteGuard(childNodeWriteGuard)
+				err := bptree.HandleLeafRootNodeSplit(leafNodeWriter, key, value)
+				return nil, 0, 0, err
+			}
 
-	extraKey, leftChildNodePageId, rightChildNodePageId, err = bptree.writeTraversal(key, value, cursor)
+			parentNodeWriter := NewInternalNodeWriter(cursor.GetCurrentParentNodeWriteGuard())
 
-	if err != nil {
-		return nil, 0, 0, err
-	}
+			return bptree.HandleLeafNodeSplit(leafNodeWriter, parentNodeWriter, key, value)
+		}
 
-	if extraKey == nil {
-		return nil, 0, 0, nil
-	}
-
-	internalNodeWriter = NewInternalNodeWriter(currWriteGuard)
-
-	ok := internalNodeWriter.InsertKey(extraKey, leftChildNodePageId, rightChildNodePageId)
-
-	if ok {
-		return nil, 0, 0, nil
-	}
-
-	rightChildNodePageId, err = bptree.bufferPoolManager.NewPage()
-
-	if err != nil {
-		return nil, 0, 0, err
-	}
-
-	writeGuard, err := bptree.bufferPoolManager.NewWriteGuard(rightChildNodePageId)
-
-	if err != nil {
-
-		bptree.bufferPoolManager.CleanupPage(rightChildNodePageId)
-		return nil, 0, 0, err
-	}
-
-	defer writeGuard.Done()
-
-	rightInternalNodeWriter := NewInternalNodeWriter(writeGuard)
-
-	splitKey := internalNodeWriter.Split(rightInternalNodeWriter)
-
-	if bytes.Compare(extraKey, splitKey) < 0 {
-		internalNodeWriter.InsertKey(extraKey, leftChildNodePageId, rightChildNodePageId)
 	} else {
-		rightInternalNodeWriter.InsertKey(extraKey, leftChildNodePageId, rightChildNodePageId)
+
+		internalNodeWriter := NewInternalNodeWriter(cursor.GetCurrentNodeWriteGuard())
+		parentNodeWriter := NewInternalNodeWriter(cursor.GetCurrentParentNodeWriteGuard())
+
+		nextChildNodePageId := internalNodeWriter.FindNextChildNodePageId(key)
+
+		childNodeWriteGuard, err := bptree.bufferPoolManager.NewWriteGuard(nextChildNodePageId)
+
+		if err != nil {
+
+			return nil, 0, 0, err
+		}
+
+		defer childNodeWriteGuard.Done()
+
+		cursor.SetCurrentParentNodeWriteGuard(cursor.GetCurrentNodeWriteGuard())
+		cursor.SetCurrentNodeWriteGuard(childNodeWriteGuard)
+
+		extraKey, leftChildNodePageId, rightChildNodePageId, err = bptree.writeTraversal(key, value, cursor)
+
+		if err != nil {
+			return nil, 0, 0, err
+		}
+
+		if extraKey == nil {
+			return nil, 0, 0, nil
+		}
+
+		if internalNodeWriter.HasEnoughSpaceToInsertElement(extraKey) {
+
+			internalNodeWriter.InsertKey(extraKey, leftChildNodePageId, rightChildNodePageId)
+			return nil, 0, 0, nil
+
+		} else {
+
+			if bptree.rootNodePageId == internalNodeWriter.GetPageId() {
+
+				err := bptree.HandleInternalRootNodeSplit(internalNodeWriter, extraKey, leftChildNodePageId, rightChildNodePageId)
+				return nil, 0, 0, err
+			}
+
+			return bptree.HandleInternalNodeSplit(
+				internalNodeWriter,
+				parentNodeWriter,
+				extraKey,
+				leftChildNodePageId,
+				rightChildNodePageId,
+			)
+		}
+
 	}
-
-	return splitKey, internalNodeWriter.GetPageId(), rightInternalNodeWriter.GetPageId(), nil
-
 }
 
 func (bptree *BPlusTree) Delete(key []byte) error {
