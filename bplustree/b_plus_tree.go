@@ -118,10 +118,56 @@ func (bptree *BPlusTree) Insert(key []byte, value []byte) error {
 	bptree.bPlusTreeMutex.Lock()
 	defer bptree.bPlusTreeMutex.Unlock()
 
+	var rootNodeGuard *bpm.WriteGuard
+
 	if bptree.rootNodePageId == 0 {
 
-		rootNodePageId, err := bptree.bufferPoolManager.NewPage()
+		rootNodePageId, allocationSource, err := bptree.bufferPoolManager.NewPage()
+		if err != nil {
+			return err
+		}
+
+		lsn, err := bptree.wal.LogCreatePageOperation(rootNodePageId, LEAF_NODE_TYPE, byte(allocationSource))
+
+		if err != nil {
+			return err
+		}
+
+		rootNodeGuard, err = bptree.bufferPoolManager.NewWriteGuard(rootNodePageId)
+
+		if err != nil {
+			slog.Error("Failed to create root node guard", "error", err.Error(), "function", "Insert", "at", "bptree")
+			return err
+		}
+
+		rootNodeWriter := NewLeafNodeWriter(rootNodeGuard)
+		rootNodeWriter.SetLSN(lsn)
+
+		lsn, err = bptree.wal.LogUpdateFirstLeafNodePageIdOperation(bptree.BPlusTreeId, rootNodePageId)
+
+		if err != nil {
+			return err
+		}
+
+		bptree.metadata.LSN = lsn
+
+		lsn, err = bptree.wal.LogUpdateRootNodePageIdOperation(bptree.BPlusTreeId, rootNodePageId)
+
+		if err != nil {
+			return err
+		}
+
+		bptree.metadata.LSN = lsn
+
 		bptree.firstLeafNodePageId = rootNodePageId
+
+		bptree.rootNodePageId = rootNodePageId
+
+	} else {
+
+		var err error
+		rootNodeGuard, err = bptree.bufferPoolManager.NewWriteGuard(bptree.rootNodePageId)
+
 		if err != nil {
 			return err
 		}
@@ -141,66 +187,120 @@ func (bptree *BPlusTree) Insert(key []byte, value []byte) error {
 	defer rootNodeGuard.Done()
 
 	writeCursor := NewWriteCursor(rootNodeGuard)
-	extraKey, leftChildNodePageId, rightChildNodePageId, err := bptree.writeTraversal(key, value, writeCursor)
+	_, _, _, err := bptree.writeTraversal(key, value, writeCursor)
 
 	if err != nil {
 		slog.Error("Error during write traversal", "error", err.Error(), "function", "Insert", "at", "btree")
 		return err
 	}
-	// new root node required.
-	if extraKey != nil {
-		slog.Info("Creating new root node due to split", "extra_key", string(extraKey), "left_child_page_ID", leftChildNodePageId, "right_child_page_ID", rightChildNodePageId, "function", "Insert", "at", "btree")
-
-		newRootPageId, err := bptree.bufferPoolManager.NewPage()
-
-		if err != nil {
-			slog.Error("Failed to create new root node page", "error", err.Error(), "function", "Insert", "at", "btree")
-			return err
-		}
-
-		newRootGuard, err := bptree.bufferPoolManager.NewWriteGuard(newRootPageId)
-		if err != nil {
-			bptree.bufferPoolManager.CleanupPage(newRootPageId)
-			slog.Error("Failed to create new root guard", "error", err.Error(), "function", "Insert", "at", "btree")
-			return err
-		}
-		defer newRootGuard.Done()
-
-		internalNodeWriter := NewInternalNodeWriter(newRootGuard)
-		internalNodeWriter.SetNodeType()
-		internalNodeWriter.InsertKey(extraKey, leftChildNodePageId, rightChildNodePageId)
-
-		//bptree.rootNodePageIdMutex.Lock()
-		bptree.rootNodePageId = newRootPageId
-		//bptree.rootNodePageIdMutex.Unlock()
-
-		slog.Info("New root node set", "new_root_page_ID", bptree.rootNodePageId, "function", "Insert", "at", "bptree")
-
-	}
 
 	return nil
 }
 
-func (bptree *BPlusTree) writeTraversal(key []byte, value []byte, cursor *WriteCursor) (extraKey []byte, leftChildNodePageId uint64, rightChildNodePageId uint64, err error) {
+func (bptree *BPlusTree) HandleLeafRootNodeSplit(oldRootNodeWriter *LeafNodeWriter, key []byte, value []byte) error {
 
-	currWriteGuard := cursor.GetCurrentNodeWriteGuard()
+	slog.Info("Creating new root node due to split", "extra_key", string(key), "value", string(value), "function", "Insert", "at", "btree")
+	newRootPageId, allocationSource, err := bptree.bufferPoolManager.NewPage()
 
-	fmt.Println()
-	slog.Info("write traversal underway...", "key", key, "page_ID", currWriteGuard.GetPageId(), "is_leaf_node", cursor.IsLeafNode(), "function", "writeTraversal", "at", "btree")
+	if err != nil {
+		slog.Error("Failed to create new root node page", "error", err.Error(), "function", "Insert", "at", "btree")
+		return err
+	}
 
-	if cursor.IsLeafNode() {
+	newRootGuard, err := bptree.bufferPoolManager.NewWriteGuard(newRootPageId)
+	if err != nil {
+		bptree.bufferPoolManager.CleanupPage(newRootPageId)
+		slog.Error("Failed to create new root guard", "error", err.Error(), "function", "Insert", "at", "btree")
+		return err
+	}
+	defer newRootGuard.Done()
 
-		leafNodeWriter := NewLeafNodeWriter(cursor.GetCurrentNodeWriteGuard())
-		leafNodeWriter.PrintElements()
-		if _, found := leafNodeWriter.FindValue(key); found {
+	lsn, err := bptree.wal.LogCreatePageOperation(newRootPageId, INTERNAL_NODE_TYPE, byte(allocationSource))
 
-			ok := leafNodeWriter.SetValue(key, value)
+	if err != nil {
+		return err
+	}
 
-			if ok {
-				return nil, 0, 0, nil
-			}
+	newRootNodeWriter := NewInternalNodeWriter(newRootGuard)
+	newRootNodeWriter.SetLSN(lsn)
+	newRootNodeWriter.SetNodeType()
 
-			rightChildNodePageId, err := bptree.bufferPoolManager.NewPage()
+	extraKey, leftChildNodePageId, rightChildNodePageId, err := bptree.HandleLeafNodeSplit(oldRootNodeWriter, newRootNodeWriter, key, value)
+
+	if err != nil {
+		return err
+	}
+
+	newRootNodeWriter.InsertKey(extraKey, leftChildNodePageId, rightChildNodePageId)
+
+	lsn, err = bptree.wal.LogUpdateRootNodePageIdOperation(bptree.BPlusTreeId, newRootPageId)
+
+	if err != nil {
+		return err
+	}
+	bptree.metadata.LSN = lsn
+	bptree.rootNodePageId = newRootPageId
+
+	return nil
+
+}
+func (bptree *BPlusTree) HandleInternalRootNodeSplit(oldRootNodeWriter *InternalNodeWriter, insertKey []byte, insertLeftChildNodePageId uint64, insertRightChildNodePageId uint64) (err error) {
+
+	newRootPageId, allocationSource, err := bptree.bufferPoolManager.NewPage()
+
+	if err != nil {
+		slog.Error("Failed to create new root node page", "error", err.Error(), "function", "Insert", "at", "btree")
+		return err
+	}
+
+	newRootGuard, err := bptree.bufferPoolManager.NewWriteGuard(newRootPageId)
+	if err != nil {
+		bptree.bufferPoolManager.CleanupPage(newRootPageId)
+		slog.Error("Failed to create new root guard", "error", err.Error(), "function", "Insert", "at", "btree")
+		return err
+	}
+	defer newRootGuard.Done()
+
+	lsn, err := bptree.wal.LogCreatePageOperation(newRootPageId, INTERNAL_NODE_TYPE, byte(allocationSource))
+
+	if err != nil {
+		return err
+	}
+
+	newRootNodeWriter := NewInternalNodeWriter(newRootGuard)
+
+	newRootNodeWriter.SetLSN(lsn)
+
+	extraKey, leftChildNodePageId, rightChildNodePageId, err := bptree.HandleInternalNodeSplit(
+		oldRootNodeWriter,
+		newRootNodeWriter,
+		insertKey,
+		insertLeftChildNodePageId,
+		insertRightChildNodePageId,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	newRootNodeWriter.InsertKey(extraKey, leftChildNodePageId, rightChildNodePageId)
+
+	lsn, err = bptree.wal.LogUpdateRootNodePageIdOperation(bptree.BPlusTreeId, newRootPageId)
+
+	if err != nil {
+		return err
+	}
+	bptree.metadata.LSN = lsn
+	bptree.rootNodePageId = newRootPageId
+	slog.Info("New root node set", "new_root_page_ID", bptree.rootNodePageId, "function", "Insert", "at", "bptree")
+
+	return nil
+
+}
+
+func (bptree *BPlusTree) HandleLeafNodeSplit(leftLeafNodeWriter *LeafNodeWriter, parentNodeWriter *InternalNodeWriter, key []byte, value []byte) (extraKey []byte, leftChildNodePageId uint64, rightChildNodePageId uint64, err error) {
+
+	rightChildNodePageId, allocationSource, err := bptree.bufferPoolManager.NewPage()
 
 			if err != nil {
 				return nil, 0, 0, err
