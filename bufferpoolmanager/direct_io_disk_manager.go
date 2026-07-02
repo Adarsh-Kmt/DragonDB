@@ -22,7 +22,9 @@ type DiskManager interface {
 
 	// allocatePage allocates a page in the file and returns a new page ID for use.
 	// It reuses a deallocated page ID if available, otherwise increments maxAllocatedPageId and returns a new page ID.
-	allocatePage() (uint64, error)
+	allocatePage() (uint64, AllocationSource, error)
+
+	EnsurePageExists(pageId uint64) error
 
 	// deallocatePage marks a page ID as free and adds it to the free list, making it available for future allocation.
 	deallocatePage(pageId uint64)
@@ -171,9 +173,42 @@ func (disk *DirectIODiskManager) read(offset int64, size int) ([]byte, error) {
 
 }
 
+func (disk *DirectIODiskManager) EnsurePageExists(pageId uint64) error {
+
+	disk.mutex.Lock()
+	defer disk.mutex.Unlock()
+
+	fileStats, err := disk.file.Stat()
+	if err != nil {
+		return err
+	}
+
+	requiredPages := pageId + 1
+	currentPages := uint64(fileStats.Size()) / PAGE_SIZE
+
+	if currentPages < requiredPages {
+
+		pagesToAdd := requiredPages - currentPages
+
+		err := disk.write(
+			int64(currentPages*PAGE_SIZE),
+			make([]byte, pagesToAdd*PAGE_SIZE),
+		)
+		if err != nil {
+			return err
+		}
+	}
+
+	if disk.metadata.MaxAllocatedPageId < pageId {
+		disk.metadata.MaxAllocatedPageId = pageId
+	}
+
+	return nil
+}
+
 // allocatePage allocates a page in the file and returns a new page ID for use.
 // It reuses a deallocated page ID if available, otherwise increments maxAllocatedPageId and returns a new page ID.
-func (disk *DirectIODiskManager) allocatePage() (uint64, error) {
+func (disk *DirectIODiskManager) allocatePage() (uint64, AllocationSource, error) {
 
 	fmt.Println()
 	disk.mutex.Lock()
@@ -188,7 +223,7 @@ func (disk *DirectIODiskManager) allocatePage() (uint64, error) {
 		slog.Info(fmt.Sprintf("allocating existing page with page ID = %d", pageId), "function", "allocatePage", "at", "DirectIODiskManager")
 
 		disk.metadata.DeallocatedPageIdList = disk.metadata.DeallocatedPageIdList[1:]
-		return pageId, nil
+		return pageId, FREELIST_ALLOCATION, nil
 
 	} else {
 
@@ -196,7 +231,7 @@ func (disk *DirectIODiskManager) allocatePage() (uint64, error) {
 		fileStats, err := disk.file.Stat()
 
 		if err != nil {
-			return 0, err
+			return 0, ERROR_ALLOCATION, err
 		}
 
 		// if the number of pages in the file = max allocated page ID + 1 (plus one because page IDs start from 0),
@@ -207,7 +242,7 @@ func (disk *DirectIODiskManager) allocatePage() (uint64, error) {
 
 			if err != nil {
 				slog.Error("Failed to write new page", "pageId", disk.metadata.MaxAllocatedPageId, "error", err.Error(), "function", "allocatePage", "at", "DirectIODiskManager")
-				return 0, err
+				return 0, ERROR_ALLOCATION, err
 			}
 		}
 
@@ -216,7 +251,7 @@ func (disk *DirectIODiskManager) allocatePage() (uint64, error) {
 
 		slog.Info(fmt.Sprintf("allocating new page with page ID = %d", pageId), "function", "allocatePage", "at", "DirectIODiskManager")
 
-		return pageId, nil
+		return pageId, FILE_EXPANSION_ALLOCATION, nil
 	}
 }
 

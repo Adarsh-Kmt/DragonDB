@@ -8,9 +8,14 @@ import (
 	"golang.org/x/sys/unix"
 )
 
+type AllocationSource byte
+
 const (
-	PAGE_SIZE        = 4096
-	METADATA_PAGE_ID = 0
+	PAGE_SIZE                 = 4096
+	METADATA_PAGE_ID          = 0
+	FREELIST_ALLOCATION       = AllocationSource(byte(0))
+	FILE_EXPANSION_ALLOCATION = AllocationSource(byte(1))
+	ERROR_ALLOCATION          = AllocationSource(byte(2))
 )
 
 type FrameID int
@@ -20,7 +25,9 @@ type BufferPoolManager interface {
 	// public methods
 
 	// NewPage allocates a new page in the file and returns its page ID.
-	NewPage() (uint64, error)
+	NewPage() (uint64, AllocationSource, error)
+
+	EnsurePageExists(pageId uint64) error
 
 	// If page is allocated in the file, but guard couldn't be acquired, then the allocated page must be added to the deallocatedPageId list.
 	CleanupPage(pageID uint64)
@@ -36,7 +43,7 @@ type BufferPoolManager interface {
 	// private methods
 
 	// flushAllPages writes all dirty pages currently in the buffer pool to disk.
-	flushAllPages() error
+	FlushAllPages() error
 
 	// fetchPage loads a page with the given page ID into the buffer pool,
 	// returning the corresponding frame. If the page is already in memory,
@@ -159,9 +166,13 @@ func (bufferPool *SimpleBufferPoolManager) PrintAllPages() {
 }
 
 // NewPage is a thread-safe function that allocates a new page in the file, and returns its page ID.
-func (bufferPool *SimpleBufferPoolManager) NewPage() (uint64, error) {
+func (bufferPool *SimpleBufferPoolManager) NewPage() (uint64, AllocationSource, error) {
 
 	return bufferPool.disk.allocatePage()
+}
+
+func (bufferPool *SimpleBufferPoolManager) EnsurePageExists(pageId uint64) error {
+	return bufferPool.disk.EnsurePageExists(pageId)
 }
 
 // If page is allocated in the file, but guard couldn't be acquired, then the allocated page must be added to the deallocatedPageId list.
@@ -355,7 +366,7 @@ func (bufferPool *SimpleBufferPoolManager) unpinPage(pageId uint64) bool {
 }
 
 // flushAllPages is used to write all dirty pages to disk, currently used during database shutdown.
-func (bufferPool *SimpleBufferPoolManager) flushAllPages() error {
+func (bufferPool *SimpleBufferPoolManager) FlushAllPages() error {
 
 	bufferPool.lookupMutex.RLock()
 	defer bufferPool.lookupMutex.RUnlock()
@@ -378,7 +389,7 @@ func (bufferPool *SimpleBufferPoolManager) flushAllPages() error {
 // Close must be executed to ensure correct shutdown of buffer pool manager.
 func (bufferPool *SimpleBufferPoolManager) Close() error {
 
-	if err := bufferPool.flushAllPages(); err != nil {
+	if err := bufferPool.FlushAllPages(); err != nil {
 		return err
 	}
 

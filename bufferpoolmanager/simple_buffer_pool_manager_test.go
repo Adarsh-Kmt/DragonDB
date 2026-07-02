@@ -240,7 +240,7 @@ func (bs *BufferPoolManagerTestSuite) TestDeletePage() {
 func (bs *BufferPoolManagerTestSuite) TestNewPage() {
 
 	// should return max allocated page ID
-	pageId, err := bs.bufferPool.NewPage()
+	pageId, _, err := bs.bufferPool.NewPage()
 
 	bs.Suite.Require().NoError(err)
 	bs.Suite.Assert().Equal(uint64(8), pageId)
@@ -256,7 +256,7 @@ func (bs *BufferPoolManagerTestSuite) TestNewPage() {
 
 	bs.Suite.Assert().Equal(true, result)
 
-	pageId, err = bs.bufferPool.NewPage()
+	pageId, _, err = bs.bufferPool.NewPage()
 	bs.Suite.Require().NoError(err)
 	bs.Suite.Assert().Equal(uint64(0), pageId)
 }
