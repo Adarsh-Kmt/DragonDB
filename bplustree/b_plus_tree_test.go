@@ -9,6 +9,7 @@ import (
 
 	bpm "github.com/Adarsh-Kmt/DragonDB/bufferpoolmanager"
 	codec "github.com/Adarsh-Kmt/DragonDB/pagecodec"
+	lucario "github.com/Adarsh-Kmt/Lucario"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -44,8 +45,11 @@ func (ts *BPlusTreeTestSuite) SetupTest() {
 	bufferPoolManager, err := bpm.NewSimpleBufferPoolManager(10, 4096, replacer, disk)
 	ts.Require().NoError(err)
 
+	wal, err := lucario.NewWAL("./lucario.wal")
+	ts.Require().NoError(err)
+
 	// Create BPlusTree
-	ts.btree = NewBPlusTree(0, bufferPoolManager, ts.metadata)
+	ts.btree = NewBPlusTree(0, bufferPoolManager, ts.metadata, wal)
 }
 
 func (ts *BPlusTreeTestSuite) TearDownTest() {

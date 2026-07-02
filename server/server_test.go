@@ -11,6 +11,7 @@ import (
 
 	bplustree "github.com/Adarsh-Kmt/DragonDB/bplustree"
 	bpm "github.com/Adarsh-Kmt/DragonDB/bufferpoolmanager"
+	lucario "github.com/Adarsh-Kmt/Lucario"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -32,7 +33,10 @@ func (test *DatabaseServerTestSuite) SetupTest() {
 	bufferPoolManager, err := bpm.NewSimpleBufferPoolManager(10, 4096, replacer, disk)
 	test.Require().NoError(err)
 
-	server, err := NewServer(":8080", bplustree.NewBPlusTree(0, bufferPoolManager, actualMetadata))
+	wal, err := lucario.NewWAL("./lucario.wal")
+	test.Require().NoError(err)
+
+	server, err := NewServer(":8080", bplustree.NewBPlusTree(0, bufferPoolManager, actualMetadata, wal))
 
 	test.Suite.Require().NoError(err)
 
