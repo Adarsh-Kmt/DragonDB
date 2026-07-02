@@ -8,6 +8,12 @@ import (
 
 	bpm "github.com/Adarsh-Kmt/DragonDB/bufferpoolmanager"
 	codec "github.com/Adarsh-Kmt/DragonDB/pagecodec"
+	lucario "github.com/Adarsh-Kmt/Lucario"
+)
+
+const (
+	LEAF_NODE_TYPE     = byte(0)
+	INTERNAL_NODE_TYPE = byte(1)
 )
 
 type BPlusTree struct {
@@ -16,12 +22,14 @@ type BPlusTree struct {
 	firstLeafNodePageId uint64
 	//rootNodePageIdMutex *sync.RWMutex
 
+	wal *lucario.WAL
+
 	bPlusTreeMutex    *sync.RWMutex
 	metadata          *codec.MetaData
 	bufferPoolManager bpm.BufferPoolManager
 }
 
-func NewBPlusTree(BPlusTreeId uint64, bufferPoolManager bpm.BufferPoolManager, metadata *codec.MetaData) *BPlusTree {
+func NewBPlusTree(BPlusTreeId uint64, bufferPoolManager bpm.BufferPoolManager, metadata *codec.MetaData, wal *lucario.WAL) *BPlusTree {
 
 	bptree := &BPlusTree{
 		BPlusTreeId:       BPlusTreeId,
@@ -29,6 +37,7 @@ func NewBPlusTree(BPlusTreeId uint64, bufferPoolManager bpm.BufferPoolManager, m
 		bPlusTreeMutex:    &sync.RWMutex{},
 		metadata:          metadata,
 		bufferPoolManager: bufferPoolManager,
+		wal:               wal,
 	}
 	return bptree
 }

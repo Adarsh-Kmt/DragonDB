@@ -61,7 +61,13 @@ func (engine *StorageEngine) OpenBPlusTree(BPlusTreeId uint64) (btree *bplustree
 
 	btree, exists = engine.openBPlusTrees[BPlusTreeId]
 
-	return btree, exists
+	if !exists {
+
+		btree = bplustree.NewBPlusTree(BPlusTreeId, engine.bufferPoolManager, engine.metadata, engine.wal)
+
+		engine.openBPlusTrees[BPlusTreeId] = btree
+	}
+	return btree, true
 }
 
 func (engine *StorageEngine) CloseBPlusTree(BPlusTreeId uint64) error {
