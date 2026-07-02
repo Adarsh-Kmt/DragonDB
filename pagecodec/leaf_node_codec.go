@@ -57,6 +57,48 @@ func (codec LeafNodeCodec) decodeElement(elementBytes []byte) LeafNodeElement {
 
 }
 
+func (codec LeafNodeCodec) EncodeAllElements(page []byte) (elementListLength int, payload []byte) {
+
+	_, elements := codec.getAllSlotsAndElements(page)
+
+	data := make([]byte, 0)
+
+	for i := range elements {
+
+		elementBytes := codec.encodeElement(elements[i])
+		data = binary.LittleEndian.AppendUint16(data, uint16(len(elementBytes)))
+		data = append(data, elementBytes...)
+	}
+
+	finalPayload := make([]byte, 0)
+	finalPayload = binary.LittleEndian.AppendUint16(finalPayload, uint16(len(elements)))
+	finalPayload = append(finalPayload, data...)
+
+	return len(elements), finalPayload
+}
+
+func (codec LeafNodeCodec) DecodeAllSlotsAndElements(payload []byte) ([]Slot, []LeafNodeElement) {
+
+	elementList := make([]LeafNodeElement, 0)
+	slotList := make([]Slot, 0)
+
+	pointer := 0
+	elementListSize := int(binary.LittleEndian.Uint16(payload[pointer:]))
+	pointer += 2
+	for range elementListSize {
+
+		elementSize := binary.LittleEndian.Uint16(payload[pointer:])
+		pointer += 2 // Skip the 2-byte size field
+
+		slotList = append(slotList, Slot{elementSize: elementSize})
+		elementBytes := payload[pointer : pointer+int(elementSize)]
+		elementList = append(elementList, codec.decodeElement(elementBytes))
+
+		pointer += int(elementSize)
+	}
+	return slotList, elementList
+}
+
 // encodeSlot takes an element struct and returns an encoded slice of bytes representing this element
 func (codec LeafNodeCodec) encodeElement(element LeafNodeElement) []byte {
 
@@ -296,7 +338,7 @@ func (codec LeafNodeCodec) getAllSlotsAndElements(page []byte) ([]Slot, []LeafNo
 }
 
 // putAllSlotsAndElements inserts slots and elements into the page, assuming it to be empty
-func (codec LeafNodeCodec) putAllSlotsAndElements(page []byte, slots []Slot, elements []LeafNodeElement) {
+func (codec LeafNodeCodec) PutAllSlotsAndElements(page []byte, slots []Slot, elements []LeafNodeElement) {
 
 	freeSpaceBegin := uint16(codec.headerCodec.getHeaderSize())
 	freeSpaceEnd := uint16(4096)
@@ -346,7 +388,7 @@ func (codec LeafNodeCodec) compact(page []byte) {
 
 	slots, elements := codec.getAllSlotsAndElements(page)
 
-	codec.putAllSlotsAndElements(page, slots, elements)
+	codec.PutAllSlotsAndElements(page, slots, elements)
 }
 
 func (codec LeafNodeCodec) FindSplitNodeIndex(leftNode []byte) int {

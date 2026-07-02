@@ -55,10 +55,52 @@ func (codec InternalNodeCodec) decodeElement(elementBytes []byte) InternalNodeEl
 
 }
 
+func (codec InternalNodeCodec) EncodeAllElements(page []byte) (elementListLength int, payload []byte) {
+
+	_, elements := codec.getAllSlotsAndElements(page)
+
+	data := make([]byte, 0)
+
+	for i := range elements {
+
+		elementBytes := codec.encodeElement(elements[i])
+		data = binary.LittleEndian.AppendUint16(data, uint16(len(elementBytes)))
+		data = append(data, elementBytes...)
+	}
+
+	finalPayload := make([]byte, 0)
+	finalPayload = binary.LittleEndian.AppendUint16(finalPayload, uint16(len(elements)))
+	finalPayload = append(finalPayload, data...)
+
+	return len(elements), finalPayload
+}
+
+func (codec InternalNodeCodec) DecodeAllSlotsAndElements(payload []byte) ([]Slot, []InternalNodeElement) {
+
+	elementList := make([]InternalNodeElement, 0)
+	slotList := make([]Slot, 0)
+
+	pointer := 0
+	elementListSize := int(binary.LittleEndian.Uint16(payload[pointer:]))
+	pointer += 2
+	for range elementListSize {
+
+		elementSize := binary.LittleEndian.Uint16(payload[pointer:])
+		pointer += 2 // Skip the 2-byte size field
+
+		slotList = append(slotList, Slot{elementSize: elementSize})
+		elementBytes := payload[pointer : pointer+int(elementSize)]
+		elementList = append(elementList, codec.decodeElement(elementBytes))
+
+		pointer += int(elementSize)
+	}
+	return slotList, elementList
+}
+
 // encodeSlot takes an element struct and returns an encoded slice of bytes representing this element
 func (codec InternalNodeCodec) encodeElement(element InternalNodeElement) []byte {
 
-	fmt.Println()
+	//fmt.Println()
 	//slog.Info("Encoding element...", "function", "encodeInternalNodeElement", "at", "InternalNodeCodec")
 	b := make([]byte, 0)
 
@@ -226,8 +268,8 @@ func (codec InternalNodeCodec) getAllSlotsAndElements(page []byte) ([]Slot, []In
 	return slots, elements
 }
 
-// putAllSlotsAndElements inserts slots and elements into the page, assuming it to be empty
-func (codec InternalNodeCodec) putAllSlotsAndElements(page []byte, slots []Slot, elements []InternalNodeElement) {
+// PutAllSlotsAndElements inserts slots and elements into the page, assuming it to be empty
+func (codec InternalNodeCodec) PutAllSlotsAndElements(page []byte, slots []Slot, elements []InternalNodeElement) {
 
 	freeSpaceBegin := uint16(codec.headerCodec.getHeaderSize())
 	freeSpaceEnd := uint16(4096)
@@ -544,7 +586,7 @@ func (codec InternalNodeCodec) appendAllSlotsAndElements(page []byte, slots []Sl
 // 		rightElements = siblingElements
 // 	}
 
-// 	codec.putAllSlotsAndElements(underflowNode, leftSlots, leftElements)
+// 	codec.PutAllSlotsAndElements(underflowNode, leftSlots, leftElements)
 
 // 	headerBytes := underflowNode[:codec.headerCodec.getHeaderSize()]
 
