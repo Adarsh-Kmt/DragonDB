@@ -4,6 +4,7 @@ import "encoding/binary"
 
 // add currBPlusTreeId
 type MetaData struct {
+	LSN                   uint64
 	CurrBPlusTreeId       uint64
 	RootPages             map[uint64]uint64
 	MaxAllocatedPageId    uint64
@@ -25,6 +26,9 @@ func (codec MetaDataCodec) EncodeMetaDataPage(metadata *MetaData) []byte {
 	data := make([]byte, 4096)
 
 	pointer := 0
+
+	binary.LittleEndian.PutUint64(data[pointer:pointer+8], metadata.LSN)
+	pointer += 8
 
 	binary.LittleEndian.PutUint64(data[pointer:pointer+8], metadata.CurrBPlusTreeId)
 	pointer += 8
@@ -67,6 +71,9 @@ func (codec MetaDataCodec) EncodeMetaDataPage(metadata *MetaData) []byte {
 func (codec MetaDataCodec) DecodeMetaDataPage(data []byte) *MetaData {
 
 	pointer := 0
+
+	LSN := binary.LittleEndian.Uint64(data[pointer : pointer+8])
+	pointer += 8
 
 	currBPlusTreeId := binary.LittleEndian.Uint64(data[pointer : pointer+8])
 	pointer += 8
@@ -112,6 +119,7 @@ func (codec MetaDataCodec) DecodeMetaDataPage(data []byte) *MetaData {
 		FirstLeafNodePages[BPlusTreeId] = rootPage
 	}
 	return &MetaData{
+		LSN:                   LSN,
 		CurrBPlusTreeId:       currBPlusTreeId,
 		RootPages:             BPlusTreeRootPages,
 		MaxAllocatedPageId:    maxAllocatedPageId,
