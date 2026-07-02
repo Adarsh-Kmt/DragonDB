@@ -8,6 +8,7 @@ import (
 	bplustree "github.com/Adarsh-Kmt/DragonDB/bplustree"
 	bpm "github.com/Adarsh-Kmt/DragonDB/bufferpoolmanager"
 	codec "github.com/Adarsh-Kmt/DragonDB/pagecodec"
+	lucario "github.com/Adarsh-Kmt/Lucario"
 )
 
 type StorageEngine struct {
@@ -17,12 +18,17 @@ type StorageEngine struct {
 	openBPlusTrees      map[uint64]*bplustree.BPlusTree
 	metadata            *codec.MetaData
 
+	wal             *lucario.WAL
+	redoFuncMapping map[lucario.Operation]RedoFunc
+
 	bufferPoolManager bpm.BufferPoolManager
 	// WAL dependency
 
 }
 
 func NewStorageEngine() (engine *StorageEngine, isNewDatabase bool, err error) {
+
+	engine = &StorageEngine{}
 
 	cache := bpm.NewLRUReplacer()
 	disk, metadata, isNewDatabase, err := bpm.NewDirectIODiskManager("dragon.db")
@@ -37,15 +43,33 @@ func NewStorageEngine() (engine *StorageEngine, isNewDatabase bool, err error) {
 		return nil, false, err
 	}
 
-	return &StorageEngine{
-		currBPlusTreeId: metadata.CurrBPlusTreeId,
+	wal, err := lucario.NewWAL("./lucario.wal")
 
-		openBPlusTreesMutex: &sync.Mutex{},
-		openBPlusTrees:      make(map[uint64]*bplustree.BPlusTree),
+	if err != nil {
+		return nil, false, err
+	}
 
-		metadata:          metadata,
-		bufferPoolManager: bufferPoolManager,
-	}, isNewDatabase, err
+	engine.currBPlusTreeId = metadata.CurrBPlusTreeId
+
+	engine.openBPlusTreesMutex = &sync.Mutex{}
+	engine.openBPlusTrees = make(map[uint64]*bplustree.BPlusTree)
+	engine.metadata = metadata
+
+	engine.wal = wal
+
+	engine.redoFuncMapping = map[lucario.Operation]RedoFunc{
+		lucario.CreatePage:                engine.RedoCreatePageOperation,
+		lucario.UpdateRootNodePageId:      engine.RedoUpdateRootNodePageId,
+		lucario.UpdateFirstLeafNodePageId: engine.RedoUpdateFirstLeafNodePageId,
+		lucario.UpdateLeafNodeEntry:       engine.RedoUpdateLeafNodeEntry,
+		lucario.InsertLeafNodeEntry:       engine.RedoInsertLeafNodeEntry,
+		lucario.SplitInternalNode:         engine.RedoSplitInternalNode,
+		lucario.SplitLeafNode:             engine.RedoSplitLeafNode,
+	}
+
+	engine.bufferPoolManager = bufferPoolManager
+
+	return engine, isNewDatabase, err
 
 }
 func (engine *StorageEngine) NewBPlusTree() (BPlusTreeId uint64) {
