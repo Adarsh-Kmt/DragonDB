@@ -1,0 +1,970 @@
+{"time":"2026-07-03T16:50:26.873934+05:30","level":"INFO","msg":"dragon.db file does not exist, creating new file...","filePath":"dragon.db","function":"NewDirectIODiskManager","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:26.874217+05:30","level":"INFO","msg":"Opening file in DIRECT I/O mode","function":"NewDirectIODiskManager","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:26.874577+05:30","level":"INFO","msg":"writing new metadata page","function":"NewDirectIODiskManager","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:26.874623+05:30","level":"INFO","msg":"Writing data to offset","offset":0,"size":4096,"function":"write","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:26.874719+05:30","level":"INFO","msg":"New metadata page written successfully","function":"NewDirectIODiskManager","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:26.874961+05:30","level":"INFO","msg":"WAL file does not exist"}
+{"time":"2026-07-03T16:50:26.875006+05:30","level":"INFO","msg":"inserting key 0"}
+{"time":"2026-07-03T16:50:26.879757+05:30","level":"INFO","msg":"Writing data to offset","offset":4096,"size":65536,"function":"write","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:26.880251+05:30","level":"INFO","msg":"allocating new page with page ID = 1","function":"allocatePage","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:26.882047+05:30","level":"INFO","msg":"Reading data from offset","offset":4096,"size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:26.882066+05:30","level":"INFO","msg":"allocating aligned block for read","size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:26.896659+05:30","level":"INFO","msg":"Starting Insert operation","key":"large_key_00","function":"Insert","at":"bptree"}
+{"time":"2026-07-03T16:50:26.89669+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1016,"freeSpace":4064,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:26.89961+05:30","level":"INFO","msg":"inserting key large_key_00 into page-id 1"}
+{"time":"2026-07-03T16:50:26.899623+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1020,"freeSpace":4064,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:26.902666+05:30","level":"INFO","msg":"------------------"}
+{"time":"2026-07-03T16:50:26.902677+05:30","level":"INFO","msg":"inserting key 1"}
+{"time":"2026-07-03T16:50:26.905697+05:30","level":"INFO","msg":"Starting Insert operation","key":"large_key_01","function":"Insert","at":"bptree"}
+{"time":"2026-07-03T16:50:26.905708+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1016,"freeSpace":3044,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:26.908898+05:30","level":"INFO","msg":"inserting key large_key_01 into page-id 1"}
+{"time":"2026-07-03T16:50:26.908915+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1020,"freeSpace":3044,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:26.911642+05:30","level":"INFO","msg":"------------------"}
+{"time":"2026-07-03T16:50:26.911657+05:30","level":"INFO","msg":"inserting key 2"}
+{"time":"2026-07-03T16:50:26.914595+05:30","level":"INFO","msg":"Starting Insert operation","key":"large_key_02","function":"Insert","at":"bptree"}
+{"time":"2026-07-03T16:50:26.914605+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1016,"freeSpace":2024,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:26.918287+05:30","level":"INFO","msg":"inserting key large_key_02 into page-id 1"}
+{"time":"2026-07-03T16:50:26.918299+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1020,"freeSpace":2024,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:26.921621+05:30","level":"INFO","msg":"------------------"}
+{"time":"2026-07-03T16:50:26.921629+05:30","level":"INFO","msg":"inserting key 3"}
+{"time":"2026-07-03T16:50:26.924614+05:30","level":"INFO","msg":"Starting Insert operation","key":"large_key_03","function":"Insert","at":"bptree"}
+{"time":"2026-07-03T16:50:26.924634+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1016,"freeSpace":1004,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:26.92466+05:30","level":"INFO","msg":"Creating new root node due to split","extra_key":"large_key_03","value":"ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKL","function":"Insert","at":"btree"}
+{"time":"2026-07-03T16:50:26.92469+05:30","level":"INFO","msg":"allocating new page with page ID = 2","function":"allocatePage","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:26.924699+05:30","level":"INFO","msg":"Reading data from offset","offset":8192,"size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:26.924703+05:30","level":"INFO","msg":"allocating aligned block for read","size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:26.927648+05:30","level":"INFO","msg":"allocating new page with page ID = 3","function":"allocatePage","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:26.927662+05:30","level":"INFO","msg":"Reading data from offset","offset":12288,"size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:26.927668+05:30","level":"INFO","msg":"allocating aligned block for read","size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:26.931553+05:30","level":"INFO","msg":"splitting node 1"}
+{"time":"2026-07-03T16:50:26.931568+05:30","level":"INFO","msg":"inserting key large_key_03 into page-id 3"}
+{"time":"2026-07-03T16:50:26.931574+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1020,"freeSpace":3044,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:26.933022+05:30","level":"INFO","msg":"inserting key large_key_02 into page-id 2"}
+{"time":"2026-07-03T16:50:26.933029+05:30","level":"INFO","msg":"Inserting element in page...","key":"large_key_02","left_child_node_page_ID":1,"right_child_node_page_ID":3,"function":"InsertElement","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:26.933032+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":34,"freeSpace":4064,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:26.937656+05:30","level":"INFO","msg":"------------------"}
+{"time":"2026-07-03T16:50:26.937666+05:30","level":"INFO","msg":"inserting key 4"}
+{"time":"2026-07-03T16:50:26.939077+05:30","level":"INFO","msg":"Starting Insert operation","key":"large_key_04","function":"Insert","at":"bptree"}
+{"time":"2026-07-03T16:50:26.93909+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1016,"freeSpace":2024,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:26.941639+05:30","level":"INFO","msg":"inserting key large_key_04 into page-id 3"}
+{"time":"2026-07-03T16:50:26.941649+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1020,"freeSpace":2024,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:26.944607+05:30","level":"INFO","msg":"------------------"}
+{"time":"2026-07-03T16:50:26.944618+05:30","level":"INFO","msg":"inserting key 5"}
+{"time":"2026-07-03T16:50:26.947559+05:30","level":"INFO","msg":"Starting Insert operation","key":"large_key_05","function":"Insert","at":"bptree"}
+{"time":"2026-07-03T16:50:26.947572+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1016,"freeSpace":1004,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:26.947584+05:30","level":"INFO","msg":"allocating new page with page ID = 4","function":"allocatePage","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:26.947589+05:30","level":"INFO","msg":"Reading data from offset","offset":16384,"size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:26.947593+05:30","level":"INFO","msg":"allocating aligned block for read","size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:26.953575+05:30","level":"INFO","msg":"splitting node 3"}
+{"time":"2026-07-03T16:50:26.95359+05:30","level":"INFO","msg":"inserting key large_key_05 into page-id 4"}
+{"time":"2026-07-03T16:50:26.953596+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1020,"freeSpace":3044,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:26.953606+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":30,"freeSpace":4030,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:26.956634+05:30","level":"INFO","msg":"inserting key large_key_04 into page-id 2"}
+{"time":"2026-07-03T16:50:26.956648+05:30","level":"INFO","msg":"Inserting element in page...","key":"large_key_04","left_child_node_page_ID":3,"right_child_node_page_ID":4,"function":"InsertElement","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:26.956654+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":34,"freeSpace":4030,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:26.959619+05:30","level":"INFO","msg":"------------------"}
+{"time":"2026-07-03T16:50:26.959632+05:30","level":"INFO","msg":"inserting key 6"}
+{"time":"2026-07-03T16:50:26.962619+05:30","level":"INFO","msg":"Starting Insert operation","key":"large_key_06","function":"Insert","at":"bptree"}
+{"time":"2026-07-03T16:50:26.962631+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1016,"freeSpace":2024,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:26.965614+05:30","level":"INFO","msg":"inserting key large_key_06 into page-id 4"}
+{"time":"2026-07-03T16:50:26.965621+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1020,"freeSpace":2024,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:26.968609+05:30","level":"INFO","msg":"------------------"}
+{"time":"2026-07-03T16:50:26.968614+05:30","level":"INFO","msg":"inserting key 7"}
+{"time":"2026-07-03T16:50:26.971622+05:30","level":"INFO","msg":"Starting Insert operation","key":"large_key_07","function":"Insert","at":"bptree"}
+{"time":"2026-07-03T16:50:26.97164+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1016,"freeSpace":1004,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:26.971654+05:30","level":"INFO","msg":"allocating new page with page ID = 5","function":"allocatePage","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:26.97166+05:30","level":"INFO","msg":"Reading data from offset","offset":20480,"size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:26.971663+05:30","level":"INFO","msg":"allocating aligned block for read","size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:26.977577+05:30","level":"INFO","msg":"splitting node 4"}
+{"time":"2026-07-03T16:50:26.9776+05:30","level":"INFO","msg":"inserting key large_key_07 into page-id 5"}
+{"time":"2026-07-03T16:50:26.977607+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1020,"freeSpace":3044,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:26.977628+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":30,"freeSpace":3996,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:26.980579+05:30","level":"INFO","msg":"inserting key large_key_06 into page-id 2"}
+{"time":"2026-07-03T16:50:26.980589+05:30","level":"INFO","msg":"Inserting element in page...","key":"large_key_06","left_child_node_page_ID":4,"right_child_node_page_ID":5,"function":"InsertElement","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:26.980595+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":34,"freeSpace":3996,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:26.98362+05:30","level":"INFO","msg":"------------------"}
+{"time":"2026-07-03T16:50:26.983628+05:30","level":"INFO","msg":"inserting key 8"}
+{"time":"2026-07-03T16:50:26.986602+05:30","level":"INFO","msg":"Starting Insert operation","key":"large_key_08","function":"Insert","at":"bptree"}
+{"time":"2026-07-03T16:50:26.986616+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1016,"freeSpace":2024,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:26.989583+05:30","level":"INFO","msg":"inserting key large_key_08 into page-id 5"}
+{"time":"2026-07-03T16:50:26.989593+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1020,"freeSpace":2024,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:26.992597+05:30","level":"INFO","msg":"------------------"}
+{"time":"2026-07-03T16:50:26.992614+05:30","level":"INFO","msg":"inserting key 9"}
+{"time":"2026-07-03T16:50:26.994278+05:30","level":"INFO","msg":"Starting Insert operation","key":"large_key_09","function":"Insert","at":"bptree"}
+{"time":"2026-07-03T16:50:26.994354+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1016,"freeSpace":1004,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:26.994368+05:30","level":"INFO","msg":"allocating new page with page ID = 6","function":"allocatePage","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:26.994387+05:30","level":"INFO","msg":"Reading data from offset","offset":24576,"size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:26.994391+05:30","level":"INFO","msg":"allocating aligned block for read","size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:26.994413+05:30","level":"INFO","msg":"Writing data to offset","offset":4096,"size":4096,"function":"write","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:26.998953+05:30","level":"INFO","msg":"splitting node 5"}
+{"time":"2026-07-03T16:50:26.998969+05:30","level":"INFO","msg":"inserting key large_key_09 into page-id 6"}
+{"time":"2026-07-03T16:50:26.998974+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1020,"freeSpace":3044,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:26.998982+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":30,"freeSpace":3962,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.000712+05:30","level":"INFO","msg":"inserting key large_key_08 into page-id 2"}
+{"time":"2026-07-03T16:50:27.000719+05:30","level":"INFO","msg":"Inserting element in page...","key":"large_key_08","left_child_node_page_ID":5,"right_child_node_page_ID":6,"function":"InsertElement","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.000723+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":34,"freeSpace":3962,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.002532+05:30","level":"INFO","msg":"------------------"}
+{"time":"2026-07-03T16:50:27.002541+05:30","level":"INFO","msg":"inserting key 10"}
+{"time":"2026-07-03T16:50:27.005604+05:30","level":"INFO","msg":"Starting Insert operation","key":"large_key_10","function":"Insert","at":"bptree"}
+{"time":"2026-07-03T16:50:27.005625+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1016,"freeSpace":2024,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.008766+05:30","level":"INFO","msg":"inserting key large_key_10 into page-id 6"}
+{"time":"2026-07-03T16:50:27.008779+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1020,"freeSpace":2024,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.011863+05:30","level":"INFO","msg":"------------------"}
+{"time":"2026-07-03T16:50:27.011878+05:30","level":"INFO","msg":"inserting key 11"}
+{"time":"2026-07-03T16:50:27.014595+05:30","level":"INFO","msg":"Starting Insert operation","key":"large_key_11","function":"Insert","at":"bptree"}
+{"time":"2026-07-03T16:50:27.014968+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1016,"freeSpace":1004,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.014979+05:30","level":"INFO","msg":"allocating new page with page ID = 7","function":"allocatePage","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.014983+05:30","level":"INFO","msg":"Reading data from offset","offset":28672,"size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.014987+05:30","level":"INFO","msg":"allocating aligned block for read","size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.015+05:30","level":"INFO","msg":"Writing data to offset","offset":12288,"size":4096,"function":"write","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.021625+05:30","level":"INFO","msg":"splitting node 6"}
+{"time":"2026-07-03T16:50:27.022076+05:30","level":"INFO","msg":"inserting key large_key_11 into page-id 7"}
+{"time":"2026-07-03T16:50:27.022081+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1020,"freeSpace":3044,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.022088+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":30,"freeSpace":3928,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.023831+05:30","level":"INFO","msg":"inserting key large_key_10 into page-id 2"}
+{"time":"2026-07-03T16:50:27.023839+05:30","level":"INFO","msg":"Inserting element in page...","key":"large_key_10","left_child_node_page_ID":6,"right_child_node_page_ID":7,"function":"InsertElement","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.023849+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":34,"freeSpace":3928,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.025506+05:30","level":"INFO","msg":"------------------"}
+{"time":"2026-07-03T16:50:27.025558+05:30","level":"INFO","msg":"inserting key 12"}
+{"time":"2026-07-03T16:50:27.028587+05:30","level":"INFO","msg":"Starting Insert operation","key":"large_key_12","function":"Insert","at":"bptree"}
+{"time":"2026-07-03T16:50:27.028598+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1016,"freeSpace":2024,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.031634+05:30","level":"INFO","msg":"inserting key large_key_12 into page-id 7"}
+{"time":"2026-07-03T16:50:27.031641+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1020,"freeSpace":2024,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.034617+05:30","level":"INFO","msg":"------------------"}
+{"time":"2026-07-03T16:50:27.034623+05:30","level":"INFO","msg":"inserting key 13"}
+{"time":"2026-07-03T16:50:27.037609+05:30","level":"INFO","msg":"Starting Insert operation","key":"large_key_13","function":"Insert","at":"bptree"}
+{"time":"2026-07-03T16:50:27.037619+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1016,"freeSpace":1004,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.037629+05:30","level":"INFO","msg":"allocating new page with page ID = 8","function":"allocatePage","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.037641+05:30","level":"INFO","msg":"Reading data from offset","offset":32768,"size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.037644+05:30","level":"INFO","msg":"allocating aligned block for read","size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.037669+05:30","level":"INFO","msg":"Writing data to offset","offset":16384,"size":4096,"function":"write","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.043626+05:30","level":"INFO","msg":"splitting node 7"}
+{"time":"2026-07-03T16:50:27.043645+05:30","level":"INFO","msg":"inserting key large_key_13 into page-id 8"}
+{"time":"2026-07-03T16:50:27.043652+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1020,"freeSpace":3044,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.043663+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":30,"freeSpace":3894,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.046709+05:30","level":"INFO","msg":"inserting key large_key_12 into page-id 2"}
+{"time":"2026-07-03T16:50:27.046719+05:30","level":"INFO","msg":"Inserting element in page...","key":"large_key_12","left_child_node_page_ID":7,"right_child_node_page_ID":8,"function":"InsertElement","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.046724+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":34,"freeSpace":3894,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.049629+05:30","level":"INFO","msg":"------------------"}
+{"time":"2026-07-03T16:50:27.049635+05:30","level":"INFO","msg":"inserting key 14"}
+{"time":"2026-07-03T16:50:27.05148+05:30","level":"INFO","msg":"Starting Insert operation","key":"large_key_14","function":"Insert","at":"bptree"}
+{"time":"2026-07-03T16:50:27.051491+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1016,"freeSpace":2024,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.054846+05:30","level":"INFO","msg":"inserting key large_key_14 into page-id 8"}
+{"time":"2026-07-03T16:50:27.054855+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1020,"freeSpace":2024,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.057703+05:30","level":"INFO","msg":"------------------"}
+{"time":"2026-07-03T16:50:27.057712+05:30","level":"INFO","msg":"inserting key 15"}
+{"time":"2026-07-03T16:50:27.059301+05:30","level":"INFO","msg":"Starting Insert operation","key":"large_key_15","function":"Insert","at":"bptree"}
+{"time":"2026-07-03T16:50:27.059314+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1016,"freeSpace":1004,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.059326+05:30","level":"INFO","msg":"allocating new page with page ID = 9","function":"allocatePage","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.059331+05:30","level":"INFO","msg":"Reading data from offset","offset":36864,"size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.059335+05:30","level":"INFO","msg":"allocating aligned block for read","size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.05935+05:30","level":"INFO","msg":"Writing data to offset","offset":20480,"size":4096,"function":"write","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.065636+05:30","level":"INFO","msg":"splitting node 8"}
+{"time":"2026-07-03T16:50:27.065649+05:30","level":"INFO","msg":"inserting key large_key_15 into page-id 9"}
+{"time":"2026-07-03T16:50:27.065656+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1020,"freeSpace":3044,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.065666+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":30,"freeSpace":3860,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.067471+05:30","level":"INFO","msg":"inserting key large_key_14 into page-id 2"}
+{"time":"2026-07-03T16:50:27.06748+05:30","level":"INFO","msg":"Inserting element in page...","key":"large_key_14","left_child_node_page_ID":8,"right_child_node_page_ID":9,"function":"InsertElement","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.067484+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":34,"freeSpace":3860,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.070632+05:30","level":"INFO","msg":"------------------"}
+{"time":"2026-07-03T16:50:27.07066+05:30","level":"INFO","msg":"inserting key 16"}
+{"time":"2026-07-03T16:50:27.073629+05:30","level":"INFO","msg":"Starting Insert operation","key":"large_key_16","function":"Insert","at":"bptree"}
+{"time":"2026-07-03T16:50:27.073666+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1016,"freeSpace":2024,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.076602+05:30","level":"INFO","msg":"inserting key large_key_16 into page-id 9"}
+{"time":"2026-07-03T16:50:27.076611+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1020,"freeSpace":2024,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.079627+05:30","level":"INFO","msg":"------------------"}
+{"time":"2026-07-03T16:50:27.079637+05:30","level":"INFO","msg":"inserting key 17"}
+{"time":"2026-07-03T16:50:27.082637+05:30","level":"INFO","msg":"Starting Insert operation","key":"large_key_17","function":"Insert","at":"bptree"}
+{"time":"2026-07-03T16:50:27.082655+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1016,"freeSpace":1004,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.082666+05:30","level":"INFO","msg":"allocating new page with page ID = 10","function":"allocatePage","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.082671+05:30","level":"INFO","msg":"Reading data from offset","offset":40960,"size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.082675+05:30","level":"INFO","msg":"allocating aligned block for read","size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.082683+05:30","level":"INFO","msg":"Writing data to offset","offset":24576,"size":4096,"function":"write","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.088652+05:30","level":"INFO","msg":"splitting node 9"}
+{"time":"2026-07-03T16:50:27.088709+05:30","level":"INFO","msg":"inserting key large_key_17 into page-id 10"}
+{"time":"2026-07-03T16:50:27.088721+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1020,"freeSpace":3044,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.088738+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":30,"freeSpace":3826,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.091618+05:30","level":"INFO","msg":"inserting key large_key_16 into page-id 2"}
+{"time":"2026-07-03T16:50:27.091666+05:30","level":"INFO","msg":"Inserting element in page...","key":"large_key_16","left_child_node_page_ID":9,"right_child_node_page_ID":10,"function":"InsertElement","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.091682+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":34,"freeSpace":3826,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.094612+05:30","level":"INFO","msg":"------------------"}
+{"time":"2026-07-03T16:50:27.094625+05:30","level":"INFO","msg":"inserting key 18"}
+{"time":"2026-07-03T16:50:27.097617+05:30","level":"INFO","msg":"Starting Insert operation","key":"large_key_18","function":"Insert","at":"bptree"}
+{"time":"2026-07-03T16:50:27.097629+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1016,"freeSpace":2024,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.100628+05:30","level":"INFO","msg":"inserting key large_key_18 into page-id 10"}
+{"time":"2026-07-03T16:50:27.100639+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1020,"freeSpace":2024,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.103629+05:30","level":"INFO","msg":"------------------"}
+{"time":"2026-07-03T16:50:27.103637+05:30","level":"INFO","msg":"inserting key 19"}
+{"time":"2026-07-03T16:50:27.106618+05:30","level":"INFO","msg":"Starting Insert operation","key":"large_key_19","function":"Insert","at":"bptree"}
+{"time":"2026-07-03T16:50:27.106629+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1016,"freeSpace":1004,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.106639+05:30","level":"INFO","msg":"allocating new page with page ID = 11","function":"allocatePage","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.106645+05:30","level":"INFO","msg":"Reading data from offset","offset":45056,"size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.106648+05:30","level":"INFO","msg":"allocating aligned block for read","size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.106659+05:30","level":"INFO","msg":"Writing data to offset","offset":28672,"size":4096,"function":"write","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.112613+05:30","level":"INFO","msg":"splitting node 10"}
+{"time":"2026-07-03T16:50:27.112631+05:30","level":"INFO","msg":"inserting key large_key_19 into page-id 11"}
+{"time":"2026-07-03T16:50:27.112636+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1020,"freeSpace":3044,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.112645+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":30,"freeSpace":3792,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.115618+05:30","level":"INFO","msg":"inserting key large_key_18 into page-id 2"}
+{"time":"2026-07-03T16:50:27.115626+05:30","level":"INFO","msg":"Inserting element in page...","key":"large_key_18","left_child_node_page_ID":10,"right_child_node_page_ID":11,"function":"InsertElement","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.11563+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":34,"freeSpace":3792,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.117314+05:30","level":"INFO","msg":"------------------"}
+{"time":"2026-07-03T16:50:27.117338+05:30","level":"INFO","msg":"Opening file in DIRECT I/O mode","function":"NewDirectIODiskManager","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.1174+05:30","level":"INFO","msg":"Reading metadata page from existing file","function":"NewDirectIODiskManager","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.117406+05:30","level":"INFO","msg":"Reading data from offset","offset":0,"size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.117411+05:30","level":"INFO","msg":"allocating aligned block for read","size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.11746+05:30","level":"INFO","msg":"WAL file exists"}
+{"time":"2026-07-03T16:50:27.117464+05:30","level":"INFO","msg":"SEEK","TO":51478}
+{"time":"2026-07-03T16:50:27.11747+05:30","level":"INFO","msg":"BYTE ARRAY CONTENTS ","last WAL record length":"AAAAAAAAABI="}
+{"time":"2026-07-03T16:50:27.11752+05:30","level":"INFO","msg":"WAl record decoded","LSN":83,"Operation":10}
+{"time":"2026-07-03T16:50:27.11753+05:30","level":"INFO","msg":"starting recovery...","currOffset":0,"wal file size":51486}
+{"time":"2026-07-03T16:50:27.117535+05:30","level":"INFO","msg":"WAl record decoded","LSN":1,"Operation":9}
+{"time":"2026-07-03T16:50:27.117539+05:30","level":"INFO","msg":"WAL RECORD","LSN":1,"Operation":9}
+{"time":"2026-07-03T16:50:27.117542+05:30","level":"INFO","msg":"WAl record decoded","LSN":2,"Operation":0}
+{"time":"2026-07-03T16:50:27.11758+05:30","level":"INFO","msg":"WAL RECORD","LSN":2,"Operation":0}
+{"time":"2026-07-03T16:50:27.117584+05:30","level":"INFO","msg":"WAl record decoded","LSN":3,"Operation":8}
+{"time":"2026-07-03T16:50:27.117586+05:30","level":"INFO","msg":"WAL RECORD","LSN":3,"Operation":8}
+{"time":"2026-07-03T16:50:27.117589+05:30","level":"INFO","msg":"WAl record decoded","LSN":4,"Operation":7}
+{"time":"2026-07-03T16:50:27.117591+05:30","level":"INFO","msg":"WAL RECORD","LSN":4,"Operation":7}
+{"time":"2026-07-03T16:50:27.117595+05:30","level":"INFO","msg":"WAl record decoded","LSN":5,"Operation":3}
+{"time":"2026-07-03T16:50:27.117596+05:30","level":"INFO","msg":"WAL RECORD","LSN":5,"Operation":3}
+{"time":"2026-07-03T16:50:27.117599+05:30","level":"INFO","msg":"WAl record decoded","LSN":6,"Operation":10}
+{"time":"2026-07-03T16:50:27.117602+05:30","level":"INFO","msg":"WAL RECORD","LSN":6,"Operation":10}
+{"time":"2026-07-03T16:50:27.117605+05:30","level":"INFO","msg":"found BEGIN"}
+{"time":"2026-07-03T16:50:27.117607+05:30","level":"INFO","msg":"Redo: CreatePageOperation","pageId":1,"allocationSource":1,"pageType":0,"lsn":2}
+{"time":"2026-07-03T16:50:27.117616+05:30","level":"INFO","msg":"Reading data from offset","offset":4096,"size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.117619+05:30","level":"INFO","msg":"allocating aligned block for read","size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.117626+05:30","level":"INFO","msg":"Redo: UpdateFirstLeafNodePageId","bplusTreeId":1,"firstLeafNodePageId":1,"lsn":3}
+{"time":"2026-07-03T16:50:27.117629+05:30","level":"INFO","msg":"Redo: UpdateRootNodePageId","bplusTreeId":1,"rootNodePageId":1,"lsn":4}
+{"time":"2026-07-03T16:50:27.117632+05:30","level":"INFO","msg":"Redo: InsertLeafNodeEntry","pageId":1,"key":"large_key_00","valueLength":1000,"lsn":5}
+{"time":"2026-07-03T16:50:27.117636+05:30","level":"INFO","msg":"found COMMIT"}
+{"time":"2026-07-03T16:50:27.117639+05:30","level":"INFO","msg":"WAl record decoded","LSN":7,"Operation":9}
+{"time":"2026-07-03T16:50:27.117642+05:30","level":"INFO","msg":"WAL RECORD","LSN":7,"Operation":9}
+{"time":"2026-07-03T16:50:27.117645+05:30","level":"INFO","msg":"WAl record decoded","LSN":8,"Operation":3}
+{"time":"2026-07-03T16:50:27.117648+05:30","level":"INFO","msg":"WAL RECORD","LSN":8,"Operation":3}
+{"time":"2026-07-03T16:50:27.117651+05:30","level":"INFO","msg":"WAl record decoded","LSN":9,"Operation":10}
+{"time":"2026-07-03T16:50:27.117653+05:30","level":"INFO","msg":"WAL RECORD","LSN":9,"Operation":10}
+{"time":"2026-07-03T16:50:27.117655+05:30","level":"INFO","msg":"found BEGIN"}
+{"time":"2026-07-03T16:50:27.117657+05:30","level":"INFO","msg":"Redo: InsertLeafNodeEntry","pageId":1,"key":"large_key_01","valueLength":1000,"lsn":8}
+{"time":"2026-07-03T16:50:27.11766+05:30","level":"INFO","msg":"found COMMIT"}
+{"time":"2026-07-03T16:50:27.117663+05:30","level":"INFO","msg":"WAl record decoded","LSN":10,"Operation":9}
+{"time":"2026-07-03T16:50:27.117665+05:30","level":"INFO","msg":"WAL RECORD","LSN":10,"Operation":9}
+{"time":"2026-07-03T16:50:27.11767+05:30","level":"INFO","msg":"WAl record decoded","LSN":11,"Operation":3}
+{"time":"2026-07-03T16:50:27.117673+05:30","level":"INFO","msg":"WAL RECORD","LSN":11,"Operation":3}
+{"time":"2026-07-03T16:50:27.117676+05:30","level":"INFO","msg":"WAl record decoded","LSN":12,"Operation":10}
+{"time":"2026-07-03T16:50:27.117678+05:30","level":"INFO","msg":"WAL RECORD","LSN":12,"Operation":10}
+{"time":"2026-07-03T16:50:27.11768+05:30","level":"INFO","msg":"found BEGIN"}
+{"time":"2026-07-03T16:50:27.117682+05:30","level":"INFO","msg":"Redo: InsertLeafNodeEntry","pageId":1,"key":"large_key_02","valueLength":1000,"lsn":11}
+{"time":"2026-07-03T16:50:27.117685+05:30","level":"INFO","msg":"found COMMIT"}
+{"time":"2026-07-03T16:50:27.117687+05:30","level":"INFO","msg":"WAl record decoded","LSN":13,"Operation":9}
+{"time":"2026-07-03T16:50:27.117689+05:30","level":"INFO","msg":"WAL RECORD","LSN":13,"Operation":9}
+{"time":"2026-07-03T16:50:27.117695+05:30","level":"INFO","msg":"WAl record decoded","LSN":14,"Operation":0}
+{"time":"2026-07-03T16:50:27.117697+05:30","level":"INFO","msg":"WAL RECORD","LSN":14,"Operation":0}
+{"time":"2026-07-03T16:50:27.1177+05:30","level":"INFO","msg":"WAl record decoded","LSN":15,"Operation":0}
+{"time":"2026-07-03T16:50:27.117702+05:30","level":"INFO","msg":"WAL RECORD","LSN":15,"Operation":0}
+{"time":"2026-07-03T16:50:27.117706+05:30","level":"INFO","msg":"WAl record decoded","LSN":16,"Operation":6}
+{"time":"2026-07-03T16:50:27.117708+05:30","level":"INFO","msg":"WAL RECORD","LSN":16,"Operation":6}
+{"time":"2026-07-03T16:50:27.117711+05:30","level":"INFO","msg":"WAl record decoded","LSN":17,"Operation":2}
+{"time":"2026-07-03T16:50:27.117713+05:30","level":"INFO","msg":"WAL RECORD","LSN":17,"Operation":2}
+{"time":"2026-07-03T16:50:27.117716+05:30","level":"INFO","msg":"WAl record decoded","LSN":18,"Operation":7}
+{"time":"2026-07-03T16:50:27.117718+05:30","level":"INFO","msg":"WAL RECORD","LSN":18,"Operation":7}
+{"time":"2026-07-03T16:50:27.117721+05:30","level":"INFO","msg":"WAl record decoded","LSN":19,"Operation":10}
+{"time":"2026-07-03T16:50:27.117723+05:30","level":"INFO","msg":"WAL RECORD","LSN":19,"Operation":10}
+{"time":"2026-07-03T16:50:27.117725+05:30","level":"INFO","msg":"found BEGIN"}
+{"time":"2026-07-03T16:50:27.117727+05:30","level":"INFO","msg":"Redo: CreatePageOperation","pageId":2,"allocationSource":1,"pageType":1,"lsn":14}
+{"time":"2026-07-03T16:50:27.117732+05:30","level":"INFO","msg":"Reading data from offset","offset":8192,"size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.117735+05:30","level":"INFO","msg":"allocating aligned block for read","size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.117739+05:30","level":"INFO","msg":"Redo: CreatePageOperation","pageId":3,"allocationSource":1,"pageType":0,"lsn":15}
+{"time":"2026-07-03T16:50:27.117745+05:30","level":"INFO","msg":"Reading data from offset","offset":12288,"size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.117747+05:30","level":"INFO","msg":"allocating aligned block for read","size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.117753+05:30","level":"INFO","msg":"Redo: SplitLeafNode","leftPageId":1,"rightPageId":3,"separatorKeyIndex":2,"insertKey":"large_key_03","nextLeafNodePageId":0,"lsn":16}
+{"time":"2026-07-03T16:50:27.117762+05:30","level":"INFO","msg":"Split recovery details","totalElements":3,"separatorIndex":2,"leftElementsCount":3,"rightElementsCount":1}
+{"time":"2026-07-03T16:50:27.117766+05:30","level":"INFO","msg":"Redo: InsertInternalNodeEntry","pageId":2,"key":"large_key_02","leftChildPageId":1,"rightChildPageId":3,"lsn":17}
+{"time":"2026-07-03T16:50:27.11777+05:30","level":"INFO","msg":"inserting key large_key_02 into page-id 2"}
+{"time":"2026-07-03T16:50:27.117772+05:30","level":"INFO","msg":"Inserting element in page...","key":"large_key_02","left_child_node_page_ID":1,"right_child_node_page_ID":3,"function":"InsertElement","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.117775+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":34,"freeSpace":4064,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.11778+05:30","level":"INFO","msg":"Redo: UpdateRootNodePageId","bplusTreeId":1,"rootNodePageId":2,"lsn":18}
+{"time":"2026-07-03T16:50:27.11779+05:30","level":"INFO","msg":"found COMMIT"}
+{"time":"2026-07-03T16:50:27.117796+05:30","level":"INFO","msg":"WAl record decoded","LSN":20,"Operation":9}
+{"time":"2026-07-03T16:50:27.1178+05:30","level":"INFO","msg":"WAL RECORD","LSN":20,"Operation":9}
+{"time":"2026-07-03T16:50:27.117804+05:30","level":"INFO","msg":"WAl record decoded","LSN":21,"Operation":3}
+{"time":"2026-07-03T16:50:27.117807+05:30","level":"INFO","msg":"WAL RECORD","LSN":21,"Operation":3}
+{"time":"2026-07-03T16:50:27.11781+05:30","level":"INFO","msg":"WAl record decoded","LSN":22,"Operation":10}
+{"time":"2026-07-03T16:50:27.117818+05:30","level":"INFO","msg":"WAL RECORD","LSN":22,"Operation":10}
+{"time":"2026-07-03T16:50:27.117821+05:30","level":"INFO","msg":"found BEGIN"}
+{"time":"2026-07-03T16:50:27.117824+05:30","level":"INFO","msg":"Redo: InsertLeafNodeEntry","pageId":3,"key":"large_key_04","valueLength":1000,"lsn":21}
+{"time":"2026-07-03T16:50:27.117827+05:30","level":"INFO","msg":"found COMMIT"}
+{"time":"2026-07-03T16:50:27.11783+05:30","level":"INFO","msg":"WAl record decoded","LSN":23,"Operation":9}
+{"time":"2026-07-03T16:50:27.117832+05:30","level":"INFO","msg":"WAL RECORD","LSN":23,"Operation":9}
+{"time":"2026-07-03T16:50:27.117836+05:30","level":"INFO","msg":"WAl record decoded","LSN":24,"Operation":0}
+{"time":"2026-07-03T16:50:27.117838+05:30","level":"INFO","msg":"WAL RECORD","LSN":24,"Operation":0}
+{"time":"2026-07-03T16:50:27.117841+05:30","level":"INFO","msg":"WAl record decoded","LSN":25,"Operation":6}
+{"time":"2026-07-03T16:50:27.117844+05:30","level":"INFO","msg":"WAL RECORD","LSN":25,"Operation":6}
+{"time":"2026-07-03T16:50:27.117865+05:30","level":"INFO","msg":"WAl record decoded","LSN":26,"Operation":2}
+{"time":"2026-07-03T16:50:27.117868+05:30","level":"INFO","msg":"WAL RECORD","LSN":26,"Operation":2}
+{"time":"2026-07-03T16:50:27.117901+05:30","level":"INFO","msg":"WAl record decoded","LSN":27,"Operation":10}
+{"time":"2026-07-03T16:50:27.117904+05:30","level":"INFO","msg":"WAL RECORD","LSN":27,"Operation":10}
+{"time":"2026-07-03T16:50:27.117906+05:30","level":"INFO","msg":"found BEGIN"}
+{"time":"2026-07-03T16:50:27.117908+05:30","level":"INFO","msg":"Redo: CreatePageOperation","pageId":4,"allocationSource":1,"pageType":0,"lsn":24}
+{"time":"2026-07-03T16:50:27.117913+05:30","level":"INFO","msg":"Reading data from offset","offset":16384,"size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.117916+05:30","level":"INFO","msg":"allocating aligned block for read","size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.117922+05:30","level":"INFO","msg":"Redo: SplitLeafNode","leftPageId":3,"rightPageId":4,"separatorKeyIndex":2,"insertKey":"large_key_05","nextLeafNodePageId":0,"lsn":25}
+{"time":"2026-07-03T16:50:27.117928+05:30","level":"INFO","msg":"Split recovery details","totalElements":3,"separatorIndex":2,"leftElementsCount":3,"rightElementsCount":1}
+{"time":"2026-07-03T16:50:27.117931+05:30","level":"INFO","msg":"Redo: InsertInternalNodeEntry","pageId":2,"key":"large_key_04","leftChildPageId":3,"rightChildPageId":4,"lsn":26}
+{"time":"2026-07-03T16:50:27.117934+05:30","level":"INFO","msg":"inserting key large_key_04 into page-id 2"}
+{"time":"2026-07-03T16:50:27.117936+05:30","level":"INFO","msg":"Inserting element in page...","key":"large_key_04","left_child_node_page_ID":3,"right_child_node_page_ID":4,"function":"InsertElement","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.117938+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":34,"freeSpace":4030,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.117944+05:30","level":"INFO","msg":"found COMMIT"}
+{"time":"2026-07-03T16:50:27.117947+05:30","level":"INFO","msg":"WAl record decoded","LSN":28,"Operation":9}
+{"time":"2026-07-03T16:50:27.117949+05:30","level":"INFO","msg":"WAL RECORD","LSN":28,"Operation":9}
+{"time":"2026-07-03T16:50:27.117952+05:30","level":"INFO","msg":"WAl record decoded","LSN":29,"Operation":3}
+{"time":"2026-07-03T16:50:27.117955+05:30","level":"INFO","msg":"WAL RECORD","LSN":29,"Operation":3}
+{"time":"2026-07-03T16:50:27.117975+05:30","level":"INFO","msg":"WAl record decoded","LSN":30,"Operation":10}
+{"time":"2026-07-03T16:50:27.117981+05:30","level":"INFO","msg":"WAL RECORD","LSN":30,"Operation":10}
+{"time":"2026-07-03T16:50:27.117987+05:30","level":"INFO","msg":"found BEGIN"}
+{"time":"2026-07-03T16:50:27.11799+05:30","level":"INFO","msg":"Redo: InsertLeafNodeEntry","pageId":4,"key":"large_key_06","valueLength":1000,"lsn":29}
+{"time":"2026-07-03T16:50:27.117993+05:30","level":"INFO","msg":"found COMMIT"}
+{"time":"2026-07-03T16:50:27.118002+05:30","level":"INFO","msg":"WAl record decoded","LSN":31,"Operation":9}
+{"time":"2026-07-03T16:50:27.118005+05:30","level":"INFO","msg":"WAL RECORD","LSN":31,"Operation":9}
+{"time":"2026-07-03T16:50:27.118009+05:30","level":"INFO","msg":"WAl record decoded","LSN":32,"Operation":0}
+{"time":"2026-07-03T16:50:27.118011+05:30","level":"INFO","msg":"WAL RECORD","LSN":32,"Operation":0}
+{"time":"2026-07-03T16:50:27.118016+05:30","level":"INFO","msg":"WAl record decoded","LSN":33,"Operation":6}
+{"time":"2026-07-03T16:50:27.118019+05:30","level":"INFO","msg":"WAL RECORD","LSN":33,"Operation":6}
+{"time":"2026-07-03T16:50:27.118022+05:30","level":"INFO","msg":"WAl record decoded","LSN":34,"Operation":2}
+{"time":"2026-07-03T16:50:27.118024+05:30","level":"INFO","msg":"WAL RECORD","LSN":34,"Operation":2}
+{"time":"2026-07-03T16:50:27.118027+05:30","level":"INFO","msg":"WAl record decoded","LSN":35,"Operation":10}
+{"time":"2026-07-03T16:50:27.118029+05:30","level":"INFO","msg":"WAL RECORD","LSN":35,"Operation":10}
+{"time":"2026-07-03T16:50:27.118032+05:30","level":"INFO","msg":"found BEGIN"}
+{"time":"2026-07-03T16:50:27.118041+05:30","level":"INFO","msg":"Redo: CreatePageOperation","pageId":5,"allocationSource":1,"pageType":0,"lsn":32}
+{"time":"2026-07-03T16:50:27.118052+05:30","level":"INFO","msg":"Reading data from offset","offset":20480,"size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.118055+05:30","level":"INFO","msg":"allocating aligned block for read","size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.118061+05:30","level":"INFO","msg":"Redo: SplitLeafNode","leftPageId":4,"rightPageId":5,"separatorKeyIndex":2,"insertKey":"large_key_07","nextLeafNodePageId":0,"lsn":33}
+{"time":"2026-07-03T16:50:27.118075+05:30","level":"INFO","msg":"Split recovery details","totalElements":3,"separatorIndex":2,"leftElementsCount":3,"rightElementsCount":1}
+{"time":"2026-07-03T16:50:27.118082+05:30","level":"INFO","msg":"Redo: InsertInternalNodeEntry","pageId":2,"key":"large_key_06","leftChildPageId":4,"rightChildPageId":5,"lsn":34}
+{"time":"2026-07-03T16:50:27.118086+05:30","level":"INFO","msg":"inserting key large_key_06 into page-id 2"}
+{"time":"2026-07-03T16:50:27.118088+05:30","level":"INFO","msg":"Inserting element in page...","key":"large_key_06","left_child_node_page_ID":4,"right_child_node_page_ID":5,"function":"InsertElement","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.118091+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":34,"freeSpace":3996,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.118112+05:30","level":"INFO","msg":"found COMMIT"}
+{"time":"2026-07-03T16:50:27.118115+05:30","level":"INFO","msg":"WAl record decoded","LSN":36,"Operation":9}
+{"time":"2026-07-03T16:50:27.118118+05:30","level":"INFO","msg":"WAL RECORD","LSN":36,"Operation":9}
+{"time":"2026-07-03T16:50:27.118121+05:30","level":"INFO","msg":"WAl record decoded","LSN":37,"Operation":3}
+{"time":"2026-07-03T16:50:27.118123+05:30","level":"INFO","msg":"WAL RECORD","LSN":37,"Operation":3}
+{"time":"2026-07-03T16:50:27.118126+05:30","level":"INFO","msg":"WAl record decoded","LSN":38,"Operation":10}
+{"time":"2026-07-03T16:50:27.118128+05:30","level":"INFO","msg":"WAL RECORD","LSN":38,"Operation":10}
+{"time":"2026-07-03T16:50:27.118131+05:30","level":"INFO","msg":"found BEGIN"}
+{"time":"2026-07-03T16:50:27.118133+05:30","level":"INFO","msg":"Redo: InsertLeafNodeEntry","pageId":5,"key":"large_key_08","valueLength":1000,"lsn":37}
+{"time":"2026-07-03T16:50:27.118135+05:30","level":"INFO","msg":"found COMMIT"}
+{"time":"2026-07-03T16:50:27.118145+05:30","level":"INFO","msg":"WAl record decoded","LSN":39,"Operation":9}
+{"time":"2026-07-03T16:50:27.11815+05:30","level":"INFO","msg":"WAL RECORD","LSN":39,"Operation":9}
+{"time":"2026-07-03T16:50:27.118154+05:30","level":"INFO","msg":"WAl record decoded","LSN":40,"Operation":0}
+{"time":"2026-07-03T16:50:27.118157+05:30","level":"INFO","msg":"WAL RECORD","LSN":40,"Operation":0}
+{"time":"2026-07-03T16:50:27.118166+05:30","level":"INFO","msg":"WAl record decoded","LSN":41,"Operation":6}
+{"time":"2026-07-03T16:50:27.118168+05:30","level":"INFO","msg":"WAL RECORD","LSN":41,"Operation":6}
+{"time":"2026-07-03T16:50:27.118172+05:30","level":"INFO","msg":"WAl record decoded","LSN":42,"Operation":2}
+{"time":"2026-07-03T16:50:27.11818+05:30","level":"INFO","msg":"WAL RECORD","LSN":42,"Operation":2}
+{"time":"2026-07-03T16:50:27.118185+05:30","level":"INFO","msg":"WAl record decoded","LSN":43,"Operation":10}
+{"time":"2026-07-03T16:50:27.118197+05:30","level":"INFO","msg":"WAL RECORD","LSN":43,"Operation":10}
+{"time":"2026-07-03T16:50:27.1182+05:30","level":"INFO","msg":"found BEGIN"}
+{"time":"2026-07-03T16:50:27.118202+05:30","level":"INFO","msg":"Redo: CreatePageOperation","pageId":6,"allocationSource":1,"pageType":0,"lsn":40}
+{"time":"2026-07-03T16:50:27.118208+05:30","level":"INFO","msg":"Reading data from offset","offset":24576,"size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.118231+05:30","level":"INFO","msg":"allocating aligned block for read","size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.118238+05:30","level":"INFO","msg":"Writing data to offset","offset":4096,"size":4096,"function":"write","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.118249+05:30","level":"INFO","msg":"Redo: SplitLeafNode","leftPageId":5,"rightPageId":6,"separatorKeyIndex":2,"insertKey":"large_key_09","nextLeafNodePageId":0,"lsn":41}
+{"time":"2026-07-03T16:50:27.118259+05:30","level":"INFO","msg":"Split recovery details","totalElements":3,"separatorIndex":2,"leftElementsCount":3,"rightElementsCount":1}
+{"time":"2026-07-03T16:50:27.118263+05:30","level":"INFO","msg":"Redo: InsertInternalNodeEntry","pageId":2,"key":"large_key_08","leftChildPageId":5,"rightChildPageId":6,"lsn":42}
+{"time":"2026-07-03T16:50:27.118266+05:30","level":"INFO","msg":"inserting key large_key_08 into page-id 2"}
+{"time":"2026-07-03T16:50:27.118268+05:30","level":"INFO","msg":"Inserting element in page...","key":"large_key_08","left_child_node_page_ID":5,"right_child_node_page_ID":6,"function":"InsertElement","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.11827+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":34,"freeSpace":3962,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.118275+05:30","level":"INFO","msg":"found COMMIT"}
+{"time":"2026-07-03T16:50:27.118278+05:30","level":"INFO","msg":"WAl record decoded","LSN":44,"Operation":9}
+{"time":"2026-07-03T16:50:27.11828+05:30","level":"INFO","msg":"WAL RECORD","LSN":44,"Operation":9}
+{"time":"2026-07-03T16:50:27.118283+05:30","level":"INFO","msg":"WAl record decoded","LSN":45,"Operation":3}
+{"time":"2026-07-03T16:50:27.118285+05:30","level":"INFO","msg":"WAL RECORD","LSN":45,"Operation":3}
+{"time":"2026-07-03T16:50:27.118289+05:30","level":"INFO","msg":"WAl record decoded","LSN":46,"Operation":10}
+{"time":"2026-07-03T16:50:27.118291+05:30","level":"INFO","msg":"WAL RECORD","LSN":46,"Operation":10}
+{"time":"2026-07-03T16:50:27.118293+05:30","level":"INFO","msg":"found BEGIN"}
+{"time":"2026-07-03T16:50:27.118295+05:30","level":"INFO","msg":"Redo: InsertLeafNodeEntry","pageId":6,"key":"large_key_10","valueLength":1000,"lsn":45}
+{"time":"2026-07-03T16:50:27.118297+05:30","level":"INFO","msg":"found COMMIT"}
+{"time":"2026-07-03T16:50:27.1183+05:30","level":"INFO","msg":"WAl record decoded","LSN":47,"Operation":9}
+{"time":"2026-07-03T16:50:27.118302+05:30","level":"INFO","msg":"WAL RECORD","LSN":47,"Operation":9}
+{"time":"2026-07-03T16:50:27.118305+05:30","level":"INFO","msg":"WAl record decoded","LSN":48,"Operation":0}
+{"time":"2026-07-03T16:50:27.118307+05:30","level":"INFO","msg":"WAL RECORD","LSN":48,"Operation":0}
+{"time":"2026-07-03T16:50:27.118312+05:30","level":"INFO","msg":"WAl record decoded","LSN":49,"Operation":6}
+{"time":"2026-07-03T16:50:27.118314+05:30","level":"INFO","msg":"WAL RECORD","LSN":49,"Operation":6}
+{"time":"2026-07-03T16:50:27.118331+05:30","level":"INFO","msg":"WAl record decoded","LSN":50,"Operation":2}
+{"time":"2026-07-03T16:50:27.118334+05:30","level":"INFO","msg":"WAL RECORD","LSN":50,"Operation":2}
+{"time":"2026-07-03T16:50:27.118338+05:30","level":"INFO","msg":"WAl record decoded","LSN":51,"Operation":10}
+{"time":"2026-07-03T16:50:27.11834+05:30","level":"INFO","msg":"WAL RECORD","LSN":51,"Operation":10}
+{"time":"2026-07-03T16:50:27.118343+05:30","level":"INFO","msg":"found BEGIN"}
+{"time":"2026-07-03T16:50:27.118345+05:30","level":"INFO","msg":"Redo: CreatePageOperation","pageId":7,"allocationSource":1,"pageType":0,"lsn":48}
+{"time":"2026-07-03T16:50:27.118356+05:30","level":"INFO","msg":"Reading data from offset","offset":28672,"size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.118359+05:30","level":"INFO","msg":"allocating aligned block for read","size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.118365+05:30","level":"INFO","msg":"Writing data to offset","offset":12288,"size":4096,"function":"write","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.118384+05:30","level":"INFO","msg":"Redo: SplitLeafNode","leftPageId":6,"rightPageId":7,"separatorKeyIndex":2,"insertKey":"large_key_11","nextLeafNodePageId":0,"lsn":49}
+{"time":"2026-07-03T16:50:27.118391+05:30","level":"INFO","msg":"Split recovery details","totalElements":3,"separatorIndex":2,"leftElementsCount":3,"rightElementsCount":1}
+{"time":"2026-07-03T16:50:27.118394+05:30","level":"INFO","msg":"Redo: InsertInternalNodeEntry","pageId":2,"key":"large_key_10","leftChildPageId":6,"rightChildPageId":7,"lsn":50}
+{"time":"2026-07-03T16:50:27.118398+05:30","level":"INFO","msg":"inserting key large_key_10 into page-id 2"}
+{"time":"2026-07-03T16:50:27.1184+05:30","level":"INFO","msg":"Inserting element in page...","key":"large_key_10","left_child_node_page_ID":6,"right_child_node_page_ID":7,"function":"InsertElement","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.118402+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":34,"freeSpace":3928,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.118407+05:30","level":"INFO","msg":"found COMMIT"}
+{"time":"2026-07-03T16:50:27.11841+05:30","level":"INFO","msg":"WAl record decoded","LSN":52,"Operation":9}
+{"time":"2026-07-03T16:50:27.118412+05:30","level":"INFO","msg":"WAL RECORD","LSN":52,"Operation":9}
+{"time":"2026-07-03T16:50:27.118415+05:30","level":"INFO","msg":"WAl record decoded","LSN":53,"Operation":3}
+{"time":"2026-07-03T16:50:27.118417+05:30","level":"INFO","msg":"WAL RECORD","LSN":53,"Operation":3}
+{"time":"2026-07-03T16:50:27.11842+05:30","level":"INFO","msg":"WAl record decoded","LSN":54,"Operation":10}
+{"time":"2026-07-03T16:50:27.118433+05:30","level":"INFO","msg":"WAL RECORD","LSN":54,"Operation":10}
+{"time":"2026-07-03T16:50:27.118444+05:30","level":"INFO","msg":"found BEGIN"}
+{"time":"2026-07-03T16:50:27.118447+05:30","level":"INFO","msg":"Redo: InsertLeafNodeEntry","pageId":7,"key":"large_key_12","valueLength":1000,"lsn":53}
+{"time":"2026-07-03T16:50:27.118449+05:30","level":"INFO","msg":"found COMMIT"}
+{"time":"2026-07-03T16:50:27.118452+05:30","level":"INFO","msg":"WAl record decoded","LSN":55,"Operation":9}
+{"time":"2026-07-03T16:50:27.118454+05:30","level":"INFO","msg":"WAL RECORD","LSN":55,"Operation":9}
+{"time":"2026-07-03T16:50:27.118457+05:30","level":"INFO","msg":"WAl record decoded","LSN":56,"Operation":0}
+{"time":"2026-07-03T16:50:27.11846+05:30","level":"INFO","msg":"WAL RECORD","LSN":56,"Operation":0}
+{"time":"2026-07-03T16:50:27.118464+05:30","level":"INFO","msg":"WAl record decoded","LSN":57,"Operation":6}
+{"time":"2026-07-03T16:50:27.118466+05:30","level":"INFO","msg":"WAL RECORD","LSN":57,"Operation":6}
+{"time":"2026-07-03T16:50:27.118469+05:30","level":"INFO","msg":"WAl record decoded","LSN":58,"Operation":2}
+{"time":"2026-07-03T16:50:27.118471+05:30","level":"INFO","msg":"WAL RECORD","LSN":58,"Operation":2}
+{"time":"2026-07-03T16:50:27.118474+05:30","level":"INFO","msg":"WAl record decoded","LSN":59,"Operation":10}
+{"time":"2026-07-03T16:50:27.118479+05:30","level":"INFO","msg":"WAL RECORD","LSN":59,"Operation":10}
+{"time":"2026-07-03T16:50:27.118481+05:30","level":"INFO","msg":"found BEGIN"}
+{"time":"2026-07-03T16:50:27.118483+05:30","level":"INFO","msg":"Redo: CreatePageOperation","pageId":8,"allocationSource":1,"pageType":0,"lsn":56}
+{"time":"2026-07-03T16:50:27.11851+05:30","level":"INFO","msg":"Reading data from offset","offset":32768,"size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.118553+05:30","level":"INFO","msg":"allocating aligned block for read","size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.118563+05:30","level":"INFO","msg":"Writing data to offset","offset":16384,"size":4096,"function":"write","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.118567+05:30","level":"INFO","msg":"Redo: SplitLeafNode","leftPageId":7,"rightPageId":8,"separatorKeyIndex":2,"insertKey":"large_key_13","nextLeafNodePageId":0,"lsn":57}
+{"time":"2026-07-03T16:50:27.118574+05:30","level":"INFO","msg":"Split recovery details","totalElements":3,"separatorIndex":2,"leftElementsCount":3,"rightElementsCount":1}
+{"time":"2026-07-03T16:50:27.118578+05:30","level":"INFO","msg":"inserting key large_key_13 into page-id 8"}
+{"time":"2026-07-03T16:50:27.118581+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1020,"freeSpace":3044,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.118586+05:30","level":"INFO","msg":"Element 0: Key: large_key_12 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.118588+05:30","level":"INFO","msg":"Element 1: Key: large_key_13 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.11859+05:30","level":"INFO","msg":"Redo: InsertInternalNodeEntry","pageId":2,"key":"large_key_12","leftChildPageId":7,"rightChildPageId":8,"lsn":58}
+{"time":"2026-07-03T16:50:27.118593+05:30","level":"INFO","msg":"inserting key large_key_12 into page-id 2"}
+{"time":"2026-07-03T16:50:27.118595+05:30","level":"INFO","msg":"Inserting element in page...","key":"large_key_12","left_child_node_page_ID":7,"right_child_node_page_ID":8,"function":"InsertElement","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.118597+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":34,"freeSpace":3894,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.118601+05:30","level":"INFO","msg":"found COMMIT"}
+{"time":"2026-07-03T16:50:27.118604+05:30","level":"INFO","msg":"WAl record decoded","LSN":60,"Operation":9}
+{"time":"2026-07-03T16:50:27.118606+05:30","level":"INFO","msg":"WAL RECORD","LSN":60,"Operation":9}
+{"time":"2026-07-03T16:50:27.118618+05:30","level":"INFO","msg":"WAl record decoded","LSN":61,"Operation":3}
+{"time":"2026-07-03T16:50:27.11862+05:30","level":"INFO","msg":"WAL RECORD","LSN":61,"Operation":3}
+{"time":"2026-07-03T16:50:27.118624+05:30","level":"INFO","msg":"WAl record decoded","LSN":62,"Operation":10}
+{"time":"2026-07-03T16:50:27.118626+05:30","level":"INFO","msg":"WAL RECORD","LSN":62,"Operation":10}
+{"time":"2026-07-03T16:50:27.118628+05:30","level":"INFO","msg":"found BEGIN"}
+{"time":"2026-07-03T16:50:27.11863+05:30","level":"INFO","msg":"Redo: InsertLeafNodeEntry","pageId":8,"key":"large_key_14","valueLength":1000,"lsn":61}
+{"time":"2026-07-03T16:50:27.118633+05:30","level":"INFO","msg":"inserting key large_key_14 into page-id 8"}
+{"time":"2026-07-03T16:50:27.118641+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1020,"freeSpace":2024,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.118651+05:30","level":"INFO","msg":"found COMMIT"}
+{"time":"2026-07-03T16:50:27.118656+05:30","level":"INFO","msg":"WAl record decoded","LSN":63,"Operation":9}
+{"time":"2026-07-03T16:50:27.118659+05:30","level":"INFO","msg":"WAL RECORD","LSN":63,"Operation":9}
+{"time":"2026-07-03T16:50:27.118696+05:30","level":"INFO","msg":"WAl record decoded","LSN":64,"Operation":0}
+{"time":"2026-07-03T16:50:27.118705+05:30","level":"INFO","msg":"WAL RECORD","LSN":64,"Operation":0}
+{"time":"2026-07-03T16:50:27.118709+05:30","level":"INFO","msg":"WAl record decoded","LSN":65,"Operation":6}
+{"time":"2026-07-03T16:50:27.118711+05:30","level":"INFO","msg":"WAL RECORD","LSN":65,"Operation":6}
+{"time":"2026-07-03T16:50:27.118715+05:30","level":"INFO","msg":"WAl record decoded","LSN":66,"Operation":2}
+{"time":"2026-07-03T16:50:27.118718+05:30","level":"INFO","msg":"WAL RECORD","LSN":66,"Operation":2}
+{"time":"2026-07-03T16:50:27.11872+05:30","level":"INFO","msg":"WAl record decoded","LSN":67,"Operation":10}
+{"time":"2026-07-03T16:50:27.118723+05:30","level":"INFO","msg":"WAL RECORD","LSN":67,"Operation":10}
+{"time":"2026-07-03T16:50:27.118725+05:30","level":"INFO","msg":"found BEGIN"}
+{"time":"2026-07-03T16:50:27.118727+05:30","level":"INFO","msg":"Redo: CreatePageOperation","pageId":9,"allocationSource":1,"pageType":0,"lsn":64}
+{"time":"2026-07-03T16:50:27.118731+05:30","level":"INFO","msg":"Reading data from offset","offset":36864,"size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.118733+05:30","level":"INFO","msg":"allocating aligned block for read","size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.118744+05:30","level":"INFO","msg":"Writing data to offset","offset":20480,"size":4096,"function":"write","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.11875+05:30","level":"INFO","msg":"Redo: SplitLeafNode","leftPageId":8,"rightPageId":9,"separatorKeyIndex":2,"insertKey":"large_key_15","nextLeafNodePageId":0,"lsn":65}
+{"time":"2026-07-03T16:50:27.118782+05:30","level":"INFO","msg":"Split recovery details","totalElements":3,"separatorIndex":2,"leftElementsCount":3,"rightElementsCount":1}
+{"time":"2026-07-03T16:50:27.118787+05:30","level":"INFO","msg":"inserting key large_key_15 into page-id 9"}
+{"time":"2026-07-03T16:50:27.1188+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1020,"freeSpace":3044,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.118807+05:30","level":"INFO","msg":"Element 0: Key: large_key_14 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.11881+05:30","level":"INFO","msg":"Element 1: Key: large_key_15 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.118814+05:30","level":"INFO","msg":"Element 0: Key: large_key_12 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.118817+05:30","level":"INFO","msg":"Element 1: Key: large_key_13 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.118819+05:30","level":"INFO","msg":"Redo: InsertInternalNodeEntry","pageId":2,"key":"large_key_14","leftChildPageId":8,"rightChildPageId":9,"lsn":66}
+{"time":"2026-07-03T16:50:27.118822+05:30","level":"INFO","msg":"inserting key large_key_14 into page-id 2"}
+{"time":"2026-07-03T16:50:27.118824+05:30","level":"INFO","msg":"Inserting element in page...","key":"large_key_14","left_child_node_page_ID":8,"right_child_node_page_ID":9,"function":"InsertElement","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.118826+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":34,"freeSpace":3860,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.118831+05:30","level":"INFO","msg":"found COMMIT"}
+{"time":"2026-07-03T16:50:27.118834+05:30","level":"INFO","msg":"WAl record decoded","LSN":68,"Operation":9}
+{"time":"2026-07-03T16:50:27.118836+05:30","level":"INFO","msg":"WAL RECORD","LSN":68,"Operation":9}
+{"time":"2026-07-03T16:50:27.118842+05:30","level":"INFO","msg":"WAl record decoded","LSN":69,"Operation":3}
+{"time":"2026-07-03T16:50:27.118845+05:30","level":"INFO","msg":"WAL RECORD","LSN":69,"Operation":3}
+{"time":"2026-07-03T16:50:27.118849+05:30","level":"INFO","msg":"WAl record decoded","LSN":70,"Operation":10}
+{"time":"2026-07-03T16:50:27.118851+05:30","level":"INFO","msg":"WAL RECORD","LSN":70,"Operation":10}
+{"time":"2026-07-03T16:50:27.118879+05:30","level":"INFO","msg":"found BEGIN"}
+{"time":"2026-07-03T16:50:27.118883+05:30","level":"INFO","msg":"Redo: InsertLeafNodeEntry","pageId":9,"key":"large_key_16","valueLength":1000,"lsn":69}
+{"time":"2026-07-03T16:50:27.118894+05:30","level":"INFO","msg":"inserting key large_key_16 into page-id 9"}
+{"time":"2026-07-03T16:50:27.118907+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1020,"freeSpace":2024,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.118911+05:30","level":"INFO","msg":"found COMMIT"}
+{"time":"2026-07-03T16:50:27.118915+05:30","level":"INFO","msg":"WAl record decoded","LSN":71,"Operation":9}
+{"time":"2026-07-03T16:50:27.118917+05:30","level":"INFO","msg":"WAL RECORD","LSN":71,"Operation":9}
+{"time":"2026-07-03T16:50:27.11892+05:30","level":"INFO","msg":"WAl record decoded","LSN":72,"Operation":0}
+{"time":"2026-07-03T16:50:27.118922+05:30","level":"INFO","msg":"WAL RECORD","LSN":72,"Operation":0}
+{"time":"2026-07-03T16:50:27.118926+05:30","level":"INFO","msg":"WAl record decoded","LSN":73,"Operation":6}
+{"time":"2026-07-03T16:50:27.118928+05:30","level":"INFO","msg":"WAL RECORD","LSN":73,"Operation":6}
+{"time":"2026-07-03T16:50:27.118931+05:30","level":"INFO","msg":"WAl record decoded","LSN":74,"Operation":2}
+{"time":"2026-07-03T16:50:27.118933+05:30","level":"INFO","msg":"WAL RECORD","LSN":74,"Operation":2}
+{"time":"2026-07-03T16:50:27.118936+05:30","level":"INFO","msg":"WAl record decoded","LSN":75,"Operation":10}
+{"time":"2026-07-03T16:50:27.118938+05:30","level":"INFO","msg":"WAL RECORD","LSN":75,"Operation":10}
+{"time":"2026-07-03T16:50:27.118947+05:30","level":"INFO","msg":"found BEGIN"}
+{"time":"2026-07-03T16:50:27.118949+05:30","level":"INFO","msg":"Redo: CreatePageOperation","pageId":10,"allocationSource":1,"pageType":0,"lsn":72}
+{"time":"2026-07-03T16:50:27.118953+05:30","level":"INFO","msg":"Reading data from offset","offset":40960,"size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.118963+05:30","level":"INFO","msg":"allocating aligned block for read","size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.118993+05:30","level":"INFO","msg":"Writing data to offset","offset":24576,"size":4096,"function":"write","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.119005+05:30","level":"INFO","msg":"Redo: SplitLeafNode","leftPageId":9,"rightPageId":10,"separatorKeyIndex":2,"insertKey":"large_key_17","nextLeafNodePageId":0,"lsn":73}
+{"time":"2026-07-03T16:50:27.119012+05:30","level":"INFO","msg":"Split recovery details","totalElements":3,"separatorIndex":2,"leftElementsCount":3,"rightElementsCount":1}
+{"time":"2026-07-03T16:50:27.119016+05:30","level":"INFO","msg":"inserting key large_key_17 into page-id 10"}
+{"time":"2026-07-03T16:50:27.119018+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1020,"freeSpace":3044,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.119035+05:30","level":"INFO","msg":"Element 0: Key: large_key_16 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.119039+05:30","level":"INFO","msg":"Element 1: Key: large_key_17 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.119069+05:30","level":"INFO","msg":"Element 0: Key: large_key_14 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.119072+05:30","level":"INFO","msg":"Element 1: Key: large_key_15 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.119074+05:30","level":"INFO","msg":"Redo: InsertInternalNodeEntry","pageId":2,"key":"large_key_16","leftChildPageId":9,"rightChildPageId":10,"lsn":74}
+{"time":"2026-07-03T16:50:27.119107+05:30","level":"INFO","msg":"inserting key large_key_16 into page-id 2"}
+{"time":"2026-07-03T16:50:27.119126+05:30","level":"INFO","msg":"Inserting element in page...","key":"large_key_16","left_child_node_page_ID":9,"right_child_node_page_ID":10,"function":"InsertElement","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119133+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":34,"freeSpace":3826,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.119138+05:30","level":"INFO","msg":"found COMMIT"}
+{"time":"2026-07-03T16:50:27.119142+05:30","level":"INFO","msg":"WAl record decoded","LSN":76,"Operation":9}
+{"time":"2026-07-03T16:50:27.119144+05:30","level":"INFO","msg":"WAL RECORD","LSN":76,"Operation":9}
+{"time":"2026-07-03T16:50:27.119147+05:30","level":"INFO","msg":"WAl record decoded","LSN":77,"Operation":3}
+{"time":"2026-07-03T16:50:27.11915+05:30","level":"INFO","msg":"WAL RECORD","LSN":77,"Operation":3}
+{"time":"2026-07-03T16:50:27.119153+05:30","level":"INFO","msg":"WAl record decoded","LSN":78,"Operation":10}
+{"time":"2026-07-03T16:50:27.119163+05:30","level":"INFO","msg":"WAL RECORD","LSN":78,"Operation":10}
+{"time":"2026-07-03T16:50:27.119166+05:30","level":"INFO","msg":"found BEGIN"}
+{"time":"2026-07-03T16:50:27.119168+05:30","level":"INFO","msg":"Redo: InsertLeafNodeEntry","pageId":10,"key":"large_key_18","valueLength":1000,"lsn":77}
+{"time":"2026-07-03T16:50:27.119171+05:30","level":"INFO","msg":"inserting key large_key_18 into page-id 10"}
+{"time":"2026-07-03T16:50:27.119174+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1020,"freeSpace":2024,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.119188+05:30","level":"INFO","msg":"found COMMIT"}
+{"time":"2026-07-03T16:50:27.119192+05:30","level":"INFO","msg":"WAl record decoded","LSN":79,"Operation":9}
+{"time":"2026-07-03T16:50:27.119195+05:30","level":"INFO","msg":"WAL RECORD","LSN":79,"Operation":9}
+{"time":"2026-07-03T16:50:27.119198+05:30","level":"INFO","msg":"WAl record decoded","LSN":80,"Operation":0}
+{"time":"2026-07-03T16:50:27.1192+05:30","level":"INFO","msg":"WAL RECORD","LSN":80,"Operation":0}
+{"time":"2026-07-03T16:50:27.119225+05:30","level":"INFO","msg":"WAl record decoded","LSN":81,"Operation":6}
+{"time":"2026-07-03T16:50:27.119228+05:30","level":"INFO","msg":"WAL RECORD","LSN":81,"Operation":6}
+{"time":"2026-07-03T16:50:27.119245+05:30","level":"INFO","msg":"WAl record decoded","LSN":82,"Operation":2}
+{"time":"2026-07-03T16:50:27.119257+05:30","level":"INFO","msg":"WAL RECORD","LSN":82,"Operation":2}
+{"time":"2026-07-03T16:50:27.119262+05:30","level":"INFO","msg":"WAl record decoded","LSN":83,"Operation":10}
+{"time":"2026-07-03T16:50:27.119264+05:30","level":"INFO","msg":"WAL RECORD","LSN":83,"Operation":10}
+{"time":"2026-07-03T16:50:27.119266+05:30","level":"INFO","msg":"found BEGIN"}
+{"time":"2026-07-03T16:50:27.119268+05:30","level":"INFO","msg":"Redo: CreatePageOperation","pageId":11,"allocationSource":1,"pageType":0,"lsn":80}
+{"time":"2026-07-03T16:50:27.119273+05:30","level":"INFO","msg":"Reading data from offset","offset":45056,"size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.119275+05:30","level":"INFO","msg":"allocating aligned block for read","size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.119281+05:30","level":"INFO","msg":"Writing data to offset","offset":28672,"size":4096,"function":"write","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.119286+05:30","level":"INFO","msg":"Redo: SplitLeafNode","leftPageId":10,"rightPageId":11,"separatorKeyIndex":2,"insertKey":"large_key_19","nextLeafNodePageId":0,"lsn":81}
+{"time":"2026-07-03T16:50:27.119292+05:30","level":"INFO","msg":"Split recovery details","totalElements":3,"separatorIndex":2,"leftElementsCount":3,"rightElementsCount":1}
+{"time":"2026-07-03T16:50:27.119297+05:30","level":"INFO","msg":"inserting key large_key_19 into page-id 11"}
+{"time":"2026-07-03T16:50:27.119299+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":1020,"freeSpace":3044,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.119304+05:30","level":"INFO","msg":"Element 0: Key: large_key_18 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.119306+05:30","level":"INFO","msg":"Element 1: Key: large_key_19 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.11931+05:30","level":"INFO","msg":"Element 0: Key: large_key_16 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.119312+05:30","level":"INFO","msg":"Element 1: Key: large_key_17 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.119314+05:30","level":"INFO","msg":"Redo: InsertInternalNodeEntry","pageId":2,"key":"large_key_18","leftChildPageId":10,"rightChildPageId":11,"lsn":82}
+{"time":"2026-07-03T16:50:27.119317+05:30","level":"INFO","msg":"inserting key large_key_18 into page-id 2"}
+{"time":"2026-07-03T16:50:27.119319+05:30","level":"INFO","msg":"Inserting element in page...","key":"large_key_18","left_child_node_page_ID":10,"right_child_node_page_ID":11,"function":"InsertElement","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119321+05:30","level":"INFO","msg":"Checking if page has enough space...","requiredSpace":34,"freeSpace":3792,"function":"isAdequate","at":"HeaderCodec"}
+{"time":"2026-07-03T16:50:27.119327+05:30","level":"INFO","msg":"found COMMIT"}
+{"time":"2026-07-03T16:50:27.119329+05:30","level":"INFO","msg":"Writing data to offset","offset":45056,"size":4096,"function":"write","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.119342+05:30","level":"INFO","msg":"Writing data to offset","offset":32768,"size":4096,"function":"write","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.119359+05:30","level":"INFO","msg":"Writing data to offset","offset":36864,"size":4096,"function":"write","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.119396+05:30","level":"INFO","msg":"Writing data to offset","offset":40960,"size":4096,"function":"write","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.119403+05:30","level":"INFO","msg":"Writing data to offset","offset":8192,"size":4096,"function":"write","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.11941+05:30","level":"INFO","msg":"Starting Get operation","key":"large_key_00","function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.119412+05:30","level":"INFO","msg":"Creating read guard for root node","root_node_page_ID":2,"function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.119415+05:30","level":"INFO","msg":"Starting read traversal","function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.119417+05:30","level":"INFO","msg":"read traversal underway...","key":"large_key_00","page ID":2,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.119422+05:30","level":"INFO","msg":"Element 0: Key: large_key_02, LeftChildNodePageId: 1, RightChildNodePageId: 3","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119433+05:30","level":"INFO","msg":"Element 1: Key: large_key_04, LeftChildNodePageId: 3, RightChildNodePageId: 4","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119436+05:30","level":"INFO","msg":"Element 2: Key: large_key_06, LeftChildNodePageId: 4, RightChildNodePageId: 5","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119438+05:30","level":"INFO","msg":"Element 3: Key: large_key_08, LeftChildNodePageId: 5, RightChildNodePageId: 6","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.11944+05:30","level":"INFO","msg":"Element 4: Key: large_key_10, LeftChildNodePageId: 6, RightChildNodePageId: 7","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119442+05:30","level":"INFO","msg":"Element 5: Key: large_key_12, LeftChildNodePageId: 7, RightChildNodePageId: 8","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119444+05:30","level":"INFO","msg":"Element 6: Key: large_key_14, LeftChildNodePageId: 8, RightChildNodePageId: 9","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119446+05:30","level":"INFO","msg":"Element 7: Key: large_key_16, LeftChildNodePageId: 9, RightChildNodePageId: 10","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119448+05:30","level":"INFO","msg":"Element 8: Key: large_key_18, LeftChildNodePageId: 10, RightChildNodePageId: 11","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119451+05:30","level":"INFO","msg":"Element search result","key":"large_key_00","next_page_ID":1,"is_leaf_node":false,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.119455+05:30","level":"INFO","msg":"Reading data from offset","offset":4096,"size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.119457+05:30","level":"INFO","msg":"allocating aligned block for read","size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.119482+05:30","level":"INFO","msg":"Writing data to offset","offset":32768,"size":4096,"function":"write","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.119487+05:30","level":"INFO","msg":"Traversing to child node","next_page_ID":1,"function":"readTraversal","at":"bptree"}
+{"time":"2026-07-03T16:50:27.119489+05:30","level":"INFO","msg":"read traversal underway...","key":"large_key_00","page ID":1,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.119492+05:30","level":"INFO","msg":"Element 0: Key: large_key_00 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.119494+05:30","level":"INFO","msg":"Element 1: Key: large_key_01 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.119497+05:30","level":"INFO","msg":"Key found, returning value","key":"large_key_00","value_length":1000,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.119502+05:30","level":"INFO","msg":"Starting Get operation","key":"large_key_01","function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.119504+05:30","level":"INFO","msg":"Creating read guard for root node","root_node_page_ID":2,"function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.119506+05:30","level":"INFO","msg":"Starting read traversal","function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.119509+05:30","level":"INFO","msg":"read traversal underway...","key":"large_key_01","page ID":2,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.119512+05:30","level":"INFO","msg":"Element 0: Key: large_key_02, LeftChildNodePageId: 1, RightChildNodePageId: 3","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119526+05:30","level":"INFO","msg":"Element 1: Key: large_key_04, LeftChildNodePageId: 3, RightChildNodePageId: 4","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119553+05:30","level":"INFO","msg":"Element 2: Key: large_key_06, LeftChildNodePageId: 4, RightChildNodePageId: 5","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119571+05:30","level":"INFO","msg":"Element 3: Key: large_key_08, LeftChildNodePageId: 5, RightChildNodePageId: 6","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119586+05:30","level":"INFO","msg":"Element 4: Key: large_key_10, LeftChildNodePageId: 6, RightChildNodePageId: 7","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119589+05:30","level":"INFO","msg":"Element 5: Key: large_key_12, LeftChildNodePageId: 7, RightChildNodePageId: 8","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119611+05:30","level":"INFO","msg":"Element 6: Key: large_key_14, LeftChildNodePageId: 8, RightChildNodePageId: 9","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119618+05:30","level":"INFO","msg":"Element 7: Key: large_key_16, LeftChildNodePageId: 9, RightChildNodePageId: 10","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119621+05:30","level":"INFO","msg":"Element 8: Key: large_key_18, LeftChildNodePageId: 10, RightChildNodePageId: 11","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119638+05:30","level":"INFO","msg":"Element search result","key":"large_key_01","next_page_ID":1,"is_leaf_node":false,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.119642+05:30","level":"INFO","msg":"Traversing to child node","next_page_ID":1,"function":"readTraversal","at":"bptree"}
+{"time":"2026-07-03T16:50:27.119645+05:30","level":"INFO","msg":"read traversal underway...","key":"large_key_01","page ID":1,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.119648+05:30","level":"INFO","msg":"Element 0: Key: large_key_00 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.119651+05:30","level":"INFO","msg":"Element 1: Key: large_key_01 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.119653+05:30","level":"INFO","msg":"Key found, returning value","key":"large_key_01","value_length":1000,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.119657+05:30","level":"INFO","msg":"Starting Get operation","key":"large_key_02","function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.119659+05:30","level":"INFO","msg":"Creating read guard for root node","root_node_page_ID":2,"function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.119661+05:30","level":"INFO","msg":"Starting read traversal","function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.119664+05:30","level":"INFO","msg":"read traversal underway...","key":"large_key_02","page ID":2,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.119667+05:30","level":"INFO","msg":"Element 0: Key: large_key_02, LeftChildNodePageId: 1, RightChildNodePageId: 3","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119671+05:30","level":"INFO","msg":"Element 1: Key: large_key_04, LeftChildNodePageId: 3, RightChildNodePageId: 4","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119673+05:30","level":"INFO","msg":"Element 2: Key: large_key_06, LeftChildNodePageId: 4, RightChildNodePageId: 5","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119675+05:30","level":"INFO","msg":"Element 3: Key: large_key_08, LeftChildNodePageId: 5, RightChildNodePageId: 6","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119677+05:30","level":"INFO","msg":"Element 4: Key: large_key_10, LeftChildNodePageId: 6, RightChildNodePageId: 7","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119679+05:30","level":"INFO","msg":"Element 5: Key: large_key_12, LeftChildNodePageId: 7, RightChildNodePageId: 8","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119681+05:30","level":"INFO","msg":"Element 6: Key: large_key_14, LeftChildNodePageId: 8, RightChildNodePageId: 9","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119683+05:30","level":"INFO","msg":"Element 7: Key: large_key_16, LeftChildNodePageId: 9, RightChildNodePageId: 10","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119685+05:30","level":"INFO","msg":"Element 8: Key: large_key_18, LeftChildNodePageId: 10, RightChildNodePageId: 11","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119688+05:30","level":"INFO","msg":"Element search result","key":"large_key_02","next_page_ID":3,"is_leaf_node":false,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.119691+05:30","level":"INFO","msg":"Reading data from offset","offset":12288,"size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.119694+05:30","level":"INFO","msg":"allocating aligned block for read","size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.119699+05:30","level":"INFO","msg":"Writing data to offset","offset":36864,"size":4096,"function":"write","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.119703+05:30","level":"INFO","msg":"Traversing to child node","next_page_ID":3,"function":"readTraversal","at":"bptree"}
+{"time":"2026-07-03T16:50:27.119706+05:30","level":"INFO","msg":"read traversal underway...","key":"large_key_02","page ID":3,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.119716+05:30","level":"INFO","msg":"Element 0: Key: large_key_02 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.119733+05:30","level":"INFO","msg":"Element 1: Key: large_key_03 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.119736+05:30","level":"INFO","msg":"Key found, returning value","key":"large_key_02","value_length":1000,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.119747+05:30","level":"INFO","msg":"Starting Get operation","key":"large_key_03","function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.119751+05:30","level":"INFO","msg":"Creating read guard for root node","root_node_page_ID":2,"function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.119754+05:30","level":"INFO","msg":"Starting read traversal","function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.119756+05:30","level":"INFO","msg":"read traversal underway...","key":"large_key_03","page ID":2,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.119761+05:30","level":"INFO","msg":"Element 0: Key: large_key_02, LeftChildNodePageId: 1, RightChildNodePageId: 3","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119768+05:30","level":"INFO","msg":"Element 1: Key: large_key_04, LeftChildNodePageId: 3, RightChildNodePageId: 4","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119773+05:30","level":"INFO","msg":"Element 2: Key: large_key_06, LeftChildNodePageId: 4, RightChildNodePageId: 5","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119775+05:30","level":"INFO","msg":"Element 3: Key: large_key_08, LeftChildNodePageId: 5, RightChildNodePageId: 6","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119777+05:30","level":"INFO","msg":"Element 4: Key: large_key_10, LeftChildNodePageId: 6, RightChildNodePageId: 7","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119786+05:30","level":"INFO","msg":"Element 5: Key: large_key_12, LeftChildNodePageId: 7, RightChildNodePageId: 8","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119788+05:30","level":"INFO","msg":"Element 6: Key: large_key_14, LeftChildNodePageId: 8, RightChildNodePageId: 9","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.11979+05:30","level":"INFO","msg":"Element 7: Key: large_key_16, LeftChildNodePageId: 9, RightChildNodePageId: 10","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119792+05:30","level":"INFO","msg":"Element 8: Key: large_key_18, LeftChildNodePageId: 10, RightChildNodePageId: 11","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119796+05:30","level":"INFO","msg":"Element search result","key":"large_key_03","next_page_ID":3,"is_leaf_node":false,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.1198+05:30","level":"INFO","msg":"Traversing to child node","next_page_ID":3,"function":"readTraversal","at":"bptree"}
+{"time":"2026-07-03T16:50:27.119821+05:30","level":"INFO","msg":"read traversal underway...","key":"large_key_03","page ID":3,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.119831+05:30","level":"INFO","msg":"Element 0: Key: large_key_02 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.119837+05:30","level":"INFO","msg":"Element 1: Key: large_key_03 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.11984+05:30","level":"INFO","msg":"Key found, returning value","key":"large_key_03","value_length":1000,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.119844+05:30","level":"INFO","msg":"Starting Get operation","key":"large_key_04","function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.119847+05:30","level":"INFO","msg":"Creating read guard for root node","root_node_page_ID":2,"function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.119849+05:30","level":"INFO","msg":"Starting read traversal","function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.119851+05:30","level":"INFO","msg":"read traversal underway...","key":"large_key_04","page ID":2,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.119854+05:30","level":"INFO","msg":"Element 0: Key: large_key_02, LeftChildNodePageId: 1, RightChildNodePageId: 3","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119857+05:30","level":"INFO","msg":"Element 1: Key: large_key_04, LeftChildNodePageId: 3, RightChildNodePageId: 4","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119859+05:30","level":"INFO","msg":"Element 2: Key: large_key_06, LeftChildNodePageId: 4, RightChildNodePageId: 5","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119861+05:30","level":"INFO","msg":"Element 3: Key: large_key_08, LeftChildNodePageId: 5, RightChildNodePageId: 6","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119863+05:30","level":"INFO","msg":"Element 4: Key: large_key_10, LeftChildNodePageId: 6, RightChildNodePageId: 7","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119864+05:30","level":"INFO","msg":"Element 5: Key: large_key_12, LeftChildNodePageId: 7, RightChildNodePageId: 8","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119866+05:30","level":"INFO","msg":"Element 6: Key: large_key_14, LeftChildNodePageId: 8, RightChildNodePageId: 9","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119868+05:30","level":"INFO","msg":"Element 7: Key: large_key_16, LeftChildNodePageId: 9, RightChildNodePageId: 10","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.11987+05:30","level":"INFO","msg":"Element 8: Key: large_key_18, LeftChildNodePageId: 10, RightChildNodePageId: 11","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119873+05:30","level":"INFO","msg":"Element search result","key":"large_key_04","next_page_ID":4,"is_leaf_node":false,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.119877+05:30","level":"INFO","msg":"Reading data from offset","offset":16384,"size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.119879+05:30","level":"INFO","msg":"allocating aligned block for read","size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.119884+05:30","level":"INFO","msg":"Writing data to offset","offset":45056,"size":4096,"function":"write","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.119887+05:30","level":"INFO","msg":"Traversing to child node","next_page_ID":4,"function":"readTraversal","at":"bptree"}
+{"time":"2026-07-03T16:50:27.11989+05:30","level":"INFO","msg":"read traversal underway...","key":"large_key_04","page ID":4,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.119893+05:30","level":"INFO","msg":"Element 0: Key: large_key_04 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.119895+05:30","level":"INFO","msg":"Element 1: Key: large_key_05 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.119897+05:30","level":"INFO","msg":"Key found, returning value","key":"large_key_04","value_length":1000,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.119901+05:30","level":"INFO","msg":"Starting Get operation","key":"large_key_05","function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.119903+05:30","level":"INFO","msg":"Creating read guard for root node","root_node_page_ID":2,"function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.119905+05:30","level":"INFO","msg":"Starting read traversal","function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.119909+05:30","level":"INFO","msg":"read traversal underway...","key":"large_key_05","page ID":2,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.119913+05:30","level":"INFO","msg":"Element 0: Key: large_key_02, LeftChildNodePageId: 1, RightChildNodePageId: 3","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119916+05:30","level":"INFO","msg":"Element 1: Key: large_key_04, LeftChildNodePageId: 3, RightChildNodePageId: 4","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119919+05:30","level":"INFO","msg":"Element 2: Key: large_key_06, LeftChildNodePageId: 4, RightChildNodePageId: 5","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119921+05:30","level":"INFO","msg":"Element 3: Key: large_key_08, LeftChildNodePageId: 5, RightChildNodePageId: 6","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119923+05:30","level":"INFO","msg":"Element 4: Key: large_key_10, LeftChildNodePageId: 6, RightChildNodePageId: 7","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119925+05:30","level":"INFO","msg":"Element 5: Key: large_key_12, LeftChildNodePageId: 7, RightChildNodePageId: 8","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119927+05:30","level":"INFO","msg":"Element 6: Key: large_key_14, LeftChildNodePageId: 8, RightChildNodePageId: 9","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119929+05:30","level":"INFO","msg":"Element 7: Key: large_key_16, LeftChildNodePageId: 9, RightChildNodePageId: 10","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119931+05:30","level":"INFO","msg":"Element 8: Key: large_key_18, LeftChildNodePageId: 10, RightChildNodePageId: 11","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119933+05:30","level":"INFO","msg":"Element search result","key":"large_key_05","next_page_ID":4,"is_leaf_node":false,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.119936+05:30","level":"INFO","msg":"Traversing to child node","next_page_ID":4,"function":"readTraversal","at":"bptree"}
+{"time":"2026-07-03T16:50:27.119939+05:30","level":"INFO","msg":"read traversal underway...","key":"large_key_05","page ID":4,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.119947+05:30","level":"INFO","msg":"Element 0: Key: large_key_04 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.11995+05:30","level":"INFO","msg":"Element 1: Key: large_key_05 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.119953+05:30","level":"INFO","msg":"Key found, returning value","key":"large_key_05","value_length":1000,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.119957+05:30","level":"INFO","msg":"Starting Get operation","key":"large_key_06","function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.119959+05:30","level":"INFO","msg":"Creating read guard for root node","root_node_page_ID":2,"function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.119962+05:30","level":"INFO","msg":"Starting read traversal","function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.119964+05:30","level":"INFO","msg":"read traversal underway...","key":"large_key_06","page ID":2,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.119967+05:30","level":"INFO","msg":"Element 0: Key: large_key_02, LeftChildNodePageId: 1, RightChildNodePageId: 3","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119969+05:30","level":"INFO","msg":"Element 1: Key: large_key_04, LeftChildNodePageId: 3, RightChildNodePageId: 4","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119971+05:30","level":"INFO","msg":"Element 2: Key: large_key_06, LeftChildNodePageId: 4, RightChildNodePageId: 5","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119974+05:30","level":"INFO","msg":"Element 3: Key: large_key_08, LeftChildNodePageId: 5, RightChildNodePageId: 6","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119976+05:30","level":"INFO","msg":"Element 4: Key: large_key_10, LeftChildNodePageId: 6, RightChildNodePageId: 7","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119978+05:30","level":"INFO","msg":"Element 5: Key: large_key_12, LeftChildNodePageId: 7, RightChildNodePageId: 8","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.11998+05:30","level":"INFO","msg":"Element 6: Key: large_key_14, LeftChildNodePageId: 8, RightChildNodePageId: 9","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119982+05:30","level":"INFO","msg":"Element 7: Key: large_key_16, LeftChildNodePageId: 9, RightChildNodePageId: 10","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119984+05:30","level":"INFO","msg":"Element 8: Key: large_key_18, LeftChildNodePageId: 10, RightChildNodePageId: 11","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.119986+05:30","level":"INFO","msg":"Element search result","key":"large_key_06","next_page_ID":5,"is_leaf_node":false,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.11999+05:30","level":"INFO","msg":"Reading data from offset","offset":20480,"size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.119992+05:30","level":"INFO","msg":"allocating aligned block for read","size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.119997+05:30","level":"INFO","msg":"Writing data to offset","offset":40960,"size":4096,"function":"write","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.120001+05:30","level":"INFO","msg":"Traversing to child node","next_page_ID":5,"function":"readTraversal","at":"bptree"}
+{"time":"2026-07-03T16:50:27.120004+05:30","level":"INFO","msg":"read traversal underway...","key":"large_key_06","page ID":5,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120007+05:30","level":"INFO","msg":"Element 0: Key: large_key_06 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.120009+05:30","level":"INFO","msg":"Element 1: Key: large_key_07 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.120011+05:30","level":"INFO","msg":"Key found, returning value","key":"large_key_06","value_length":1000,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120015+05:30","level":"INFO","msg":"Starting Get operation","key":"large_key_07","function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.120017+05:30","level":"INFO","msg":"Creating read guard for root node","root_node_page_ID":2,"function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.12002+05:30","level":"INFO","msg":"Starting read traversal","function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.120023+05:30","level":"INFO","msg":"read traversal underway...","key":"large_key_07","page ID":2,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120027+05:30","level":"INFO","msg":"Element 0: Key: large_key_02, LeftChildNodePageId: 1, RightChildNodePageId: 3","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.12003+05:30","level":"INFO","msg":"Element 1: Key: large_key_04, LeftChildNodePageId: 3, RightChildNodePageId: 4","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120032+05:30","level":"INFO","msg":"Element 2: Key: large_key_06, LeftChildNodePageId: 4, RightChildNodePageId: 5","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120034+05:30","level":"INFO","msg":"Element 3: Key: large_key_08, LeftChildNodePageId: 5, RightChildNodePageId: 6","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120035+05:30","level":"INFO","msg":"Element 4: Key: large_key_10, LeftChildNodePageId: 6, RightChildNodePageId: 7","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120037+05:30","level":"INFO","msg":"Element 5: Key: large_key_12, LeftChildNodePageId: 7, RightChildNodePageId: 8","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120039+05:30","level":"INFO","msg":"Element 6: Key: large_key_14, LeftChildNodePageId: 8, RightChildNodePageId: 9","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120041+05:30","level":"INFO","msg":"Element 7: Key: large_key_16, LeftChildNodePageId: 9, RightChildNodePageId: 10","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120043+05:30","level":"INFO","msg":"Element 8: Key: large_key_18, LeftChildNodePageId: 10, RightChildNodePageId: 11","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120046+05:30","level":"INFO","msg":"Element search result","key":"large_key_07","next_page_ID":5,"is_leaf_node":false,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120049+05:30","level":"INFO","msg":"Traversing to child node","next_page_ID":5,"function":"readTraversal","at":"bptree"}
+{"time":"2026-07-03T16:50:27.120052+05:30","level":"INFO","msg":"read traversal underway...","key":"large_key_07","page ID":5,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120055+05:30","level":"INFO","msg":"Element 0: Key: large_key_06 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.120061+05:30","level":"INFO","msg":"Element 1: Key: large_key_07 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.120064+05:30","level":"INFO","msg":"Key found, returning value","key":"large_key_07","value_length":1000,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120067+05:30","level":"INFO","msg":"Starting Get operation","key":"large_key_08","function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.120069+05:30","level":"INFO","msg":"Creating read guard for root node","root_node_page_ID":2,"function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.120071+05:30","level":"INFO","msg":"Starting read traversal","function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.120076+05:30","level":"INFO","msg":"read traversal underway...","key":"large_key_08","page ID":2,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120081+05:30","level":"INFO","msg":"Element 0: Key: large_key_02, LeftChildNodePageId: 1, RightChildNodePageId: 3","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120084+05:30","level":"INFO","msg":"Element 1: Key: large_key_04, LeftChildNodePageId: 3, RightChildNodePageId: 4","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120086+05:30","level":"INFO","msg":"Element 2: Key: large_key_06, LeftChildNodePageId: 4, RightChildNodePageId: 5","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120088+05:30","level":"INFO","msg":"Element 3: Key: large_key_08, LeftChildNodePageId: 5, RightChildNodePageId: 6","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.12009+05:30","level":"INFO","msg":"Element 4: Key: large_key_10, LeftChildNodePageId: 6, RightChildNodePageId: 7","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120092+05:30","level":"INFO","msg":"Element 5: Key: large_key_12, LeftChildNodePageId: 7, RightChildNodePageId: 8","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120093+05:30","level":"INFO","msg":"Element 6: Key: large_key_14, LeftChildNodePageId: 8, RightChildNodePageId: 9","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120095+05:30","level":"INFO","msg":"Element 7: Key: large_key_16, LeftChildNodePageId: 9, RightChildNodePageId: 10","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120097+05:30","level":"INFO","msg":"Element 8: Key: large_key_18, LeftChildNodePageId: 10, RightChildNodePageId: 11","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.1201+05:30","level":"INFO","msg":"Element search result","key":"large_key_08","next_page_ID":6,"is_leaf_node":false,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120103+05:30","level":"INFO","msg":"Reading data from offset","offset":24576,"size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.120105+05:30","level":"INFO","msg":"allocating aligned block for read","size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.12011+05:30","level":"INFO","msg":"Traversing to child node","next_page_ID":6,"function":"readTraversal","at":"bptree"}
+{"time":"2026-07-03T16:50:27.120113+05:30","level":"INFO","msg":"read traversal underway...","key":"large_key_08","page ID":6,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120115+05:30","level":"INFO","msg":"Element 0: Key: large_key_08 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.120117+05:30","level":"INFO","msg":"Element 1: Key: large_key_09 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.12012+05:30","level":"INFO","msg":"Key found, returning value","key":"large_key_08","value_length":1000,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120123+05:30","level":"INFO","msg":"Starting Get operation","key":"large_key_09","function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.120125+05:30","level":"INFO","msg":"Creating read guard for root node","root_node_page_ID":2,"function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.120127+05:30","level":"INFO","msg":"Starting read traversal","function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.12013+05:30","level":"INFO","msg":"read traversal underway...","key":"large_key_09","page ID":2,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120133+05:30","level":"INFO","msg":"Element 0: Key: large_key_02, LeftChildNodePageId: 1, RightChildNodePageId: 3","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120135+05:30","level":"INFO","msg":"Element 1: Key: large_key_04, LeftChildNodePageId: 3, RightChildNodePageId: 4","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120137+05:30","level":"INFO","msg":"Element 2: Key: large_key_06, LeftChildNodePageId: 4, RightChildNodePageId: 5","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120139+05:30","level":"INFO","msg":"Element 3: Key: large_key_08, LeftChildNodePageId: 5, RightChildNodePageId: 6","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120149+05:30","level":"INFO","msg":"Element 4: Key: large_key_10, LeftChildNodePageId: 6, RightChildNodePageId: 7","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120151+05:30","level":"INFO","msg":"Element 5: Key: large_key_12, LeftChildNodePageId: 7, RightChildNodePageId: 8","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120153+05:30","level":"INFO","msg":"Element 6: Key: large_key_14, LeftChildNodePageId: 8, RightChildNodePageId: 9","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120155+05:30","level":"INFO","msg":"Element 7: Key: large_key_16, LeftChildNodePageId: 9, RightChildNodePageId: 10","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120159+05:30","level":"INFO","msg":"Element 8: Key: large_key_18, LeftChildNodePageId: 10, RightChildNodePageId: 11","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120162+05:30","level":"INFO","msg":"Element search result","key":"large_key_09","next_page_ID":6,"is_leaf_node":false,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120165+05:30","level":"INFO","msg":"Traversing to child node","next_page_ID":6,"function":"readTraversal","at":"bptree"}
+{"time":"2026-07-03T16:50:27.120181+05:30","level":"INFO","msg":"read traversal underway...","key":"large_key_09","page ID":6,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120186+05:30","level":"INFO","msg":"Element 0: Key: large_key_08 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.120189+05:30","level":"INFO","msg":"Element 1: Key: large_key_09 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.120192+05:30","level":"INFO","msg":"Key found, returning value","key":"large_key_09","value_length":1000,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120196+05:30","level":"INFO","msg":"Starting Get operation","key":"large_key_10","function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.120198+05:30","level":"INFO","msg":"Creating read guard for root node","root_node_page_ID":2,"function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.120201+05:30","level":"INFO","msg":"Starting read traversal","function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.120204+05:30","level":"INFO","msg":"read traversal underway...","key":"large_key_10","page ID":2,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120207+05:30","level":"INFO","msg":"Element 0: Key: large_key_02, LeftChildNodePageId: 1, RightChildNodePageId: 3","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120209+05:30","level":"INFO","msg":"Element 1: Key: large_key_04, LeftChildNodePageId: 3, RightChildNodePageId: 4","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120211+05:30","level":"INFO","msg":"Element 2: Key: large_key_06, LeftChildNodePageId: 4, RightChildNodePageId: 5","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120213+05:30","level":"INFO","msg":"Element 3: Key: large_key_08, LeftChildNodePageId: 5, RightChildNodePageId: 6","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120215+05:30","level":"INFO","msg":"Element 4: Key: large_key_10, LeftChildNodePageId: 6, RightChildNodePageId: 7","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120217+05:30","level":"INFO","msg":"Element 5: Key: large_key_12, LeftChildNodePageId: 7, RightChildNodePageId: 8","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120219+05:30","level":"INFO","msg":"Element 6: Key: large_key_14, LeftChildNodePageId: 8, RightChildNodePageId: 9","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120221+05:30","level":"INFO","msg":"Element 7: Key: large_key_16, LeftChildNodePageId: 9, RightChildNodePageId: 10","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120223+05:30","level":"INFO","msg":"Element 8: Key: large_key_18, LeftChildNodePageId: 10, RightChildNodePageId: 11","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120226+05:30","level":"INFO","msg":"Element search result","key":"large_key_10","next_page_ID":7,"is_leaf_node":false,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.12024+05:30","level":"INFO","msg":"Reading data from offset","offset":28672,"size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.120251+05:30","level":"INFO","msg":"allocating aligned block for read","size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.120281+05:30","level":"INFO","msg":"Traversing to child node","next_page_ID":7,"function":"readTraversal","at":"bptree"}
+{"time":"2026-07-03T16:50:27.120302+05:30","level":"INFO","msg":"read traversal underway...","key":"large_key_10","page ID":7,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120314+05:30","level":"INFO","msg":"Element 0: Key: large_key_10 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.12033+05:30","level":"INFO","msg":"Element 1: Key: large_key_11 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.120339+05:30","level":"INFO","msg":"Key found, returning value","key":"large_key_10","value_length":1000,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120345+05:30","level":"INFO","msg":"Starting Get operation","key":"large_key_11","function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.120352+05:30","level":"INFO","msg":"Creating read guard for root node","root_node_page_ID":2,"function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.12036+05:30","level":"INFO","msg":"Starting read traversal","function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.120366+05:30","level":"INFO","msg":"read traversal underway...","key":"large_key_11","page ID":2,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120369+05:30","level":"INFO","msg":"Element 0: Key: large_key_02, LeftChildNodePageId: 1, RightChildNodePageId: 3","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120377+05:30","level":"INFO","msg":"Element 1: Key: large_key_04, LeftChildNodePageId: 3, RightChildNodePageId: 4","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120379+05:30","level":"INFO","msg":"Element 2: Key: large_key_06, LeftChildNodePageId: 4, RightChildNodePageId: 5","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120381+05:30","level":"INFO","msg":"Element 3: Key: large_key_08, LeftChildNodePageId: 5, RightChildNodePageId: 6","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120383+05:30","level":"INFO","msg":"Element 4: Key: large_key_10, LeftChildNodePageId: 6, RightChildNodePageId: 7","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120385+05:30","level":"INFO","msg":"Element 5: Key: large_key_12, LeftChildNodePageId: 7, RightChildNodePageId: 8","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120387+05:30","level":"INFO","msg":"Element 6: Key: large_key_14, LeftChildNodePageId: 8, RightChildNodePageId: 9","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120389+05:30","level":"INFO","msg":"Element 7: Key: large_key_16, LeftChildNodePageId: 9, RightChildNodePageId: 10","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120392+05:30","level":"INFO","msg":"Element 8: Key: large_key_18, LeftChildNodePageId: 10, RightChildNodePageId: 11","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120395+05:30","level":"INFO","msg":"Element search result","key":"large_key_11","next_page_ID":7,"is_leaf_node":false,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120423+05:30","level":"INFO","msg":"Traversing to child node","next_page_ID":7,"function":"readTraversal","at":"bptree"}
+{"time":"2026-07-03T16:50:27.120438+05:30","level":"INFO","msg":"read traversal underway...","key":"large_key_11","page ID":7,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120454+05:30","level":"INFO","msg":"Element 0: Key: large_key_10 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.120457+05:30","level":"INFO","msg":"Element 1: Key: large_key_11 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.12046+05:30","level":"INFO","msg":"Key found, returning value","key":"large_key_11","value_length":1000,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120463+05:30","level":"INFO","msg":"Starting Get operation","key":"large_key_12","function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.120466+05:30","level":"INFO","msg":"Creating read guard for root node","root_node_page_ID":2,"function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.120468+05:30","level":"INFO","msg":"Starting read traversal","function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.120471+05:30","level":"INFO","msg":"read traversal underway...","key":"large_key_12","page ID":2,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120474+05:30","level":"INFO","msg":"Element 0: Key: large_key_02, LeftChildNodePageId: 1, RightChildNodePageId: 3","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120476+05:30","level":"INFO","msg":"Element 1: Key: large_key_04, LeftChildNodePageId: 3, RightChildNodePageId: 4","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120478+05:30","level":"INFO","msg":"Element 2: Key: large_key_06, LeftChildNodePageId: 4, RightChildNodePageId: 5","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.12048+05:30","level":"INFO","msg":"Element 3: Key: large_key_08, LeftChildNodePageId: 5, RightChildNodePageId: 6","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120482+05:30","level":"INFO","msg":"Element 4: Key: large_key_10, LeftChildNodePageId: 6, RightChildNodePageId: 7","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120484+05:30","level":"INFO","msg":"Element 5: Key: large_key_12, LeftChildNodePageId: 7, RightChildNodePageId: 8","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120486+05:30","level":"INFO","msg":"Element 6: Key: large_key_14, LeftChildNodePageId: 8, RightChildNodePageId: 9","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120488+05:30","level":"INFO","msg":"Element 7: Key: large_key_16, LeftChildNodePageId: 9, RightChildNodePageId: 10","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.12049+05:30","level":"INFO","msg":"Element 8: Key: large_key_18, LeftChildNodePageId: 10, RightChildNodePageId: 11","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120493+05:30","level":"INFO","msg":"Element search result","key":"large_key_12","next_page_ID":8,"is_leaf_node":false,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120496+05:30","level":"INFO","msg":"Reading data from offset","offset":32768,"size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.120499+05:30","level":"INFO","msg":"allocating aligned block for read","size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.120503+05:30","level":"INFO","msg":"Traversing to child node","next_page_ID":8,"function":"readTraversal","at":"bptree"}
+{"time":"2026-07-03T16:50:27.120505+05:30","level":"INFO","msg":"read traversal underway...","key":"large_key_12","page ID":8,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120508+05:30","level":"INFO","msg":"Element 0: Key: large_key_12 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.12051+05:30","level":"INFO","msg":"Element 1: Key: large_key_13 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.120512+05:30","level":"INFO","msg":"Key found, returning value","key":"large_key_12","value_length":1000,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120516+05:30","level":"INFO","msg":"Starting Get operation","key":"large_key_13","function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.120518+05:30","level":"INFO","msg":"Creating read guard for root node","root_node_page_ID":2,"function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.12052+05:30","level":"INFO","msg":"Starting read traversal","function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.120522+05:30","level":"INFO","msg":"read traversal underway...","key":"large_key_13","page ID":2,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120525+05:30","level":"INFO","msg":"Element 0: Key: large_key_02, LeftChildNodePageId: 1, RightChildNodePageId: 3","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120527+05:30","level":"INFO","msg":"Element 1: Key: large_key_04, LeftChildNodePageId: 3, RightChildNodePageId: 4","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120529+05:30","level":"INFO","msg":"Element 2: Key: large_key_06, LeftChildNodePageId: 4, RightChildNodePageId: 5","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120531+05:30","level":"INFO","msg":"Element 3: Key: large_key_08, LeftChildNodePageId: 5, RightChildNodePageId: 6","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120533+05:30","level":"INFO","msg":"Element 4: Key: large_key_10, LeftChildNodePageId: 6, RightChildNodePageId: 7","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120535+05:30","level":"INFO","msg":"Element 5: Key: large_key_12, LeftChildNodePageId: 7, RightChildNodePageId: 8","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120537+05:30","level":"INFO","msg":"Element 6: Key: large_key_14, LeftChildNodePageId: 8, RightChildNodePageId: 9","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120539+05:30","level":"INFO","msg":"Element 7: Key: large_key_16, LeftChildNodePageId: 9, RightChildNodePageId: 10","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120541+05:30","level":"INFO","msg":"Element 8: Key: large_key_18, LeftChildNodePageId: 10, RightChildNodePageId: 11","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120544+05:30","level":"INFO","msg":"Element search result","key":"large_key_13","next_page_ID":8,"is_leaf_node":false,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120546+05:30","level":"INFO","msg":"Traversing to child node","next_page_ID":8,"function":"readTraversal","at":"bptree"}
+{"time":"2026-07-03T16:50:27.12055+05:30","level":"INFO","msg":"read traversal underway...","key":"large_key_13","page ID":8,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120554+05:30","level":"INFO","msg":"Element 0: Key: large_key_12 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.120556+05:30","level":"INFO","msg":"Element 1: Key: large_key_13 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.120559+05:30","level":"INFO","msg":"Key found, returning value","key":"large_key_13","value_length":1000,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120563+05:30","level":"INFO","msg":"Starting Get operation","key":"large_key_14","function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.120565+05:30","level":"INFO","msg":"Creating read guard for root node","root_node_page_ID":2,"function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.120567+05:30","level":"INFO","msg":"Starting read traversal","function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.12057+05:30","level":"INFO","msg":"read traversal underway...","key":"large_key_14","page ID":2,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120573+05:30","level":"INFO","msg":"Element 0: Key: large_key_02, LeftChildNodePageId: 1, RightChildNodePageId: 3","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120575+05:30","level":"INFO","msg":"Element 1: Key: large_key_04, LeftChildNodePageId: 3, RightChildNodePageId: 4","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120577+05:30","level":"INFO","msg":"Element 2: Key: large_key_06, LeftChildNodePageId: 4, RightChildNodePageId: 5","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120579+05:30","level":"INFO","msg":"Element 3: Key: large_key_08, LeftChildNodePageId: 5, RightChildNodePageId: 6","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120581+05:30","level":"INFO","msg":"Element 4: Key: large_key_10, LeftChildNodePageId: 6, RightChildNodePageId: 7","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120583+05:30","level":"INFO","msg":"Element 5: Key: large_key_12, LeftChildNodePageId: 7, RightChildNodePageId: 8","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120585+05:30","level":"INFO","msg":"Element 6: Key: large_key_14, LeftChildNodePageId: 8, RightChildNodePageId: 9","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120587+05:30","level":"INFO","msg":"Element 7: Key: large_key_16, LeftChildNodePageId: 9, RightChildNodePageId: 10","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120589+05:30","level":"INFO","msg":"Element 8: Key: large_key_18, LeftChildNodePageId: 10, RightChildNodePageId: 11","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120591+05:30","level":"INFO","msg":"Element search result","key":"large_key_14","next_page_ID":9,"is_leaf_node":false,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120595+05:30","level":"INFO","msg":"Reading data from offset","offset":36864,"size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.120597+05:30","level":"INFO","msg":"allocating aligned block for read","size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.120602+05:30","level":"INFO","msg":"Traversing to child node","next_page_ID":9,"function":"readTraversal","at":"bptree"}
+{"time":"2026-07-03T16:50:27.120606+05:30","level":"INFO","msg":"read traversal underway...","key":"large_key_14","page ID":9,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120608+05:30","level":"INFO","msg":"Element 0: Key: large_key_14 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.120612+05:30","level":"INFO","msg":"Element 1: Key: large_key_15 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.120619+05:30","level":"INFO","msg":"Key found, returning value","key":"large_key_14","value_length":1000,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120625+05:30","level":"INFO","msg":"Starting Get operation","key":"large_key_15","function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.120627+05:30","level":"INFO","msg":"Creating read guard for root node","root_node_page_ID":2,"function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.120632+05:30","level":"INFO","msg":"Starting read traversal","function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.120635+05:30","level":"INFO","msg":"read traversal underway...","key":"large_key_15","page ID":2,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120638+05:30","level":"INFO","msg":"Element 0: Key: large_key_02, LeftChildNodePageId: 1, RightChildNodePageId: 3","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.12064+05:30","level":"INFO","msg":"Element 1: Key: large_key_04, LeftChildNodePageId: 3, RightChildNodePageId: 4","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120642+05:30","level":"INFO","msg":"Element 2: Key: large_key_06, LeftChildNodePageId: 4, RightChildNodePageId: 5","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120644+05:30","level":"INFO","msg":"Element 3: Key: large_key_08, LeftChildNodePageId: 5, RightChildNodePageId: 6","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120646+05:30","level":"INFO","msg":"Element 4: Key: large_key_10, LeftChildNodePageId: 6, RightChildNodePageId: 7","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120648+05:30","level":"INFO","msg":"Element 5: Key: large_key_12, LeftChildNodePageId: 7, RightChildNodePageId: 8","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.12065+05:30","level":"INFO","msg":"Element 6: Key: large_key_14, LeftChildNodePageId: 8, RightChildNodePageId: 9","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120655+05:30","level":"INFO","msg":"Element 7: Key: large_key_16, LeftChildNodePageId: 9, RightChildNodePageId: 10","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.12066+05:30","level":"INFO","msg":"Element 8: Key: large_key_18, LeftChildNodePageId: 10, RightChildNodePageId: 11","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120682+05:30","level":"INFO","msg":"Element search result","key":"large_key_15","next_page_ID":9,"is_leaf_node":false,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120711+05:30","level":"INFO","msg":"Traversing to child node","next_page_ID":9,"function":"readTraversal","at":"bptree"}
+{"time":"2026-07-03T16:50:27.120719+05:30","level":"INFO","msg":"read traversal underway...","key":"large_key_15","page ID":9,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120723+05:30","level":"INFO","msg":"Element 0: Key: large_key_14 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.120725+05:30","level":"INFO","msg":"Element 1: Key: large_key_15 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.120728+05:30","level":"INFO","msg":"Key found, returning value","key":"large_key_15","value_length":1000,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120754+05:30","level":"INFO","msg":"Starting Get operation","key":"large_key_16","function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.120792+05:30","level":"INFO","msg":"Creating read guard for root node","root_node_page_ID":2,"function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.120815+05:30","level":"INFO","msg":"Starting read traversal","function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.120818+05:30","level":"INFO","msg":"read traversal underway...","key":"large_key_16","page ID":2,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120822+05:30","level":"INFO","msg":"Element 0: Key: large_key_02, LeftChildNodePageId: 1, RightChildNodePageId: 3","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120824+05:30","level":"INFO","msg":"Element 1: Key: large_key_04, LeftChildNodePageId: 3, RightChildNodePageId: 4","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120826+05:30","level":"INFO","msg":"Element 2: Key: large_key_06, LeftChildNodePageId: 4, RightChildNodePageId: 5","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120828+05:30","level":"INFO","msg":"Element 3: Key: large_key_08, LeftChildNodePageId: 5, RightChildNodePageId: 6","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.12083+05:30","level":"INFO","msg":"Element 4: Key: large_key_10, LeftChildNodePageId: 6, RightChildNodePageId: 7","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120832+05:30","level":"INFO","msg":"Element 5: Key: large_key_12, LeftChildNodePageId: 7, RightChildNodePageId: 8","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120843+05:30","level":"INFO","msg":"Element 6: Key: large_key_14, LeftChildNodePageId: 8, RightChildNodePageId: 9","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120856+05:30","level":"INFO","msg":"Element 7: Key: large_key_16, LeftChildNodePageId: 9, RightChildNodePageId: 10","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.12086+05:30","level":"INFO","msg":"Element 8: Key: large_key_18, LeftChildNodePageId: 10, RightChildNodePageId: 11","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120863+05:30","level":"INFO","msg":"Element search result","key":"large_key_16","next_page_ID":10,"is_leaf_node":false,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120868+05:30","level":"INFO","msg":"Reading data from offset","offset":40960,"size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.120887+05:30","level":"INFO","msg":"allocating aligned block for read","size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.120909+05:30","level":"INFO","msg":"Traversing to child node","next_page_ID":10,"function":"readTraversal","at":"bptree"}
+{"time":"2026-07-03T16:50:27.120916+05:30","level":"INFO","msg":"read traversal underway...","key":"large_key_16","page ID":10,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120919+05:30","level":"INFO","msg":"Element 0: Key: large_key_16 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.120921+05:30","level":"INFO","msg":"Element 1: Key: large_key_17 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.120924+05:30","level":"INFO","msg":"Key found, returning value","key":"large_key_16","value_length":1000,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120927+05:30","level":"INFO","msg":"Starting Get operation","key":"large_key_17","function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.12093+05:30","level":"INFO","msg":"Creating read guard for root node","root_node_page_ID":2,"function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.120932+05:30","level":"INFO","msg":"Starting read traversal","function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.120936+05:30","level":"INFO","msg":"read traversal underway...","key":"large_key_17","page ID":2,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120939+05:30","level":"INFO","msg":"Element 0: Key: large_key_02, LeftChildNodePageId: 1, RightChildNodePageId: 3","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120941+05:30","level":"INFO","msg":"Element 1: Key: large_key_04, LeftChildNodePageId: 3, RightChildNodePageId: 4","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120943+05:30","level":"INFO","msg":"Element 2: Key: large_key_06, LeftChildNodePageId: 4, RightChildNodePageId: 5","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120945+05:30","level":"INFO","msg":"Element 3: Key: large_key_08, LeftChildNodePageId: 5, RightChildNodePageId: 6","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120947+05:30","level":"INFO","msg":"Element 4: Key: large_key_10, LeftChildNodePageId: 6, RightChildNodePageId: 7","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120949+05:30","level":"INFO","msg":"Element 5: Key: large_key_12, LeftChildNodePageId: 7, RightChildNodePageId: 8","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120951+05:30","level":"INFO","msg":"Element 6: Key: large_key_14, LeftChildNodePageId: 8, RightChildNodePageId: 9","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120953+05:30","level":"INFO","msg":"Element 7: Key: large_key_16, LeftChildNodePageId: 9, RightChildNodePageId: 10","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120955+05:30","level":"INFO","msg":"Element 8: Key: large_key_18, LeftChildNodePageId: 10, RightChildNodePageId: 11","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120959+05:30","level":"INFO","msg":"Element search result","key":"large_key_17","next_page_ID":10,"is_leaf_node":false,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120962+05:30","level":"INFO","msg":"Traversing to child node","next_page_ID":10,"function":"readTraversal","at":"bptree"}
+{"time":"2026-07-03T16:50:27.120967+05:30","level":"INFO","msg":"read traversal underway...","key":"large_key_17","page ID":10,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120971+05:30","level":"INFO","msg":"Element 0: Key: large_key_16 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.120973+05:30","level":"INFO","msg":"Element 1: Key: large_key_17 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.120976+05:30","level":"INFO","msg":"Key found, returning value","key":"large_key_17","value_length":1000,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.120979+05:30","level":"INFO","msg":"Starting Get operation","key":"large_key_18","function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.120981+05:30","level":"INFO","msg":"Creating read guard for root node","root_node_page_ID":2,"function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.120984+05:30","level":"INFO","msg":"Starting read traversal","function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.120987+05:30","level":"INFO","msg":"read traversal underway...","key":"large_key_18","page ID":2,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.12099+05:30","level":"INFO","msg":"Element 0: Key: large_key_02, LeftChildNodePageId: 1, RightChildNodePageId: 3","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120992+05:30","level":"INFO","msg":"Element 1: Key: large_key_04, LeftChildNodePageId: 3, RightChildNodePageId: 4","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120994+05:30","level":"INFO","msg":"Element 2: Key: large_key_06, LeftChildNodePageId: 4, RightChildNodePageId: 5","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120996+05:30","level":"INFO","msg":"Element 3: Key: large_key_08, LeftChildNodePageId: 5, RightChildNodePageId: 6","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.120998+05:30","level":"INFO","msg":"Element 4: Key: large_key_10, LeftChildNodePageId: 6, RightChildNodePageId: 7","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.121+05:30","level":"INFO","msg":"Element 5: Key: large_key_12, LeftChildNodePageId: 7, RightChildNodePageId: 8","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.121002+05:30","level":"INFO","msg":"Element 6: Key: large_key_14, LeftChildNodePageId: 8, RightChildNodePageId: 9","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.121004+05:30","level":"INFO","msg":"Element 7: Key: large_key_16, LeftChildNodePageId: 9, RightChildNodePageId: 10","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.121006+05:30","level":"INFO","msg":"Element 8: Key: large_key_18, LeftChildNodePageId: 10, RightChildNodePageId: 11","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.121009+05:30","level":"INFO","msg":"Element search result","key":"large_key_18","next_page_ID":11,"is_leaf_node":false,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.121012+05:30","level":"INFO","msg":"Reading data from offset","offset":45056,"size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.121014+05:30","level":"INFO","msg":"allocating aligned block for read","size":4096,"function":"read","at":"DirectIODiskManager"}
+{"time":"2026-07-03T16:50:27.121019+05:30","level":"INFO","msg":"Traversing to child node","next_page_ID":11,"function":"readTraversal","at":"bptree"}
+{"time":"2026-07-03T16:50:27.121023+05:30","level":"INFO","msg":"read traversal underway...","key":"large_key_18","page ID":11,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.121026+05:30","level":"INFO","msg":"Element 0: Key: large_key_18 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.121028+05:30","level":"INFO","msg":"Element 1: Key: large_key_19 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.12103+05:30","level":"INFO","msg":"Key found, returning value","key":"large_key_18","value_length":1000,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.121033+05:30","level":"INFO","msg":"Starting Get operation","key":"large_key_19","function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.121036+05:30","level":"INFO","msg":"Creating read guard for root node","root_node_page_ID":2,"function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.121038+05:30","level":"INFO","msg":"Starting read traversal","function":"Get","at":"btree"}
+{"time":"2026-07-03T16:50:27.12104+05:30","level":"INFO","msg":"read traversal underway...","key":"large_key_19","page ID":2,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.121043+05:30","level":"INFO","msg":"Element 0: Key: large_key_02, LeftChildNodePageId: 1, RightChildNodePageId: 3","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.121045+05:30","level":"INFO","msg":"Element 1: Key: large_key_04, LeftChildNodePageId: 3, RightChildNodePageId: 4","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.121047+05:30","level":"INFO","msg":"Element 2: Key: large_key_06, LeftChildNodePageId: 4, RightChildNodePageId: 5","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.121049+05:30","level":"INFO","msg":"Element 3: Key: large_key_08, LeftChildNodePageId: 5, RightChildNodePageId: 6","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.121051+05:30","level":"INFO","msg":"Element 4: Key: large_key_10, LeftChildNodePageId: 6, RightChildNodePageId: 7","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.121053+05:30","level":"INFO","msg":"Element 5: Key: large_key_12, LeftChildNodePageId: 7, RightChildNodePageId: 8","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.121055+05:30","level":"INFO","msg":"Element 6: Key: large_key_14, LeftChildNodePageId: 8, RightChildNodePageId: 9","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.121057+05:30","level":"INFO","msg":"Element 7: Key: large_key_16, LeftChildNodePageId: 9, RightChildNodePageId: 10","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.121059+05:30","level":"INFO","msg":"Element 8: Key: large_key_18, LeftChildNodePageId: 10, RightChildNodePageId: 11","function":"printElements","at":"InternalNodeCodec"}
+{"time":"2026-07-03T16:50:27.121062+05:30","level":"INFO","msg":"Element search result","key":"large_key_19","next_page_ID":11,"is_leaf_node":false,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.121064+05:30","level":"INFO","msg":"Traversing to child node","next_page_ID":11,"function":"readTraversal","at":"bptree"}
+{"time":"2026-07-03T16:50:27.121068+05:30","level":"INFO","msg":"read traversal underway...","key":"large_key_19","page ID":11,"function":"readTraversal","at":"btree"}
+{"time":"2026-07-03T16:50:27.121071+05:30","level":"INFO","msg":"Element 0: Key: large_key_18 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.121079+05:30","level":"INFO","msg":"Element 1: Key: large_key_19 ","function":"printElements","at":"LeafNodeCodec"}
+{"time":"2026-07-03T16:50:27.121083+05:30","level":"INFO","msg":"Key found, returning value","key":"large_key_19","value_length":1000,"function":"readTraversal","at":"btree"}
