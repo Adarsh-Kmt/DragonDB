@@ -108,13 +108,9 @@ func (bptree *BPlusTree) readTraversal(key []byte, cursor *ReadCursor) ([]byte, 
 }
 
 func (bptree *BPlusTree) Insert(key []byte, value []byte) error {
-	// slog.Info("before insert")
-	// bptree.bufferPoolManager.PrintAllPages()
-	// print := func() {
-	// 	slog.Info("after insert pages")
-	// 	bptree.bufferPoolManager.PrintAllPages()
-	// }
-	// defer print()
+
+	bptree.wal.LogBeginOperation()
+
 	bptree.bPlusTreeMutex.Lock()
 	defer bptree.bPlusTreeMutex.Unlock()
 
@@ -186,6 +182,8 @@ func (bptree *BPlusTree) Insert(key []byte, value []byte) error {
 		return err
 	}
 
+	bptree.wal.LogCommitOperation()
+
 	return nil
 }
 
@@ -217,12 +215,19 @@ func (bptree *BPlusTree) HandleLeafRootNodeSplit(oldRootNodeWriter *LeafNodeWrit
 	newRootNodeWriter.SetLSN(lsn)
 	newRootNodeWriter.SetNodeType()
 
-	extraKey, leftChildNodePageId, rightChildNodePageId, err := bptree.HandleLeafNodeSplit(oldRootNodeWriter, newRootNodeWriter, key, value)
+	extraKey, leftChildNodePageId, rightChildNodePageId, err := bptree.HandleLeafNodeSplit(oldRootNodeWriter, key, value)
 
 	if err != nil {
 		return err
 	}
 
+	lsn, err = bptree.wal.LogInsertInternalNodeEntryOperation(newRootNodeWriter.GetPageId(), extraKey, leftChildNodePageId, rightChildNodePageId)
+
+	if err != nil {
+		return err
+	}
+
+	newRootNodeWriter.SetLSN(lsn)
 	newRootNodeWriter.InsertKey(extraKey, leftChildNodePageId, rightChildNodePageId)
 
 	lsn, err = bptree.wal.LogUpdateRootNodePageIdOperation(bptree.BPlusTreeId, newRootPageId)
@@ -275,6 +280,14 @@ func (bptree *BPlusTree) HandleInternalRootNodeSplit(oldRootNodeWriter *Internal
 		return err
 	}
 
+	lsn, err = bptree.wal.LogInsertInternalNodeEntryOperation(newRootNodeWriter.GetPageId(), extraKey, leftChildNodePageId, rightChildNodePageId)
+
+	if err != nil {
+		return err
+	}
+
+	newRootNodeWriter.SetLSN(lsn)
+
 	newRootNodeWriter.InsertKey(extraKey, leftChildNodePageId, rightChildNodePageId)
 
 	lsn, err = bptree.wal.LogUpdateRootNodePageIdOperation(bptree.BPlusTreeId, newRootPageId)
@@ -290,7 +303,7 @@ func (bptree *BPlusTree) HandleInternalRootNodeSplit(oldRootNodeWriter *Internal
 
 }
 
-func (bptree *BPlusTree) HandleLeafNodeSplit(leftLeafNodeWriter *LeafNodeWriter, parentNodeWriter *InternalNodeWriter, key []byte, value []byte) (extraKey []byte, leftChildNodePageId uint64, rightChildNodePageId uint64, err error) {
+func (bptree *BPlusTree) HandleLeafNodeSplit(leftLeafNodeWriter *LeafNodeWriter, key []byte, value []byte) (extraKey []byte, leftChildNodePageId uint64, rightChildNodePageId uint64, err error) {
 
 	rightChildNodePageId, allocationSource, err := bptree.bufferPoolManager.NewPage()
 
@@ -325,7 +338,6 @@ func (bptree *BPlusTree) HandleLeafNodeSplit(leftLeafNodeWriter *LeafNodeWriter,
 	lsn, err = bptree.wal.LogSplitLeafNodeOperation(
 		leftLeafNodeWriter.GetPageId(),
 		rightNodeWriteGuard.GetPageId(),
-		parentNodeWriter.GetPageId(),
 		uint16(splitIndex),
 		leftLeafNodeWriter.GetNextLeafNodePageId(),
 		key,
@@ -340,7 +352,6 @@ func (bptree *BPlusTree) HandleLeafNodeSplit(leftLeafNodeWriter *LeafNodeWriter,
 
 	rightLeafNodeWriter.SetLSN(lsn)
 	leftLeafNodeWriter.SetLSN(lsn)
-	parentNodeWriter.SetLSN(lsn)
 
 	extraKey = leftLeafNodeWriter.Split(rightLeafNodeWriter, splitIndex)
 
@@ -387,7 +398,6 @@ func (bptree *BPlusTree) HandleInternalNodeSplit(leftInternalNodeWriter *Interna
 	lsn, err = bptree.wal.LogSplitInternalNodeOperation(
 		leftInternalNodeWriter.GetPageId(),
 		rightInternalNodeWriter.GetPageId(),
-		parentNodeWriter.GetPageId(),
 		uint16(splitIndex),
 		insertKey,
 		insertLeftNodePageId,
@@ -444,9 +454,8 @@ func (bptree *BPlusTree) writeTraversal(key []byte, value []byte, cursor *WriteC
 					err := bptree.HandleLeafRootNodeSplit(leafNodeWriter, key, value)
 					return nil, 0, 0, err
 				}
-				parentNodeWriter := NewInternalNodeWriter(cursor.GetCurrentParentNodeWriteGuard())
 
-				return bptree.HandleLeafNodeSplit(leafNodeWriter, parentNodeWriter, key, value)
+				return bptree.HandleLeafNodeSplit(leafNodeWriter, key, value)
 			}
 
 		}
@@ -472,9 +481,7 @@ func (bptree *BPlusTree) writeTraversal(key []byte, value []byte, cursor *WriteC
 				return nil, 0, 0, err
 			}
 
-			parentNodeWriter := NewInternalNodeWriter(cursor.GetCurrentParentNodeWriteGuard())
-
-			return bptree.HandleLeafNodeSplit(leafNodeWriter, parentNodeWriter, key, value)
+			return bptree.HandleLeafNodeSplit(leafNodeWriter, key, value)
 		}
 
 	} else {
@@ -508,6 +515,13 @@ func (bptree *BPlusTree) writeTraversal(key []byte, value []byte, cursor *WriteC
 
 		if internalNodeWriter.HasEnoughSpaceToInsertElement(extraKey) {
 
+			lsn, err := bptree.wal.LogInsertInternalNodeEntryOperation(internalNodeWriter.GetPageId(), extraKey, leftChildNodePageId, rightChildNodePageId)
+
+			if err != nil {
+				return nil, 0, 0, err
+			}
+
+			internalNodeWriter.SetLSN(lsn)
 			internalNodeWriter.InsertKey(extraKey, leftChildNodePageId, rightChildNodePageId)
 			return nil, 0, 0, nil
 

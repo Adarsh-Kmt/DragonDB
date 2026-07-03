@@ -63,6 +63,7 @@ func NewStorageEngine() (engine *StorageEngine, isNewDatabase bool, err error) {
 		lucario.UpdateFirstLeafNodePageId: engine.RedoUpdateFirstLeafNodePageId,
 		lucario.UpdateLeafNodeEntry:       engine.RedoUpdateLeafNodeEntry,
 		lucario.InsertLeafNodeEntry:       engine.RedoInsertLeafNodeEntry,
+		lucario.InsertInternalNodeEntry:   engine.RedoInsertInternalNodeEntry,
 		lucario.SplitInternalNode:         engine.RedoSplitInternalNode,
 		lucario.SplitLeafNode:             engine.RedoSplitLeafNode,
 	}
