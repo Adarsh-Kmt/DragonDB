@@ -8,6 +8,15 @@ A B+ Tree based database storage engine, written in Go.
 
 Check out my [substack](https://adarshkmt.substack.com/s/building-a-database), where I'll be explaining how I built it, layer by layer.
 
+## Features
+- Allows single write, multiple reads.
+- Uses a slotted page format to represent B+ Tree nodes with support for variable-size records and compaction.
+- Uses a buffer pool manager with an LRU eviction policy to cache database pages in memory.
+- Direct I/O is used to bypass the kernel page cache and read/write data directly to disk, improving memory
+efficiency and giving the database full control over caching.
+- Integrated a [Write Ahead Log](https://github.com/Adarsh-Kmt/Lucario). Page level modifications are logged before persistence and replayed
+during crash recovery.
+
 ## Architecture
 Checkout [architecture.md](https://github.com/Adarsh-Kmt/DragonDB/blob/master/architecture.md) for an overview.
 
@@ -27,38 +36,29 @@ go build ./...
 
 ## Technical Challenges Solved
 
-### 1. Race Condition in Root Node Initialization
-**Problem**: When multiple threads simultaneously try to insert into an empty B-tree, both detect that no root exists and attempt to create one, resulting in data loss.
-
-**Solution**: Implemented double-checked locking pattern:
-- Acquire read lock and check if root exists.
-- If not, release read lock and acquire write lock.
-- Re-check condition under write lock to make sure another thread didn't initialize a root node before write lock could be acquired.
-- Only one thread successfully initializes the root.
-
-### 2. Duplicate Page Fetching
+### 1. Duplicate Page Fetching
 **Problem**: When multiple threads simultaneously try to read the same page from disk, duplicate copies of the page are created in memory.
 <p align="center">
   <img src="assets/Race Conditions/Fetch Page/1. Race Condition.png" alt="Architecture Diagram" width="1000"/>
 </p>
 
-**Solution**: Implemented double-checked locking pattern:
+**Solution**: Use a double-checked locking pattern:
 - Acquire read lock and check if page exists in memory.
 - If not, release read lock and acquire write lock.
 - Re-check condition under write lock to make sure another thread didn't make a copy of the page before write lock could be acquired.
-- Only one thread successfully initializes the root.
+- Only one copy of the page exists in memory.
 
   <p align="center">
   <img src="assets/Race Conditions/Fetch Page/3. Read-Write Lock Solution.png" alt="Architecture Diagram" width="1000"/>
 </p>
 
-### 3. Resource Leaks in Error Paths
+### 2. Resource Leaks in Error Paths
 **Problem**: Page allocation followed by I/O error left allocated page unused, causing memory leaks.
 
 **Solution**: Comprehensive cleanup patterns:
 - Immediate cleanup on I/O failure.
 
-### 4. Direct I/O Performance Optimization
+### 3. Direct I/O Performance Optimization
 **Problem**: Buffered I/O operations suffered from double-buffering and unpredictable kernel cache behavior.
 
 <p align="center">
