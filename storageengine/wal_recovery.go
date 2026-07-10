@@ -2,7 +2,6 @@ package storageengine
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"log/slog"
 
@@ -296,9 +295,7 @@ func (engine *StorageEngine) Recover() error {
 
 	defer iterator.Close()
 
-	inOperation := false
-
-	recoveryOperations := make([]lucario.WALRecord, 0)
+	recoveryOperationsMap := make(map[uint64][]lucario.WALRecord)
 
 	for iterator.HasNext() {
 
@@ -314,12 +311,15 @@ func (engine *StorageEngine) Recover() error {
 
 		case lucario.BeginOperation:
 
-			inOperation = true
+			recoveryOperationsMap[record.BPlusTreeId] = make([]lucario.WALRecord, 0)
 
 		case lucario.CommitOperation:
 
-			if !inOperation {
-				return errors.New("CommitOperation without BeginOperation")
+			recoveryOperations, exists := recoveryOperationsMap[record.BPlusTreeId]
+
+			if !exists {
+
+				return fmt.Errorf("CommitOperation without BeginOperation")
 			}
 
 			slog.Info("found BEGIN")
@@ -335,17 +335,23 @@ func (engine *StorageEngine) Recover() error {
 
 			slog.Info("found COMMIT")
 
-			inOperation = false
-			recoveryOperations = recoveryOperations[:0]
+			delete(recoveryOperationsMap, record.BPlusTreeId)
 
 		default:
 
+			recoveryOperations, exists := recoveryOperationsMap[record.BPlusTreeId]
+
+			if !exists {
+
+				return fmt.Errorf("Operation without BeginOperation")
+			}
 			recoveryOperations = append(recoveryOperations, record)
+			recoveryOperationsMap[record.BPlusTreeId] = recoveryOperations
 		}
 
 	}
 
-	if inOperation {
+	if len(recoveryOperationsMap) > 0 {
 
 		slog.Info("ignoring incomplete WAL operation at end of log")
 	}
