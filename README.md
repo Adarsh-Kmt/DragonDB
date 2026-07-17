@@ -9,7 +9,8 @@ A B+ Tree based database storage engine, written in Go.
 Check out my [substack](https://adarshkmt.substack.com/s/building-a-database), where I'll be explaining how I built it, layer by layer.
 
 ## Features
-- Allows single write, multiple reads.
+- Create multiple B+ trees.
+- Allows multiple concurrent readers or single exclusive writer per B+ tree.
 - Uses a slotted page format to represent B+ Tree nodes with support for variable-size records and compaction.
 - Uses a buffer pool manager with an LRU eviction policy to cache database pages in memory.
 - Direct I/O is used to bypass the kernel page cache and read/write data directly to disk, improving memory
