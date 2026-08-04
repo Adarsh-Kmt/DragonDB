@@ -48,15 +48,15 @@ func (bptree *BPlusTree) Get(key []byte) ([]byte, error) {
 	defer bptree.bPlusTreeMutex.RUnlock()
 
 	fmt.Println()
-	slog.Info("Starting Get operation", "key", string(key), "function", "Get", "at", "btree")
+	slog.Info("Starting Get operation", "key", string(key), "function", "Get", "at", "bptree")
 
-	slog.Info("Creating read guard for root node", "root_node_page_ID", bptree.rootNodePageId, "function", "Get", "at", "btree")
+	slog.Info("Creating read guard for root node", "root_node_page_ID", bptree.rootNodePageId, "function", "Get", "at", "bptree")
 	//rootNodeGuard, err := bptree.fetchRootNodeReadGuard()
 
 	rootNodeGuard, err := bptree.bufferPoolManager.NewReadGuard(bptree.rootNodePageId)
 
 	if err != nil {
-		slog.Error("Failed to create read guard for root node", "error", err.Error(), "function", "Get", "at", "btree")
+		slog.Error("Failed to create read guard for root node", "error", err.Error(), "function", "Get", "at", "bptree")
 		return nil, err
 	}
 
@@ -64,13 +64,13 @@ func (bptree *BPlusTree) Get(key []byte) ([]byte, error) {
 
 	readCursor := NewReadCursor(rootNodeGuard)
 
-	slog.Info("Starting read traversal", "function", "Get", "at", "btree")
+	slog.Info("Starting read traversal", "function", "Get", "at", "bptree")
 	return bptree.readTraversal(key, readCursor)
 }
 
 func (bptree *BPlusTree) readTraversal(key []byte, cursor *ReadCursor) ([]byte, error) {
 	fmt.Println()
-	slog.Info("read traversal underway...", "key", string(key), "page ID", cursor.GetCurrentNodeReadGuard().GetPageId(), "function", "readTraversal", "at", "btree")
+	slog.Info("read traversal underway...", "key", string(key), "page ID", cursor.GetCurrentNodeReadGuard().GetPageId(), "function", "readTraversal", "at", "bptree")
 
 	if cursor.IsLeafNode() {
 
@@ -79,11 +79,11 @@ func (bptree *BPlusTree) readTraversal(key []byte, cursor *ReadCursor) ([]byte, 
 		value, ok := leafNodeReader.FindValue(key)
 
 		if !ok {
-			slog.Info("Key not found in leaf node", "key", string(key), "function", "readTraversal", "at", "btree")
+			slog.Info("Key not found in leaf node", "key", string(key), "function", "readTraversal", "at", "bptree")
 			return nil, fmt.Errorf("%s", fmt.Sprintf("%s", "key "+string(key)+" not found"))
 		}
 
-		slog.Info("Key found, returning value", "key", string(key), "value_length", len(value), "function", "readTraversal", "at", "btree")
+		slog.Info("Key found, returning value", "key", string(key), "value_length", len(value), "function", "readTraversal", "at", "bptree")
 		return value, nil
 	}
 
@@ -91,11 +91,11 @@ func (bptree *BPlusTree) readTraversal(key []byte, cursor *ReadCursor) ([]byte, 
 	internalNodeReader.PrintElements()
 	childNodePageId := internalNodeReader.FindNextChildNodePageId(key)
 
-	slog.Info("Element search result", "key", string(key), "next_page_ID", childNodePageId, "is_leaf_node", false, "function", "readTraversal", "at", "btree")
+	slog.Info("Element search result", "key", string(key), "next_page_ID", childNodePageId, "is_leaf_node", false, "function", "readTraversal", "at", "bptree")
 	childNodeReadGuard, err := bptree.bufferPoolManager.NewReadGuard(childNodePageId)
 
 	if err != nil {
-		slog.Error("Failed to create read guard for child node", "next_page_ID", childNodePageId, "error", err.Error(), "function", "readTraversal", "at", "btree")
+		slog.Error("Failed to create read guard for child node", "next_page_ID", childNodePageId, "error", err.Error(), "function", "readTraversal", "at", "bptree")
 		return nil, err
 	}
 
@@ -178,7 +178,7 @@ func (bptree *BPlusTree) Insert(key []byte, value []byte) error {
 	_, _, _, err := bptree.writeTraversal(key, value, writeCursor)
 
 	if err != nil {
-		slog.Error("Error during write traversal", "error", err.Error(), "function", "Insert", "at", "btree")
+		slog.Error("Error during write traversal", "error", err.Error(), "function", "Insert", "at", "bptree")
 		return err
 	}
 
@@ -189,18 +189,18 @@ func (bptree *BPlusTree) Insert(key []byte, value []byte) error {
 
 func (bptree *BPlusTree) HandleLeafRootNodeSplit(oldRootNodeWriter *LeafNodeWriter, key []byte, value []byte) error {
 
-	slog.Info("Creating new root node due to split", "extra_key", string(key), "value", string(value), "function", "Insert", "at", "btree")
+	slog.Info("Creating new root node due to split", "extra_key", string(key), "value", string(value), "function", "Insert", "at", "bptree")
 	newRootPageId, allocationSource, err := bptree.bufferPoolManager.NewPage()
 
 	if err != nil {
-		slog.Error("Failed to create new root node page", "error", err.Error(), "function", "Insert", "at", "btree")
+		slog.Error("Failed to create new root node page", "error", err.Error(), "function", "Insert", "at", "bptree")
 		return err
 	}
 
 	newRootGuard, err := bptree.bufferPoolManager.NewWriteGuard(newRootPageId)
 	if err != nil {
 		bptree.bufferPoolManager.CleanupPage(newRootPageId)
-		slog.Error("Failed to create new root guard", "error", err.Error(), "function", "Insert", "at", "btree")
+		slog.Error("Failed to create new root guard", "error", err.Error(), "function", "Insert", "at", "bptree")
 		return err
 	}
 	defer newRootGuard.Done()
@@ -246,14 +246,14 @@ func (bptree *BPlusTree) HandleInternalRootNodeSplit(oldRootNodeWriter *Internal
 	newRootPageId, allocationSource, err := bptree.bufferPoolManager.NewPage()
 
 	if err != nil {
-		slog.Error("Failed to create new root node page", "error", err.Error(), "function", "Insert", "at", "btree")
+		slog.Error("Failed to create new root node page", "error", err.Error(), "function", "Insert", "at", "bptree")
 		return err
 	}
 
 	newRootGuard, err := bptree.bufferPoolManager.NewWriteGuard(newRootPageId)
 	if err != nil {
 		bptree.bufferPoolManager.CleanupPage(newRootPageId)
-		slog.Error("Failed to create new root guard", "error", err.Error(), "function", "Insert", "at", "btree")
+		slog.Error("Failed to create new root guard", "error", err.Error(), "function", "Insert", "at", "bptree")
 		return err
 	}
 	defer newRootGuard.Done()
