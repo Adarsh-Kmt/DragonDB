@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option go_package = "github.com/Adarsh-Kmt/DragonDB/replication";
+
+message ReplicationUnit{
+
+    uint64 minLSN = 1;
+    uint64 maxLSN = 2;
+    bytes records = 3;
+}
+
+message Ack{
+    uint64 lastLSN = 1;
+}
+
+service ReplicationService{
+
+    rpc SendReplicationUnit(ReplicationUnit) returns (Ack) {}
+}
